@@ -1,0 +1,10 @@
+@startuml
+
+component "User Information" as UserInformation
+component "Query Rewriter" as QueryRewriter
+component "Row Level Security\nAdapter" as RowLevelSecurityAdapter
+
+RowLevelSecurityAdapter -d-> UserInformation : instanciates
+RowLevelSecurityAdapter -d-> QueryRewriter : instanciates
+
+@enduml
