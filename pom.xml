@@ -14,8 +14,8 @@
         <junit.version>5.4.2</junit.version>
         <junit.platform.version>1.4.2</junit.platform.version>
         <maven.surefire.version>2.22.1</maven.surefire.version>
-        <vscjava.version>7.4.0</vscjava.version>
-        <vscjdbc.version>1.0.0</vscjdbc.version>
+        <vscjava.version>7.5.0</vscjava.version>
+        <vscjdbc.version>1.0.1</vscjdbc.version>
     </properties>
     <dependencies>
         <dependency>

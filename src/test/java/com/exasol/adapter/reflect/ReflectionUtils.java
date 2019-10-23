@@ -13,7 +13,6 @@ public final class ReflectionUtils {
     }
 
     /**
-     *
      * @param object     instance on which the method is invoked
      * @param methodName name of the method to be invoked
      * @return resulting return value of the method invocation
@@ -25,9 +24,8 @@ public final class ReflectionUtils {
             method = object.getClass().getDeclaredMethod(methodName);
             method.setAccessible(true);
             return method.invoke(object);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException exception) {
-            throw new ReflectionException(exception);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException exception) {
+            throw new com.exasol.reflect.ReflectionException(exception);
         }
     }
 }
