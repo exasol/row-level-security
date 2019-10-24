@@ -208,7 +208,7 @@ Needs: impl, utest, itest
 ### Null Values in Role IDs / Masks
 `dsn~null-values-in-role-ids-and-masks~1`
 
-If the content of a role ID or role mask cell is the `NULL` value, it must be treated as if it were a zero.
+If the content of a role ID or role mask cell is the `NULL` value, it must be treated as if it was a zero.
 
 Comment:
 
