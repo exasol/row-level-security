@@ -25,14 +25,14 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
      * @param remoteMetadataReader remote metadata reader
      * @param connection           JDBC connection to remote data source
      */
-    public RowLevelSecurityQueryRewriter(SqlDialect dialect, RemoteMetadataReader remoteMetadataReader,
-          Connection connection) {
+    public RowLevelSecurityQueryRewriter(final SqlDialect dialect, final RemoteMetadataReader remoteMetadataReader,
+          final Connection connection) {
         super(dialect, remoteMetadataReader, connection);
     }
 
     @Override
-    public String rewrite(SqlStatement statement, ExaMetadata exaMetadata, AdapterProperties properties)
-          throws AdapterException, SQLException {
+    public String rewrite(final SqlStatement statement, final ExaMetadata exaMetadata,
+          final AdapterProperties properties) throws AdapterException, SQLException {
         if (statement instanceof SqlStatementSelect) {
             final SqlStatementSelect select = (SqlStatementSelect) statement;
             final SqlStatementSelect.Builder rslStatementBuilder =
@@ -49,16 +49,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
             if (select.hasOrderBy()) {
                 rslStatementBuilder.orderBy(select.getOrderBy());
             }
-            if (select.hasFilter()) {
-                List<SqlNode> arguments = new ArrayList<>(2);
-                arguments.add(getBitAndFunction());
-                arguments.add(select.getWhereClause());
-                SqlNode whereClause = new SqlPredicateAnd(arguments);
-                rslStatementBuilder.whereClause(whereClause);
-            } else {
-                SqlNode whereClause = getBitAndFunction();
-                rslStatementBuilder.whereClause(whereClause);
-            }
+            this.applyWhereClause(select, rslStatementBuilder);
             final SqlStatementSelect newSelectStatement = rslStatementBuilder.build();
             return super.rewrite(newSelectStatement, exaMetadata, properties);
         } else {
@@ -67,11 +58,28 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         }
     }
 
-    private SqlNode getBitAndFunction() {
-        List<SqlNode> arguments = new ArrayList<>(2);
+    private void applyWhereClause(final SqlStatementSelect select,
+          final SqlStatementSelect.Builder rslStatementBuilder) {
+        final UserInformation userInformation = new UserInformation();
+//        final int exaRoleMask = userInformation.getRoleMask(this.connection);
+        final int exaRoleMask = 3;
+        if (select.hasFilter()) {
+            final SqlNode left = this.getBitAndFunction(exaRoleMask);
+            final SqlNode right = select.getWhereClause();
+            final List<SqlNode> arguments = List.of(left, right);
+            final SqlNode whereClause = new SqlPredicateAnd(arguments);
+            rslStatementBuilder.whereClause(whereClause);
+        } else {
+            final SqlNode whereClause = this.getBitAndFunction(exaRoleMask);
+            rslStatementBuilder.whereClause(whereClause);
+        }
+    }
+
+    private SqlNode getBitAndFunction(final Integer exaRoleMask) {
+        final List<SqlNode> arguments = new ArrayList<>(2);
         arguments.add(new SqlColumn(1,
               ColumnMetadata.builder().name("exa_row_roles").type(DataType.createDecimal(20, 0)).build()));
-        arguments.add(new SqlLiteralExactnumeric(BigDecimal.valueOf(3)));
+        arguments.add(new SqlLiteralExactnumeric(BigDecimal.valueOf(exaRoleMask)));
         return new SqlFunctionScalar(ScalarFunction.BIT_AND, arguments, true, false);
     }
 }
