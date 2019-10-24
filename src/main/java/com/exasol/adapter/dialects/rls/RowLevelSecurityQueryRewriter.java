@@ -61,8 +61,8 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
     private void applyWhereClause(final SqlStatementSelect select,
           final SqlStatementSelect.Builder rslStatementBuilder) {
         final UserInformation userInformation = new UserInformation();
-//        final int exaRoleMask = userInformation.getRoleMask(this.connection);
-        final int exaRoleMask = 3;
+        final int exaRoleMask = userInformation.getRoleMask(this.connection);
+//        final int exaRoleMask = 3;
         if (select.hasFilter()) {
             final SqlNode left = this.getBitAndFunction(exaRoleMask);
             final SqlNode right = select.getWhereClause();
