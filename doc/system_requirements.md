@@ -1,10 +1,10 @@
 <head><link href="oft_spec.css" rel="stylesheet"></link></head>
 
-# System Requirement Specification Exasol Row / Column Level Security
+# System Requirement Specification Exasol Row Level Security
 
 ## Introduction
 
-Exasol Row / Column Level Security (short "RCLS") is a plug-in for Exasol that provides the ability to grant access on individual rows or columns based on contents of the database.
+Exasol Row Level Security (short "RLS") is a plug-in for Exasol that provides the ability to grant access on individual rows based on contents of the database.
 
 ## About This Document
 
@@ -14,11 +14,11 @@ The target audience are end-users, requirement engineers, software designers and
 
 ### Goal
 
-The RCLS main goal is to provide fine-grained access control below the level of tables.
+The RLS main goal is to provide fine-grained access control below the level of tables.
 
 ### Quality Goals
 
-RCLS's main quality goals are in descending order of importance:
+RLS's main quality goals are in descending order of importance:
 
 1. Provide reliable security
 1. Work with an affordable performance hit compared to accessing the data without RCLS
@@ -44,12 +44,12 @@ In the following subsections central terms are explained in more detail.
 
 ## Features
 
-Features are the highest level requirements in this document that describe the main functionality of RCLS.
+Features are the highest level requirements in this document that describe the main functionality of RLS.
 
 ### Row Level Security
 `feat~row-level-security~1`
 
-RCLS lets administrators grant access to individual table rows based on configurable criteria.
+RLS lets administrators grant access to individual table rows based on configurable criteria.
 
 Needs: req
 
@@ -66,7 +66,7 @@ Data Owners can assign zero or more roles to users.
 
 Rationale:
 
-Roles are used to determine whether a user may or may not access data in RCLS.
+Roles are used to determine whether a user may or may not access data in RLS.
 
 Covers:
 
@@ -127,7 +127,7 @@ Needs: dsn
 #### Only Accessible Rows Contribute to Aggregate Functions
 `req~only-accessible-rows-contribute-to-aggregate-functions~1`
 
-If row access is controlled by RCLS and a user invokes an aggregate function, then only the rows accessible to that user contributed to the result of the aggregate function.
+If row access is controlled by RLS and a user invokes an aggregate function, then only the rows accessible to that user contributed to the result of the aggregate function.
 
 Rationale:
 
