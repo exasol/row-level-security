@@ -130,12 +130,12 @@ def get_rls_cls_config(cn, rls_c, rls_t, cls_t):
                 v_column = str(row[3])
 
                 # reset lists, when new user occurs
-                if v_user <> v_prev_user and v_prev_user <> '':
+                if v_user != v_prev_user and v_prev_user != '':
                     cls_table = {}
                     cls_schema = {}
 
                 # reset list, when new schema occurs
-                if v_schema <> v_prev_schema and v_prev_schema <> '':
+                if v_schema != v_prev_schema and v_prev_schema != '':
                     cls_table = {}
 
                 cls_table[v_table] = v_column
