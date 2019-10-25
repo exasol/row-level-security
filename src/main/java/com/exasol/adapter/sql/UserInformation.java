@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  */
 public class UserInformation {
     private static final Logger LOGGER = Logger.getLogger(UserInformation.class.getName());
-    private static final long MAX_ROW_VALUE = BigInteger.valueOf(2).pow(62).longValue();
+    private static final long MAX_ROLE_VALUE = BigInteger.valueOf(2).pow(63).subtract(BigInteger.valueOf(1)).longValue();
     private static final long DEFAULT_ROLE_MASK = 0;
     private final String rlsUsersTableName;
 
@@ -66,10 +66,10 @@ public class UserInformation {
     }
 
     private boolean maskIsInAllowedRange(final long exaRoleMask) {
-        final boolean isInRange = exaRoleMask < MAX_ROW_VALUE && exaRoleMask >= 0;
+        final boolean isInRange = exaRoleMask <= MAX_ROLE_VALUE && exaRoleMask >= 0;
         if (!isInRange) {
             LOGGER.warning(() -> "Role mask for current user from table " + this.rlsUsersTableName
-                  + " exceeded allowed limit. Allowed limit: " + 64 + ", user mask:" + exaRoleMask
+                  + " exceeded allowed limit. Allowed limit: " + MAX_ROLE_VALUE + ", user mask:" + exaRoleMask
                   + ". The role will be set to the default.");
         }
         return isInRange;

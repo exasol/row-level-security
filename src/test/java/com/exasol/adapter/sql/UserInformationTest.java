@@ -62,7 +62,7 @@ class UserInformationTest {
     void testGetRoleMaskInvalidMaskValue() throws SQLException {
         final UserInformation userInformation = new UserInformation("table");
         final ResultSet resultSetMock = mock(ResultSet.class);
-        when(resultSetMock.getLong(any())).thenReturn(BigInteger.valueOf(2).pow(62).longValue());
+        when(resultSetMock.getLong(any())).thenReturn(BigInteger.valueOf(2).pow(63).add(BigInteger.valueOf(1)).longValue());
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(true);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
