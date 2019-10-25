@@ -18,7 +18,7 @@ class RowLevelSecurityIT {
     private static final String DATABASE_USER = "SYS";
     private static final String DATABASE_PWD = "exasol";
 
-    @Test
+
     void test() throws IOException, SQLException {
         final GenericContainer exasol = new GenericContainer<>(
                 EXASOL_DOCKER_IMAGE_ID + ":" + EXASOL_DOCKER_IMAGE_VERSION) //
