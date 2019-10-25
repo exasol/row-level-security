@@ -62,18 +62,18 @@ GRANT IMPERSONATE ANY USER TO rls_usr_4;
 
 
 --Create rls users configuration table
-CREATE OR REPLACE TABLE row_level_security_test_schema.rls_users
+CREATE OR REPLACE TABLE row_level_security_test_schema.exa_rls_users
     (
     exa_user_name VARCHAR(200),
     exa_role_mask DECIMAL(20,0)
     );
 
-INSERT INTO row_level_security_test_schema.rls_users VALUES ('rls_usr_1', NULL);
-INSERT INTO row_level_security_test_schema.rls_users VALUES ('rls_usr_2', 1);
-INSERT INTO row_level_security_test_schema.rls_users VALUES ('rls_usr_3', 3);
-INSERT INTO row_level_security_test_schema.rls_users VALUES ('rls_usr_4', 15);
+INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('rls_usr_1', NULL);
+INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('rls_usr_2', 1);
+INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('rls_usr_3', 3);
+INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('rls_usr_4', 15);
 
-SELECT * FROM row_level_security_test_schema.rls_users;
+SELECT * FROM row_level_security_test_schema.exa_rls_users;
 
 --Create a script for comparing tables
 CREATE OR REPLACE SCRIPT compare_table_contents (table_a, table_b) RETURNS TABLE AS

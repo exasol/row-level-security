@@ -60,8 +60,8 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
 
     private void applyWhereClause(final SqlStatementSelect select,
           final SqlStatementSelect.Builder rslStatementBuilder) {
-        final UserInformation userInformation = new UserInformation("rls_users");
-        final int exaRoleMask = userInformation.getRoleMask(this.connection);
+        final UserInformation userInformation = new UserInformation("exa_rls_users");
+        final long exaRoleMask = userInformation.getRoleMask(this.connection);
         if (select.hasFilter()) {
             final SqlNode left = createRoleCheckPredicate(exaRoleMask);
             final SqlNode right = select.getWhereClause();
@@ -74,7 +74,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         }
     }
 
-    private SqlNode createRoleCheckPredicate(final Integer exaRoleMask) {
+    private SqlNode createRoleCheckPredicate(final Long exaRoleMask) {
         final List<SqlNode> arguments = new ArrayList<>(2);
         arguments.add(new SqlColumn(1,
               ColumnMetadata.builder().name("exa_row_roles").type(DataType.createDecimal(20, 0)).build()));

@@ -2,16 +2,17 @@ package com.exasol.adapter.sql;
 
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 
+import java.math.BigInteger;
 import java.sql.*;
 import java.util.logging.Logger;
 
 /**
- * This class collect information about user's roles.
+ * This class collect information about a user's roles.
  */
 public class UserInformation {
     private static final Logger LOGGER = Logger.getLogger(UserInformation.class.getName());
-    private static final int MAX_ROLE_VALUE = 64;
-    private static final int DEFAULT_ROLE_MASK = 0;
+    private static final long MAX_ROW_VALUE = BigInteger.valueOf(2).pow(62).longValue();
+    private static final long DEFAULT_ROLE_MASK = 0;
     private final String rlsUsersTableName;
 
     public UserInformation(final String rlsUsersTableName) {
@@ -22,9 +23,9 @@ public class UserInformation {
      * Get user's role mask.
      *
      * @param connection a connection to Exasol
-     * @return role mask as an int
+     * @return role mask as an long
      */
-    public int getRoleMask(final Connection connection) {
+    public long getRoleMask(final Connection connection) {
         final String query =
               "SELECT exa_role_mask FROM " + this.rlsUsersTableName + " WHERE exa_user_name = CURRENT_USER";
         try (final ResultSet resultSet = connection.prepareStatement(query).executeQuery()) {
@@ -36,9 +37,9 @@ public class UserInformation {
         }
     }
 
-    private int setUserMask(final ResultSet resultSet) throws SQLException {
+    private long setUserMask(final ResultSet resultSet) throws SQLException {
         if (resultSet != null && resultSet.next()) {
-            final int exa_role_mask = resultSet.getInt("exa_role_mask");
+            final long exa_role_mask = resultSet.getLong("exa_role_mask");
             if (validateExaRoleMask(resultSet, exa_role_mask)) {
                 return exa_role_mask;
             } else {
@@ -51,7 +52,7 @@ public class UserInformation {
         }
     }
 
-    private boolean validateExaRoleMask(final ResultSet resultSet, final int exaRoleMask) throws SQLException {
+    private boolean validateExaRoleMask(final ResultSet resultSet, final long exaRoleMask) throws SQLException {
         return returnsOnlyOneResult(resultSet) && maskIsInAllowedRange(exaRoleMask);
     }
 
@@ -64,8 +65,8 @@ public class UserInformation {
         return isLast;
     }
 
-    private boolean maskIsInAllowedRange(final int exaRoleMask) {
-        final boolean isInRange = exaRoleMask <= MAX_ROLE_VALUE && exaRoleMask >= 0;
+    private boolean maskIsInAllowedRange(final long exaRoleMask) {
+        final boolean isInRange = exaRoleMask < MAX_ROW_VALUE && exaRoleMask >= 0;
         if (!isInRange) {
             LOGGER.warning(() -> "Role mask for current user from table " + this.rlsUsersTableName
                   + " exceeded allowed limit. Allowed limit: " + 64 + ", user mask:" + exaRoleMask

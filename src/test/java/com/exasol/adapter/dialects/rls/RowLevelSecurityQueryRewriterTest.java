@@ -42,7 +42,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
         final PreparedStatement preparedStatementMock = Mockito.mock(PreparedStatement.class);
         Mockito.when(preparedStatementMock.getMetaData()).thenReturn(resultSetMetadataMock);
         final ResultSet resultSetMock = mock(ResultSet.class);
-        when(resultSetMock.getInt(any())).thenReturn(3);
+        when(resultSetMock.getLong(any())).thenReturn(3L);
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(true);
         when(preparedStatementMock.executeQuery()).thenReturn(resultSetMock);

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigInteger;
 import java.sql.*;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -31,11 +32,11 @@ class UserInformationTest {
     @Test
     void testGetRoleMaskValidMask() throws SQLException {
         final ResultSet resultSetMock = mock(ResultSet.class);
-        when(resultSetMock.getInt(any())).thenReturn(3);
+        when(resultSetMock.getLong(any())).thenReturn(3L);
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(true);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
-        assertThat(this.userInformation.getRoleMask(this.connectionMock), equalTo(3));
+        assertThat(this.userInformation.getRoleMask(this.connectionMock), equalTo(3L));
     }
 
     @Test
@@ -43,28 +44,28 @@ class UserInformationTest {
         final UserInformation userInformation = new UserInformation("table");
         final ResultSet resultSet = null;
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSet);
-        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(0));
+        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(0L));
     }
 
     @Test
     void testGetRoleMaskInvalidMaskMoreThanOneResult() throws SQLException {
         final UserInformation userInformation = new UserInformation("table");
         final ResultSet resultSetMock = mock(ResultSet.class);
-        when(resultSetMock.getInt(any())).thenReturn(3);
+        when(resultSetMock.getLong(any())).thenReturn(3L);
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(false);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
-        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(0));
+        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(0L));
     }
 
     @Test
     void testGetRoleMaskInvalidMaskValue() throws SQLException {
         final UserInformation userInformation = new UserInformation("table");
         final ResultSet resultSetMock = mock(ResultSet.class);
-        when(resultSetMock.getInt(any())).thenReturn(66);
+        when(resultSetMock.getLong(any())).thenReturn(BigInteger.valueOf(2).pow(62).longValue());
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(true);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
-        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(0));
+        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(0L));
     }
 }
