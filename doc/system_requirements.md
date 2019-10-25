@@ -55,9 +55,7 @@ Needs: req
 
 ## Functional Requirements
 
-### Common Requirements
-
-In this section you find requirements that are common for both row- and column-level security. 
+### Row Level Security
 
 #### User Roles
 `req~user-roles~1`
@@ -73,8 +71,6 @@ Covers:
 * [feat~row-level-security~1](#row-level-security)
 
 Needs: dsn
-
-### Row Level Security
 
 #### Tables With Row Restrictions
 `req~tables-with-row-restrictions~1`

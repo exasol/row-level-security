@@ -21,7 +21,7 @@ Needs: dsn
 
 # Solution Strategy
 
-Row-level security is not part of the Exasol core database. However with the [Virtual Schema](https://github.com/exasol/virtual-schemas) interface lends itself nicely to what we need to implement RLS as a plug-in.
+Row-level security is not part of the Exasol core database. However with the [Virtual Schema](https://github.com/exasol/virtual-schemas/blob/master/doc/development/virtual_schema_api.md) interface lends itself nicely to what we need to implement RLS as a plug-in.
 
 At its core Exasol Virtual Schema's are a query rewriter, not unlike views. You put in a query and it passes a modified query back that is then immediately executed by the database core instead of the original one. This is exactly what we need to implement RLS.
 
@@ -67,12 +67,13 @@ Covers:
 
 # Runtime
 
-## `RowLevelSecurityAdapter` Reads Custom Properties
-`dsn~rls-adapter-reads-custom-properties~1`
+## `RowLevelSecurityDialect` Reads Custom Properties
+`dsn~rls-dialect-reads-custom-properties~1`
 
-The `RowLevelSecurityAdapter` reads the following custom properties:
+The `RowLevelSecurityDialect` reads the following custom properties:
 
 1. `ROLE_ASSIGNMENT_TABLE`: name of the table that contains the mapping of users to the roles the have
+2. `SCHEMA_NAME`: name of the schema where tables are placed
 
 Covers:
 
@@ -93,21 +94,6 @@ Covers:
 * `req~user-roles~1`
 
 Needs: impl, utest, itest
-
-## `UserInformation` Caches User Roles
-`dsn~user-information-caches-user-roles`
-
-The `UserInformation` caches the roles a user has.
-
-Rationale:
-
-This speeds up subsequent row access checks because the users roles need to be determined only once.
-
-Covers:
-
-* `req~user-roles~1`
-
-Needs: impl, utest
 
 ## Query Rewriter Determines User Roles
 
@@ -150,7 +136,7 @@ Needs: impl, utest, itest
 
 ## How do we Implement Role Checking
 
-Users have roles. A user's roles decide which rows / columns this user is allowed to see.
+Users have roles. A user's roles decide which rows this user is allowed to see.
 
 This decision is architecture-relevant because it impacts:
 

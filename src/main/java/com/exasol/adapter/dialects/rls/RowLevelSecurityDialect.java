@@ -30,7 +30,7 @@ public class RowLevelSecurityDialect extends ExasolSqlDialect {
      * @param connection SQL connection
      * @param properties adapter properties
      */
-    public RowLevelSecurityDialect(Connection connection, AdapterProperties properties) {
+    public RowLevelSecurityDialect(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
 

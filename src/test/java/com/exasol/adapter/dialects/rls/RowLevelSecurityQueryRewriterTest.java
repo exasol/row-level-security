@@ -43,16 +43,18 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
         Mockito.when(preparedStatementMock.getMetaData()).thenReturn(resultSetMetadataMock);
         final ResultSet resultSetMock = mock(ResultSet.class);
         when(resultSetMock.getInt(any())).thenReturn(3);
+        when(resultSetMock.next()).thenReturn(true);
+        when(resultSetMock.last()).thenReturn(true);
         when(preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
         this.properties = new AdapterProperties(this.rawProperties);
         this.connectionMock = Mockito.mock(Connection.class);
         Mockito.when(this.connectionMock.prepareStatement(ArgumentMatchers.any())).thenReturn(preparedStatementMock);
-        this.setConnectionNameProperty();
+        setConnectionNameProperty();
         this.metadataReader = new ExasolMetadataReader(this.connectionMock, this.properties);
     }
 
     @Test
-    void testRewrite() throws SQLException, AdapterException {
+    void testRewriteWithoutWhereClause() throws SQLException, AdapterException {
         final SqlStatementSelect statement = createSelectStatement().build();
         final RowLevelSecurityQueryRewriter rewriter =
               new RowLevelSecurityQueryRewriter(this.dialect, this.metadataReader, this.connectionMock);
@@ -61,12 +63,12 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
     }
 
     @Test
-    void testRewrite2() throws SQLException, AdapterException {
+    void testRewriteWithSimpleWhereClause() throws SQLException, AdapterException {
         final SqlColumn left =
               new SqlColumn(1, ColumnMetadata.builder().name("amount").type(DataType.createDecimal(20, 0)).build());
         final SqlLiteralExactnumeric right = new SqlLiteralExactnumeric(BigDecimal.valueOf(2));
         final SqlStatementSelect statement =
-              this.createSelectStatement().whereClause(new SqlPredicateEqual(left, right)).build();
+              createSelectStatement().whereClause(new SqlPredicateEqual(left, right)).build();
         final RowLevelSecurityQueryRewriter rewriter =
               new RowLevelSecurityQueryRewriter(this.dialect, this.metadataReader, this.connectionMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
@@ -75,7 +77,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
     }
 
     @Test
-    void testRewrite3() throws SQLException, AdapterException {
+    void testRewriteWithWhereClauseWithMultipleValues() throws SQLException, AdapterException {
         final SqlColumn left1 =
               new SqlColumn(1, ColumnMetadata.builder().name("amount").type(DataType.createDecimal(20, 0)).build());
         final SqlLiteralExactnumeric right1 = new SqlLiteralExactnumeric(BigDecimal.valueOf(2));
@@ -86,7 +88,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
         final SqlPredicateEqual secondPartOfWhereClause = new SqlPredicateEqual(left2, right2);
         final SqlPredicateAnd whereClause =
               new SqlPredicateAnd(List.of(firstPartOfWhereClause, secondPartOfWhereClause));
-        final SqlStatementSelect statement = this.createSelectStatement().whereClause(whereClause).build();
+        final SqlStatementSelect statement = createSelectStatement().whereClause(whereClause).build();
         final RowLevelSecurityQueryRewriter rewriter =
               new RowLevelSecurityQueryRewriter(this.dialect, this.metadataReader, this.connectionMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(

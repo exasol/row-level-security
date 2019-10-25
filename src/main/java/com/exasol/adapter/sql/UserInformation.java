@@ -3,17 +3,74 @@ package com.exasol.adapter.sql;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 
 import java.sql.*;
+import java.util.logging.Logger;
 
+/**
+ * This class collect information about user's roles.
+ */
 public class UserInformation {
+    private static final Logger LOGGER = Logger.getLogger(UserInformation.class.getName());
+    private static final int MAX_ROLE_VALUE = 64;
+    private static final int DEFAULT_ROLE_MASK = 0;
+    private final String rlsUsersTableName;
+
+    public UserInformation(final String rlsUsersTableName) {
+        this.rlsUsersTableName = rlsUsersTableName;
+    }
+
+    /**
+     * Get user's role mask.
+     *
+     * @param connection a connection to Exasol
+     * @return role mask as an int
+     */
     public int getRoleMask(final Connection connection) {
-        final String rlsUsersTableName = "rls_users";
-        final String query = "SELECT exa_role_mask FROM " + rlsUsersTableName + " WHERE exa_user_name = CURRENT_USER";
+        final String query =
+              "SELECT exa_role_mask FROM " + this.rlsUsersTableName + " WHERE exa_user_name = CURRENT_USER";
         try (final ResultSet resultSet = connection.prepareStatement(query).executeQuery()) {
-            return resultSet.getInt("exa_role_mask");
+            return setUserMask(resultSet);
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException(
-                  "Unable to read role mask from " + rlsUsersTableName + ". Caused by: " + exception.getMessage(),
+                  "Unable to read role mask from " + this.rlsUsersTableName + ". Caused by: " + exception.getMessage(),
                   exception);
         }
+    }
+
+    private int setUserMask(final ResultSet resultSet) throws SQLException {
+        if (resultSet != null && resultSet.next()) {
+            final int exa_role_mask = resultSet.getInt("exa_role_mask");
+            if (validateExaRoleMask(resultSet, exa_role_mask)) {
+                return exa_role_mask;
+            } else {
+                return DEFAULT_ROLE_MASK;
+            }
+        } else {
+            LOGGER.warning(() -> "Role mask for current user was not found in table " + this.rlsUsersTableName
+                  + ". The role will be set to the default.");
+            return DEFAULT_ROLE_MASK;
+        }
+    }
+
+    private boolean validateExaRoleMask(final ResultSet resultSet, final int exaRoleMask) throws SQLException {
+        return returnsOnlyOneResult(resultSet) && maskIsInAllowedRange(exaRoleMask);
+    }
+
+    private boolean returnsOnlyOneResult(final ResultSet resultSet) throws SQLException {
+        final boolean isLast = resultSet.last();
+        if (!isLast) {
+            LOGGER.warning(() -> "Role mask for current user was not found in table " + this.rlsUsersTableName
+                  + ". The role will be set to the default.");
+        }
+        return isLast;
+    }
+
+    private boolean maskIsInAllowedRange(final int exaRoleMask) {
+        final boolean isInRange = exaRoleMask <= MAX_ROLE_VALUE && exaRoleMask >= 0;
+        if (!isInRange) {
+            LOGGER.warning(() -> "Role mask for current user from table " + this.rlsUsersTableName
+                  + " exceeded allowed limit. Allowed limit: " + 64 + ", user mask:" + exaRoleMask
+                  + ". The role will be set to the default.");
+        }
+        return isInRange;
     }
 }
