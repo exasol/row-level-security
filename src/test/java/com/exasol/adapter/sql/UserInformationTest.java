@@ -25,7 +25,7 @@ class UserInformationTest {
 
     @BeforeEach
     void beforeEach() throws SQLException {
-        this.userInformation = new UserInformation("table");
+        this.userInformation = new UserInformation("table", "schema", "sys");
         when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);
     }
 
@@ -41,7 +41,7 @@ class UserInformationTest {
 
     @Test
     void testGetRoleMaskEmptyResultSet() throws SQLException {
-        final UserInformation userInformation = new UserInformation("table");
+        final UserInformation userInformation = new UserInformation("table", "schema", "sys");
         final ResultSet resultSet = null;
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSet);
         assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(0L));
@@ -49,7 +49,7 @@ class UserInformationTest {
 
     @Test
     void testGetRoleMaskInvalidMaskMoreThanOneResult() throws SQLException {
-        final UserInformation userInformation = new UserInformation("table");
+        final UserInformation userInformation = new UserInformation("table", "schema", "sys");
         final ResultSet resultSetMock = mock(ResultSet.class);
         when(resultSetMock.getLong(any())).thenReturn(3L);
         when(resultSetMock.next()).thenReturn(true);
@@ -60,7 +60,7 @@ class UserInformationTest {
 
     @Test
     void testGetRoleMaskInvalidMaskValue() throws SQLException {
-        final UserInformation userInformation = new UserInformation("table");
+        final UserInformation userInformation = new UserInformation("table", "schema", "sys");
         final ResultSet resultSetMock = mock(ResultSet.class);
         when(resultSetMock.getLong(any())).thenReturn(BigInteger.valueOf(2).pow(63).add(BigInteger.valueOf(1)).longValue());
         when(resultSetMock.next()).thenReturn(true);

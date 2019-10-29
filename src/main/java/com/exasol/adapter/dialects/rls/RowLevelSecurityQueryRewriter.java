@@ -49,7 +49,10 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
             if (select.hasOrderBy()) {
                 rlsStatementBuilder.orderBy(select.getOrderBy());
             }
-            applyWhereClause(select, rlsStatementBuilder);
+            final UserInformation userInformation =
+                  new UserInformation("EXA_RLS_USERS", properties.getSchemaName(), exaMetadata.getCurrentUser());
+            final SqlNode whereClause = createWhereClause(select, userInformation);
+            rlsStatementBuilder.whereClause(whereClause);
             final SqlStatementSelect newSelectStatement = rlsStatementBuilder.build();
             return super.rewrite(newSelectStatement, exaMetadata, properties);
         } else {
@@ -58,26 +61,26 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         }
     }
 
-    private void applyWhereClause(final SqlStatementSelect select,
-          final SqlStatementSelect.Builder rslStatementBuilder) {
-        final UserInformation userInformation = new UserInformation("exa_rls_users");
+    private SqlNode createWhereClause(final SqlStatementSelect select, final UserInformation userInformation) {
         final long exaRoleMask = userInformation.getRoleMask(this.connection);
+        final SqlNode whereClause;
         if (select.hasFilter()) {
-            final SqlNode left = createRoleCheckPredicate(exaRoleMask);
+            final SqlNode left = new SqlPredicateNotEqual(createRoleCheckPredicate(exaRoleMask),
+                  new SqlLiteralExactnumeric(BigDecimal.valueOf(0)));
             final SqlNode right = select.getWhereClause();
             final List<SqlNode> arguments = List.of(left, right);
-            final SqlNode whereClause = new SqlPredicateAnd(arguments);
-            rslStatementBuilder.whereClause(whereClause);
+            whereClause = new SqlPredicateAnd(arguments);
         } else {
-            final SqlNode whereClause = createRoleCheckPredicate(exaRoleMask);
-            rslStatementBuilder.whereClause(whereClause);
+            whereClause = new SqlPredicateNotEqual(createRoleCheckPredicate(exaRoleMask),
+                  new SqlLiteralExactnumeric(BigDecimal.valueOf(0)));
         }
+        return whereClause;
     }
 
     private SqlNode createRoleCheckPredicate(final Long exaRoleMask) {
         final List<SqlNode> arguments = new ArrayList<>(2);
         arguments.add(new SqlColumn(1,
-              ColumnMetadata.builder().name("exa_row_roles").type(DataType.createDecimal(20, 0)).build()));
+              ColumnMetadata.builder().name("EXA_ROW_ROLES").type(DataType.createDecimal(20, 0)).build()));
         arguments.add(new SqlLiteralExactnumeric(BigDecimal.valueOf(exaRoleMask)));
         return new SqlFunctionScalar(ScalarFunction.BIT_AND, arguments, true, false);
     }

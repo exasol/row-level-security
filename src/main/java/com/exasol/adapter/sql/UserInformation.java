@@ -11,12 +11,17 @@ import java.util.logging.Logger;
  */
 public class UserInformation {
     private static final Logger LOGGER = Logger.getLogger(UserInformation.class.getName());
-    private static final long MAX_ROLE_VALUE = BigInteger.valueOf(2).pow(63).subtract(BigInteger.valueOf(1)).longValue();
+    private static final long MAX_ROLE_VALUE =
+          BigInteger.valueOf(2).pow(63).subtract(BigInteger.valueOf(1)).longValue();
     private static final long DEFAULT_ROLE_MASK = 0;
     private final String rlsUsersTableName;
+    private final String schemaName;
+    private final String currentUser;
 
-    public UserInformation(final String rlsUsersTableName) {
+    public UserInformation(final String rlsUsersTableName, final String schemaName, final String currentUser) {
+        this.schemaName = schemaName;
         this.rlsUsersTableName = rlsUsersTableName;
+        this.currentUser = currentUser;
     }
 
     /**
@@ -26,8 +31,10 @@ public class UserInformation {
      * @return role mask as an long
      */
     public long getRoleMask(final Connection connection) {
+        LOGGER.info(() -> "Current user: " + this.currentUser);
         final String query =
-              "SELECT exa_role_mask FROM " + this.rlsUsersTableName + " WHERE exa_user_name = CURRENT_USER";
+              "SELECT EXA_ROLE_MASK FROM " + this.schemaName + "." + this.rlsUsersTableName + " WHERE EXA_USER_NAME = '"
+                    + this.currentUser + "'";
         try (final ResultSet resultSet = connection.prepareStatement(query).executeQuery()) {
             return setUserMask(resultSet);
         } catch (final SQLException exception) {

@@ -59,7 +59,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
         final RowLevelSecurityQueryRewriter rewriter =
               new RowLevelSecurityQueryRewriter(this.dialect, this.metadataReader, this.connectionMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties),
-              containsString("STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE BIT_AND(\"exa_row_roles\", 3)'"));
+              containsString("STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE BIT_AND(\"EXA_ROW_ROLES\", 3) <> 0'"));
     }
 
     @Test
@@ -72,7 +72,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
         final RowLevelSecurityQueryRewriter rewriter =
               new RowLevelSecurityQueryRewriter(this.dialect, this.metadataReader, this.connectionMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
-              "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (BIT_AND(\"exa_row_roles\", 3) "
+              "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (BIT_AND(\"EXA_ROW_ROLES\", 3) <> 0 "
                     + "AND \"amount\" = 2)'"));
     }
 
@@ -92,7 +92,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
         final RowLevelSecurityQueryRewriter rewriter =
               new RowLevelSecurityQueryRewriter(this.dialect, this.metadataReader, this.connectionMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
-              "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (BIT_AND(\"exa_row_roles\", 3) AND (\"amount\" ="
+              "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (BIT_AND(\"EXA_ROW_ROLES\", 3) <> 0 AND (\"amount\" ="
                     + " 2 " + "AND \"item\" = ''Screwdriver''))'"));
     }
 
@@ -102,7 +102,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
         final ColumnMetadata columnMetadata2 =
               ColumnMetadata.builder().name("item").type(DataType.createVarChar(20, ExaCharset.UTF8)).build();
         final ColumnMetadata columnMetadata3 =
-              ColumnMetadata.builder().name("exa_row_roles").type(DataType.createDecimal(20, 0)).build();
+              ColumnMetadata.builder().name("EXA_ROW_ROLES").type(DataType.createDecimal(20, 0)).build();
         final TableMetadata tableMetadata =
               new TableMetadata("order_items", "", Arrays.asList(columnMetadata, columnMetadata2, columnMetadata3), "");
         final SqlNode fromClause = new SqlTable("order_items", tableMetadata);

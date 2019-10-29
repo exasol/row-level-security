@@ -1,4 +1,6 @@
+DROP VIRTUAL SCHEMA IF EXISTS VIRTUAL_SCHEMA_RLS CASCADE;
 DROP SCHEMA IF EXISTS row_level_security_test_schema CASCADE;
+DROP CONNECTION IF EXISTS jdbc_exasol_connection;
 
 --Create test schema
 CREATE SCHEMA row_level_security_test_schema;
@@ -32,34 +34,22 @@ INSERT INTO row_level_security_test_schema.rls_sales VALUES
 (16, 'Goat Inc', 'Grass', 34, 14),
 (17, 'Donkey Inc', 'Carrot', 58, 15);
 
-SELECT * FROM row_level_security_test_schema.rls_sales;
+--Create users
+DROP USER IF EXISTS RLS_USR_1 CASCADE;
+CREATE USER RLS_USR_1 IDENTIFIED BY "RLS_USR_1";
+GRANT ALL PRIVILEGES TO RLS_USR_1;
 
+DROP USER IF EXISTS RLS_USR_2 CASCADE;
+CREATE USER RLS_USR_2 IDENTIFIED BY "RLS_USR_2";
+GRANT ALL PRIVILEGES TO RLS_USR_2;
 
---Create users and grant privileges
-CREATE USER rls_usr_1 IDENTIFIED BY "rls_usr_1";
-GRANT CREATE SESSION TO rls_usr_1;
-GRANT CREATE VIEW TO rls_usr_1;
-GRANT SELECT ON row_level_security_test_schema TO rls_usr_1;
-GRANT IMPERSONATE ANY USER TO rls_usr_1;
+DROP USER IF EXISTS RLS_USR_3 CASCADE;
+CREATE USER RLS_USR_3 IDENTIFIED BY "RLS_USR_3";
+GRANT ALL PRIVILEGES TO RLS_USR_3;
 
-CREATE USER rls_usr_2 IDENTIFIED BY "rls_usr_2";
-GRANT CREATE SESSION TO rls_usr_2;
-GRANT CREATE VIEW TO rls_usr_2;
-GRANT SELECT ON row_level_security_test_schema TO rls_usr_2;
-GRANT IMPERSONATE ANY USER TO rls_usr_2;
-
-CREATE USER rls_usr_3 IDENTIFIED BY "rls_usr_3";
-GRANT CREATE SESSION TO rls_usr_3;
-GRANT CREATE VIEW TO rls_usr_3;
-GRANT SELECT ON row_level_security_test_schema TO rls_usr_3;
-GRANT IMPERSONATE ANY USER TO rls_usr_3;
-
-CREATE USER rls_usr_4 IDENTIFIED BY "rls_usr_4";
-GRANT CREATE SESSION TO rls_usr_4;
-GRANT CREATE VIEW TO rls_usr_4;
-GRANT SELECT ON row_level_security_test_schema TO rls_usr_4;
-GRANT IMPERSONATE ANY USER TO rls_usr_4;
-
+DROP USER IF EXISTS RLS_USR_4 CASCADE;
+CREATE USER RLS_USR_4 IDENTIFIED BY "RLS_USR_4";
+GRANT ALL PRIVILEGES TO RLS_USR_4;
 
 --Create rls users configuration table
 CREATE OR REPLACE TABLE row_level_security_test_schema.exa_rls_users
@@ -68,15 +58,35 @@ CREATE OR REPLACE TABLE row_level_security_test_schema.exa_rls_users
     exa_role_mask DECIMAL(20,0)
     );
 
-INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('rls_usr_1', NULL);
-INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('rls_usr_2', 1);
-INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('rls_usr_3', 3);
-INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('rls_usr_4', 15);
+INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('RLS_USR_1', NULL);
+INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('RLS_USR_2', 1);
+INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('RLS_USR_3', 3);
+INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('RLS_USR_4', 15);
+INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('SYS', 15);
 
-SELECT * FROM row_level_security_test_schema.exa_rls_users;
+--Create Virtual Schema
+CREATE CONNECTION jdbc_exasol_connection
+TO 'jdbc:exa:host:port'
+USER 'sys'
+IDENTIFIED BY 'password';
+
+--/
+CREATE OR REPLACE JAVA ADAPTER SCRIPT row_level_security_test_schema.adapter_script_exasol_rls AS
+    %scriptclass com.exasol.adapter.RequestDispatcher;
+    %jar /buckets/bfsdefault/rls/row-level-security-0.1.0.jar;
+    %jar /buckets/bfsdefault/rls/exajdbc.jar;
+/
+;
+
+CREATE VIRTUAL SCHEMA virtual_schema_rls USING row_level_security_test_schema.adapter_script_exasol_rls WITH
+  SQL_DIALECT     = 'RLS'
+  CONNECTION_NAME = 'jdbc_exasol_connection'
+  SCHEMA_NAME     = 'ROW_LEVEL_SECURITY_TEST_SCHEMA'
+  DEBUG_ADDRESS = '192.168.122.1:3000'
+  LOG_LEVEL = 'ALL';
 
 --Create a script for comparing tables
-CREATE OR REPLACE SCRIPT compare_table_contents (table_a, table_b) RETURNS TABLE AS
+CREATE OR REPLACE SCRIPT row_level_security_test_schema.compare_table_contents (table_a, table_b) RETURNS TABLE AS
     exit(
        query([[
            (SELECT '<<<', A.*
@@ -100,58 +110,8 @@ CREATE OR REPLACE SCRIPT compare_table_contents (table_a, table_b) RETURNS TABLE
 ;
 
 --Testing
---User rls_usr_1
-IMPERSONATE rls_usr_1;
-OPEN SCHEMA row_level_security_test_schema;
-SELECT * FROM rls_sales;
-CREATE OR REPLACE VIEW rls_sales_user_1 AS SELECT * FROM rls_sales WHERE 1=0;
-SELECT * FROM rls_sales_user_1;
-EXECUTE SCRIPT compare_table_contents('rls_sales', 'rls_sales_user_1');
-
---User rls_usr_2
-IMPERSONATE rls_usr_2;
-OPEN SCHEMA row_level_security_test_schema;
-SELECT * FROM rls_sales;
-CREATE OR REPLACE VIEW rls_sales_user_2(order_id, customer, product, quantity, exa_row_rules) AS
-SELECT * FROM VALUES
-(3, 'Donkey Inc', 'Carrot', 33, 1),
-(5, 'Chicken Inc', 'Wheat', 45, 3),
-(7, 'Goat Inc', 'Grass', 84, 5),
-(9, 'Chicken Inc', 'Wheat', 64, 7),
-(11, 'Goat Inc', 'Grass', 54, 9),
-(13, 'Chicken Inc', 'Wheat', 65, 11),
-(15, 'Chicken Inc', 'Wheat', 3, 13),
-(17, 'Donkey Inc', 'Carrot', 58, 15);
-SELECT * FROM rls_sales_user_2;
-EXECUTE SCRIPT compare_table_contents('rls_sales', 'rls_sales_user_2');
-
---User rls_usr_3
-IMPERSONATE rls_usr_3;
-OPEN SCHEMA row_level_security_test_schema;
-SELECT * FROM rls_sales;
-CREATE OR REPLACE VIEW rls_sales_user_3(order_id, customer, product, quantity, exa_row_rules) AS
-SELECT * FROM VALUES
-(3, 'Donkey Inc', 'Carrot', 33, 1),
-(4, 'Chicken Inc', 'Wheat', 4, 2),
-(5, 'Chicken Inc', 'Wheat', 45, 3),
-(7, 'Goat Inc', 'Grass', 84, 5),
-(8, 'Chicken Inc', 'Wheat', 44, 6),
-(9, 'Chicken Inc', 'Wheat', 64, 7),
-(11, 'Goat Inc', 'Grass', 54, 9),
-(12, 'Chicken Inc', 'Wheat', 44, 10),
-(13, 'Chicken Inc', 'Wheat', 65, 11),
-(15, 'Chicken Inc', 'Wheat', 3, 13),
-(16, 'Goat Inc', 'Grass', 34, 14),
-(17, 'Donkey Inc', 'Carrot', 58, 15);
-SELECT * FROM rls_sales_user_3;
-EXECUTE SCRIPT compare_table_contents('rls_sales', 'rls_sales_user_3');
-
-
---User rls_usr_4
-IMPERSONATE rls_usr_4;
-OPEN SCHEMA row_level_security_test_schema;
-SELECT * FROM rls_sales;
-CREATE OR REPLACE VIEW rls_sales_user_4(order_id, customer, product, quantity, exa_row_rules) AS
+--Administrator
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_admin(order_id, customer, product, quantity, exa_row_rules) AS
 SELECT * FROM VALUES
 (3, 'Donkey Inc', 'Carrot', 33, 1),
 (4, 'Chicken Inc', 'Wheat', 4, 2),
@@ -168,5 +128,63 @@ SELECT * FROM VALUES
 (15, 'Chicken Inc', 'Wheat', 3, 13),
 (16, 'Goat Inc', 'Grass', 34, 14),
 (17, 'Donkey Inc', 'Carrot', 58, 15);
-SELECT * FROM rls_sales_user_4;
-EXECUTE SCRIPT compare_table_contents('rls_sales', 'rls_sales_user_4');
+EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_admin');
+
+--User rls_usr_1
+IMPERSONATE rls_usr_1;
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_1 AS SELECT * FROM virtual_schema_rls.rls_sales;
+EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_1');
+
+--User rls_usr_2
+IMPERSONATE rls_usr_2;
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_2(order_id, customer, product, quantity, exa_row_rules) AS
+SELECT * FROM VALUES
+(3, 'Donkey Inc', 'Carrot', 33, 1),
+(5, 'Chicken Inc', 'Wheat', 45, 3),
+(7, 'Goat Inc', 'Grass', 84, 5),
+(9, 'Chicken Inc', 'Wheat', 64, 7),
+(11, 'Goat Inc', 'Grass', 54, 9),
+(13, 'Chicken Inc', 'Wheat', 65, 11),
+(15, 'Chicken Inc', 'Wheat', 3, 13),
+(17, 'Donkey Inc', 'Carrot', 58, 15);
+EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_2');
+
+--User rls_usr_3
+IMPERSONATE rls_usr_3;
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_3(order_id, customer, product, quantity, exa_row_rules) AS
+SELECT * FROM VALUES
+(3, 'Donkey Inc', 'Carrot', 33, 1),
+(4, 'Chicken Inc', 'Wheat', 4, 2),
+(5, 'Chicken Inc', 'Wheat', 45, 3),
+(7, 'Goat Inc', 'Grass', 84, 5),
+(8, 'Chicken Inc', 'Wheat', 44, 6),
+(9, 'Chicken Inc', 'Wheat', 64, 7),
+(11, 'Goat Inc', 'Grass', 54, 9),
+(12, 'Chicken Inc', 'Wheat', 44, 10),
+(13, 'Chicken Inc', 'Wheat', 65, 11),
+(15, 'Chicken Inc', 'Wheat', 3, 13),
+(16, 'Goat Inc', 'Grass', 34, 14),
+(17, 'Donkey Inc', 'Carrot', 58, 15);
+EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_3');
+
+--User rls_usr_4
+IMPERSONATE rls_usr_4;
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_4(order_id, customer, product, quantity, exa_row_rules) AS
+SELECT * FROM VALUES
+(3, 'Donkey Inc', 'Carrot', 33, 1),
+(4, 'Chicken Inc', 'Wheat', 4, 2),
+(5, 'Chicken Inc', 'Wheat', 45, 3),
+(6, 'Donkey Inc', 'Carrot', 67, 4),
+(7, 'Goat Inc', 'Grass', 84, 5),
+(8, 'Chicken Inc', 'Wheat', 44, 6),
+(9, 'Chicken Inc', 'Wheat', 64, 7),
+(10, 'Donkey Inc', 'Carrot', 2, 8),
+(11, 'Goat Inc', 'Grass', 54, 9),
+(12, 'Chicken Inc', 'Wheat', 44, 10),
+(13, 'Chicken Inc', 'Wheat', 65, 11),
+(14, 'Donkey Inc', 'Carrot', 89, 12),
+(15, 'Chicken Inc', 'Wheat', 3, 13),
+(16, 'Goat Inc', 'Grass', 34, 14),
+(17, 'Donkey Inc', 'Carrot', 58, 15);
+EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_4');
+IMPERSONATE SYS;
