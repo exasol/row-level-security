@@ -80,7 +80,7 @@ CREATE OR REPLACE JAVA ADAPTER SCRIPT row_level_security_test_schema.adapter_scr
 ;
 
 CREATE VIRTUAL SCHEMA virtual_schema_rls USING row_level_security_test_schema.adapter_script_exasol_rls WITH
-  SQL_DIALECT     = 'RLS'
+  SQL_DIALECT     = 'EXASOL_RLS'
   CONNECTION_NAME = 'jdbc_exasol_connection'
   SCHEMA_NAME     = 'ROW_LEVEL_SECURITY_TEST_SCHEMA'
   DEBUG_ADDRESS = '192.168.122.1:3000'
@@ -112,7 +112,7 @@ CREATE OR REPLACE SCRIPT row_level_security_test_schema.compare_table_contents (
 
 --Testing
 --Administrator
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_admin(order_id, customer, product, quantity, exa_row_rules) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_admin(order_id, customer, product, quantity, exa_row_roles) AS
 SELECT * FROM VALUES
 (3, 'Donkey Inc', 'Carrot', 33, 1),
 (4, 'Chicken Inc', 'Wheat', 4, 2),
@@ -139,7 +139,7 @@ EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_sc
 
 --User rls_usr_2
 IMPERSONATE rls_usr_2;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_2(order_id, customer, product, quantity, exa_row_rules) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_2(order_id, customer, product, quantity, exa_row_roles) AS
 SELECT * FROM VALUES
 (3, 'Donkey Inc', 'Carrot', 33, 1),
 (5, 'Chicken Inc', 'Wheat', 45, 3),
@@ -149,12 +149,12 @@ SELECT * FROM VALUES
 (13, 'Chicken Inc', 'Wheat', 65, 11),
 (15, 'Chicken Inc', 'Wheat', 3, 13),
 (17, 'Donkey Inc', 'Carrot', 58, 15),
-(18, 'Donkey Inc', 'Wheat', 56, 9223372036854775808);
+(18, 'Donkey Inc', 'Wheat', 56, 9223372036854775808)
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_2');
 
 --User rls_usr_3
 IMPERSONATE rls_usr_3;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_3(order_id, customer, product, quantity, exa_row_rules) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_3(order_id, customer, product, quantity, exa_row_roles) AS
 SELECT * FROM VALUES
 (3, 'Donkey Inc', 'Carrot', 33, 1),
 (4, 'Chicken Inc', 'Wheat', 4, 2),
@@ -173,7 +173,7 @@ EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_sc
 
 --User rls_usr_4
 IMPERSONATE rls_usr_4;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_4(order_id, customer, product, quantity, exa_row_rules) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_4(order_id, customer, product, quantity, exa_row_roles) AS
 SELECT * FROM VALUES
 (3, 'Donkey Inc', 'Carrot', 33, 1),
 (4, 'Chicken Inc', 'Wheat', 4, 2),

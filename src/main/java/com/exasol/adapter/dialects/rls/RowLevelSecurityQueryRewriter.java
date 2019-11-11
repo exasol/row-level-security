@@ -50,7 +50,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
                 rlsStatementBuilder.orderBy(select.getOrderBy());
             }
             final UserInformation userInformation =
-                  new UserInformation("EXA_RLS_USERS", properties.getSchemaName(), exaMetadata.getCurrentUser());
+                  new UserInformation(exaMetadata.getCurrentUser(), properties.getSchemaName(), "EXA_RLS_USERS");
             final SqlNode whereClause = createWhereClause(select, userInformation);
             rlsStatementBuilder.whereClause(whereClause);
             final SqlStatementSelect newSelectStatement = rlsStatementBuilder.build();

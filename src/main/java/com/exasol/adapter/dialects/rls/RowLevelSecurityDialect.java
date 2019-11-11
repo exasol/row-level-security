@@ -10,7 +10,7 @@ import java.sql.Connection;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 
 public class RowLevelSecurityDialect extends ExasolSqlDialect {
-    static final String NAME = "RLS";
+    static final String NAME = "EXASOL_RLS";
     private static final Capabilities CAPABILITIES = createCapabilityList();
 
     private static Capabilities createCapabilityList() {

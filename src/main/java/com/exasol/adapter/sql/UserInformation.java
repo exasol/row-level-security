@@ -20,7 +20,7 @@ public class UserInformation {
     private final String schemaName;
     private final String currentUser;
 
-    public UserInformation(final String rlsUsersTableName, final String schemaName, final String currentUser) {
+    public UserInformation(final String currentUser, final String schemaName, final String rlsUsersTableName) {
         this.schemaName = schemaName;
         this.rlsUsersTableName = rlsUsersTableName;
         this.currentUser = currentUser;

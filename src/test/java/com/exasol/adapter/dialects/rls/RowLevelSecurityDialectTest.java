@@ -23,7 +23,7 @@ class RowLevelSecurityDialectTest {
 
     @Test
     void testGetName() {
-        assertThat(this.dialect.getName(), equalTo("RLS"));
+        assertThat(this.dialect.getName(), equalTo("EXASOL_RLS"));
     }
 
     @Test
