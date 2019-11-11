@@ -62,7 +62,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
     }
 
     private SqlNode createWhereClause(final SqlStatementSelect select, final UserInformation userInformation) {
-        final long exaRoleMask = userInformation.getRoleMask(this.connection);
+        final String exaRoleMask = userInformation.getRoleMask(this.connection);
         final SqlNode whereClause;
         if (select.hasFilter()) {
             final SqlNode left = new SqlPredicateNotEqual(createRoleCheckPredicate(exaRoleMask),
@@ -77,11 +77,11 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         return whereClause;
     }
 
-    private SqlNode createRoleCheckPredicate(final Long exaRoleMask) {
+    private SqlNode createRoleCheckPredicate(final String exaRoleMask) {
         final List<SqlNode> arguments = new ArrayList<>(2);
         arguments.add(new SqlColumn(1,
               ColumnMetadata.builder().name("EXA_ROW_ROLES").type(DataType.createDecimal(20, 0)).build()));
-        arguments.add(new SqlLiteralExactnumeric(BigDecimal.valueOf(exaRoleMask)));
+        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(exaRoleMask)));
         return new SqlFunctionScalar(ScalarFunction.BIT_AND, arguments, true, false);
     }
 }

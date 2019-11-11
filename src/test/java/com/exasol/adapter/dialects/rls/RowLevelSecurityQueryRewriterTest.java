@@ -59,7 +59,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
         final RowLevelSecurityQueryRewriter rewriter =
               new RowLevelSecurityQueryRewriter(this.dialect, this.metadataReader, this.connectionMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties),
-              containsString("STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE BIT_AND(\"EXA_ROW_ROLES\", 3) <> 0'"));
+              containsString("STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0'"));
     }
 
     @Test
@@ -72,7 +72,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
         final RowLevelSecurityQueryRewriter rewriter =
               new RowLevelSecurityQueryRewriter(this.dialect, this.metadataReader, this.connectionMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
-              "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (BIT_AND(\"EXA_ROW_ROLES\", 3) <> 0 "
+              "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0 "
                     + "AND \"amount\" = 2)'"));
     }
 
@@ -92,7 +92,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
         final RowLevelSecurityQueryRewriter rewriter =
               new RowLevelSecurityQueryRewriter(this.dialect, this.metadataReader, this.connectionMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
-              "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (BIT_AND(\"EXA_ROW_ROLES\", 3) <> 0 AND (\"amount\" ="
+              "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0 AND (\"amount\" ="
                     + " 2 " + "AND \"item\" = ''Screwdriver''))'"));
     }
 

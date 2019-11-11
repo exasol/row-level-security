@@ -6,6 +6,8 @@ import java.math.BigInteger;
 import java.sql.*;
 import java.util.logging.Logger;
 
+import static java.lang.Long.toUnsignedString;
+
 /**
  * This class collect information about a user's roles.
  */
@@ -13,7 +15,7 @@ public class UserInformation {
     private static final Logger LOGGER = Logger.getLogger(UserInformation.class.getName());
     private static final long MAX_ROLE_VALUE =
           BigInteger.valueOf(2).pow(63).subtract(BigInteger.valueOf(1)).longValue();
-    private static final long DEFAULT_ROLE_MASK = 0;
+    private static final long DEFAULT_ROLE_MASK = BigInteger.valueOf(2).pow(63).longValue();
     private final String rlsUsersTableName;
     private final String schemaName;
     private final String currentUser;
@@ -28,15 +30,16 @@ public class UserInformation {
      * Get user's role mask.
      *
      * @param connection a connection to Exasol
-     * @return role mask as an long
+     * @return role mask as a String
      */
-    public long getRoleMask(final Connection connection) {
+    public String getRoleMask(final Connection connection) {
         LOGGER.info(() -> "Current user: " + this.currentUser);
         final String query =
               "SELECT EXA_ROLE_MASK FROM " + this.schemaName + "." + this.rlsUsersTableName + " WHERE EXA_USER_NAME = '"
                     + this.currentUser + "'";
         try (final ResultSet resultSet = connection.prepareStatement(query).executeQuery()) {
-            return setUserMask(resultSet);
+            final long mask = setUserMask(resultSet);
+            return toUnsignedString(mask);
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException(
                   "Unable to read role mask from " + this.rlsUsersTableName + ". Caused by: " + exception.getMessage(),
@@ -46,9 +49,9 @@ public class UserInformation {
 
     private long setUserMask(final ResultSet resultSet) throws SQLException {
         if (resultSet != null && resultSet.next()) {
-            final long exa_role_mask = resultSet.getLong("exa_role_mask");
-            if (validateExaRoleMask(resultSet, exa_role_mask)) {
-                return exa_role_mask;
+            final long exaRoleMask = resultSet.getLong("exa_role_mask");
+            if (validateExaRoleMask(resultSet, exaRoleMask)) {
+                return setPublicAccess(exaRoleMask);
             } else {
                 return DEFAULT_ROLE_MASK;
             }
@@ -57,6 +60,10 @@ public class UserInformation {
                   + ". The role will be set to the default.");
             return DEFAULT_ROLE_MASK;
         }
+    }
+
+    private static long setPublicAccess(final long exaRoleMask) {
+        return exaRoleMask | BigInteger.valueOf(2).pow(63).longValue();
     }
 
     private boolean validateExaRoleMask(final ResultSet resultSet, final long exaRoleMask) throws SQLException {

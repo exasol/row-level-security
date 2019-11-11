@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserInformationTest {
+    private static final String DEFAULT_MASK_WITH_PUBLIC_VALUE = "9223372036854775808";
     @Mock
     private Connection connectionMock;
     @Mock
@@ -36,7 +37,7 @@ class UserInformationTest {
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(true);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
-        assertThat(this.userInformation.getRoleMask(this.connectionMock), equalTo(3L));
+        assertThat(this.userInformation.getRoleMask(this.connectionMock), equalTo("9223372036854775811"));
     }
 
     @Test
@@ -44,7 +45,7 @@ class UserInformationTest {
         final UserInformation userInformation = new UserInformation("table", "schema", "sys");
         final ResultSet resultSet = null;
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSet);
-        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(0L));
+        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
     }
 
     @Test
@@ -55,17 +56,18 @@ class UserInformationTest {
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(false);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
-        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(0L));
+        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
     }
 
     @Test
     void testGetRoleMaskInvalidMaskValue() throws SQLException {
         final UserInformation userInformation = new UserInformation("table", "schema", "sys");
         final ResultSet resultSetMock = mock(ResultSet.class);
-        when(resultSetMock.getLong(any())).thenReturn(BigInteger.valueOf(2).pow(63).add(BigInteger.valueOf(1)).longValue());
+        when(resultSetMock.getLong(any()))
+              .thenReturn(BigInteger.valueOf(2).pow(63).add(BigInteger.valueOf(1)).longValue());
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(true);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
-        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(0L));
+        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
     }
 }
