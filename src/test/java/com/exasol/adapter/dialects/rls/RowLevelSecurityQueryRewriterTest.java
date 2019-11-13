@@ -3,7 +3,7 @@ package com.exasol.adapter.dialects.rls;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.AbstractQueryRewriterTest;
+import com.exasol.adapter.dialects.AbstractQueryRewriterTestBase;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.exasol.ExasolMetadataReader;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTest {
+class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
     private SqlDialect dialect;
     private Connection connectionMock;
     private AdapterProperties properties;

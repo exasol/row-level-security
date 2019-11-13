@@ -2,7 +2,7 @@
 
 ### Run Time Dependencies
 
-Running the Virtual Schema requires a Java Runtime version 9 or later.
+Running the Virtual Schema requires a Java Runtime version 11 or later.
 
 | Dependency                                                                          | Purpose                                                | License                       |
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|

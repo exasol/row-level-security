@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.Mockito.mock;
 
-class ExasolQueryRewriterTest extends AbstractQueryRewriterTest {
+class ExasolQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @BeforeEach
     void beforeEach() {
         this.exaConnectionInformation = mock(ExaConnectionInformation.class);

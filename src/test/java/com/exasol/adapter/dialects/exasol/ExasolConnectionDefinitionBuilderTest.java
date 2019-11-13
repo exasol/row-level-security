@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-class ExasolConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTest {
+class ExasolConnectionDefinitionBuilderTest extends AbstractConnectionDefinitionBuilderTestBase {
     private static final String EXASOL_CONNECTION_STRING = "thehost:2345";
 
     @BeforeEach
