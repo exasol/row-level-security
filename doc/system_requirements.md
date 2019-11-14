@@ -151,11 +151,10 @@ Needs: dsn
 #### Tables with Both Roles and Tenants Restrictions
 `req~tables-with-both-roles-and-tenants-restrictions~1`
 
-If a table contains both roles restrictions and tenants restrictions, then only tenants restrictions will be applied. 
-
-Rationale:
-
-As a concept of tenant's access is more limited than a concept of an access with roles, tenant's access should be treated with a higher priority. 
+If a table contains both roles restrictions and tenants restrictions, both of them are applied.
+To access the data a user needs: 
+    1. To be the right tenant.
+    2. To have the right role. 
 
 Covers:
 
