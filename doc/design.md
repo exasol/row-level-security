@@ -21,7 +21,7 @@ Needs: dsn
 
 # Solution Strategy
 
-Row-level security is not part of the Exasol core database. However with the [Virtual Schema](https://github.com/exasol/virtual-schemas) interface lends itself nicely to what we need to implement RLS as a plug-in.
+Row-level security is not part of the Exasol core database. However with the [Virtual Schema](https://github.com/exasol/virtual-schemas/blob/master/doc/development/virtual_schema_api.md) interface lends itself nicely to what we need to implement RLS as a plug-in.
 
 At its core Exasol Virtual Schema's are a query rewriter, not unlike views. You put in a query and it passes a modified query back that is then immediately executed by the database core instead of the original one. This is exactly what we need to implement RLS.
 
@@ -67,12 +67,13 @@ Covers:
 
 # Runtime
 
-## `RowLevelSecurityAdapter` Reads Custom Properties
-`dsn~rls-adapter-reads-custom-properties~1`
+## `RowLevelSecurityDialect` Reads Custom Properties
+`dsn~rls-dialect-reads-custom-properties~1`
 
-The `RowLevelSecurityAdapter` reads the following custom properties:
+The `RowLevelSecurityDialect` reads the following custom properties:
 
 1. `ROLE_ASSIGNMENT_TABLE`: name of the table that contains the mapping of users to the roles the have
+2. `SCHEMA_NAME`: name of the schema where tables are placed
 
 Covers:
 
@@ -94,38 +95,48 @@ Covers:
 
 Needs: impl, utest, itest
 
-## `UserInformation` Caches User Roles
-`dsn~user-information-caches-user-roles`
+## `QueryRewriter` Determines User Roles
 
-The `UserInformation` caches the roles a user has.
-
-Rationale:
-
-This speeds up subsequent row access checks because the users roles need to be determined only once.
-
-Covers:
-
-* `req~user-roles~1`
-
-Needs: impl, utest
-
-## Query Rewriter Determines User Roles
-
-## Query Rewriter Identifies Protected Tables
+## `QueryRewriter` Identifies Protected Tables
 `dsn~query-rewriter-identifies-protected-tables~1`
 
-The Query Rewriter identifies a table as protected with row-level security, if that table has a column named `exa_row_roles`.
+The `QueryRewriter` identifies a table as protected with row-level security, if that table has a column named `exa_row_roles` or a column named  `exa_row_tenants` or both.
 
 Covers:
 
 * `req~rows-users-are-allowed-to-read~1`
+* `req~tables-with-tenants-restrictions~1`
 
 Needs: impl, utest, itest
 
-## Query Rewriter Replaces Tables
+## `QueryRewriter` Identifies Unprotected Tables
+`dsn~query-rewriter-identifies-unprotected-tables~1`
+
+The `QueryRewriter` identifies a table as unprotected, if that table does not have a column named `exa_row_roles` or `exa_row_tenants`.
+The `QueryRewriter` does not modify an unprotected table.
+
+Covers:
+
+* `req~unprotected-tables~1`
+
+Needs: impl, utest, itest
+
+## `QueryRewriter` Treats Protected Tables with Both Roles and Tenants Restrictions
+`query-rewriter-treats-protected-tables-with-both-roles-and-tenants-restrictions~1`
+
+If a table contains both `exa_row_roles` and `exa_row_tenants`columns, then the `QueryRewriter` applies both security schemes. 
+That means a user has to be marked as a tenant and have the right role in due to see a row's content.
+
+Covers:
+
+* `req~tables-with-both-roles-and-tenants-restrictions~1`
+
+Needs: impl, utest, itest
+
+## `QueryRewriter` Replaces Tables
 `dsn~query-rewriter-replaces-tables~1`
 
-If a table is protected with row level security, the Query Rewriter replaces this table with sub-select that only yields columns the user is allowed to read.
+If a table is protected with row level security, the `QueryRewriter` replaces this table with sub-select that only yields columns the user is allowed to read.
 
 Covers:
 
@@ -133,10 +144,10 @@ Covers:
 
 Needs: impl, utest, itest
 
-## Query Rewriter Adds Row Filter
-`dsn~query-rewriter-adds-row-filter~1`
+## `QueryRewriter` Adds Row Filter for Roles
+`dsn~query-rewriter-adds-row-filter-for-roles~1`
 
-The Query Rewriter adds a row filter to the injected sub-query that uses bitwise-`AND` against the users role mask and checks whether the result is not zero.
+The `QueryRewriter` adds a row filter to the injected sub-query that uses bitwise-`AND` against the users role mask and checks whether the result is not zero.
 
 Covers:
 
@@ -150,7 +161,7 @@ Needs: impl, utest, itest
 
 ## How do we Implement Role Checking
 
-Users have roles. A user's roles decide which rows / columns this user is allowed to see.
+Users have roles. A user's roles decide which rows this user is allowed to see.
 
 This decision is architecture-relevant because it impacts:
 

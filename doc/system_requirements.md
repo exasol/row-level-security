@@ -55,9 +55,7 @@ Needs: req
 
 ## Functional Requirements
 
-### Common Requirements
-
-In this section you find requirements that are common for both row- and column-level security. 
+### Row Level Security with Roles
 
 #### User Roles
 `req~user-roles~1`
@@ -73,8 +71,6 @@ Covers:
 * [feat~row-level-security~1](#row-level-security)
 
 Needs: dsn
-
-### Row Level Security
 
 #### Tables With Row Restrictions
 `req~tables-with-row-restrictions~1`
@@ -138,3 +134,39 @@ Covers:
 * [feat~row-level-security~1](#row-level-security)
 
 Needs: dsn
+
+### Row Level Security with Tenants 
+
+#### Tables With Tenants Restrictions
+`req~tables-with-tenants-restrictions~1`
+
+Data Owners can define for each row in the table if it belongs to only one user (tenant).
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+#### Tables with Both Roles and Tenants Restrictions
+`req~tables-with-both-roles-and-tenants-restrictions~1`
+
+If a table contains both roles restrictions and tenants restrictions, both of them are applied.
+To access the data a user needs: 
+    1. To be the right tenant.
+    2. To be assigned to at least one of the roles that the data owner granted access to.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+### Unprotected tables
+`req~unprotected-tables~1`
+
+Data Owners can leave a table unprotected. In this case all users can access all data in the table.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)

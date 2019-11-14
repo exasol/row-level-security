@@ -2,7 +2,7 @@
 
 ### Run Time Dependencies
 
-Running the Virtual Schema requires a Java Runtime version 9 or later.
+Running the Virtual Schema requires a Java Runtime version 11 or later.
 
 | Dependency                                                                          | Purpose                                                | License                       |
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
@@ -21,7 +21,7 @@ Running the Virtual Schema requires a Java Runtime version 9 or later.
 
 ### Build Dependencies
 
-| Plug-in                                                                             | Purpose                                                | License                       |
+| Dependency                                                                          | Purpose                                                | License                       |
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
 | [Apache Maven](https://maven.apache.org/)                                           | Build tool                                             | Apache License 2.0            |
 | [Maven Compiler Plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)    | Setting required Java version                          | Apache License 2.0            |

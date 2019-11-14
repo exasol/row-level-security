@@ -372,4 +372,3 @@ org.eclipse.jdt.core.formatter.wrap_before_shift_operator=true
 org.eclipse.jdt.core.formatter.wrap_before_string_concatenation=true
 org.eclipse.jdt.core.formatter.wrap_outer_expressions_when_nested=true
 org.eclipse.jdt.core.javaFormatter=org.eclipse.jdt.core.defaultJavaFormatter
->>>>>>> branch 'feature/2_initial_project_version' of https://github.com/exasol/row-level-security.git
