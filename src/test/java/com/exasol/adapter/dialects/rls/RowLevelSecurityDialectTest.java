@@ -1,7 +1,7 @@
 package com.exasol.adapter.dialects.rls;
 
 import static com.exasol.adapter.capabilities.MainCapability.*;
-import static com.exasol.adapter.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;

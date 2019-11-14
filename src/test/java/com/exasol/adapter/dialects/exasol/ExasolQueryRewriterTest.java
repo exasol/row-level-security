@@ -2,7 +2,7 @@ package com.exasol.adapter.dialects.exasol;
 
 import static com.exasol.adapter.AdapterProperties.*;
 import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
-import static com.exasol.adapter.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
