@@ -1,25 +1,30 @@
 package com.exasol.adapter.dialects.exasol;
 
-import com.exasol.*;
-import com.exasol.adapter.AdapterException;
-import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
-import com.exasol.adapter.sql.TestSqlStatementFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static com.exasol.adapter.AdapterProperties.*;
+import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
+import static com.exasol.adapter.reflect.ReflectionUtils.getMethodReturnViaReflection;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.mockito.Mockito.mock;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import static com.exasol.adapter.AdapterProperties.*;
-import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
-import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.mockito.Mockito.mock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.exasol.ExaConnectionAccessException;
+import com.exasol.ExaConnectionInformation;
+import com.exasol.ExaMetadata;
+import com.exasol.adapter.AdapterException;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.AbstractQueryRewriterTestBase;
+import com.exasol.adapter.dialects.QueryRewriter;
+import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.jdbc.BaseRemoteMetadataReader;
+import com.exasol.adapter.sql.TestSqlStatementFactory;
 
 class ExasolQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @BeforeEach
@@ -39,9 +44,9 @@ class ExasolQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final SqlDialect dialect = new ExasolSqlDialect(connectionMock, properties);
         final BaseRemoteMetadataReader metadataReader = new BaseRemoteMetadataReader(connectionMock, properties);
         final QueryRewriter queryRewriter = new ExasolQueryRewriter(dialect, metadataReader, connectionMock);
-        assertThat(queryRewriter.rewrite(this.statement, this.exaMetadata, properties), equalTo(
-              "IMPORT INTO (c1 DECIMAL(18, 0)) FROM JDBC AT " + CONNECTION_NAME
-                    + " STATEMENT 'SELECT 1 FROM \"DUAL\"'"));
+        assertThat(queryRewriter.rewrite(this.statement, this.exaMetadata, properties),
+                equalTo("IMPORT INTO (c1 DECIMAL(18, 0)) FROM JDBC AT " + CONNECTION_NAME
+                        + " STATEMENT 'SELECT 1 FROM \"DUAL\"'"));
     }
 
     @Test
@@ -51,7 +56,7 @@ class ExasolQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final SqlDialect dialect = new ExasolSqlDialect(null, properties);
         final QueryRewriter queryRewriter = new ExasolQueryRewriter(dialect, null, null);
         assertThat(queryRewriter.rewrite(this.statement, this.exaMetadata, properties),
-              equalTo("SELECT 1 FROM \"DUAL\""));
+                equalTo("SELECT 1 FROM \"DUAL\""));
     }
 
     private void setIsLocalProperty() {
@@ -60,7 +65,7 @@ class ExasolQueryRewriterTest extends AbstractQueryRewriterTestBase {
 
     @Test
     void testRewriteToImportFromExaWithConnectionDetailsInProperties()
-          throws AdapterException, SQLException, ExaConnectionAccessException {
+            throws AdapterException, SQLException, ExaConnectionAccessException {
         setImportFromExaProperty();
         this.rawProperties.put(CONNECTION_STRING_PROPERTY, "irrelevant");
         this.rawProperties.put(USERNAME_PROPERTY, "alibaba");
@@ -69,9 +74,9 @@ class ExasolQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final AdapterProperties properties = new AdapterProperties(this.rawProperties);
         final SqlDialect dialect = new ExasolSqlDialect(null, properties);
         final QueryRewriter queryRewriter = new ExasolQueryRewriter(dialect, null, null);
-        assertThat(queryRewriter.rewrite(this.statement, this.exaMetadata, properties), equalTo(
-              "IMPORT FROM EXA AT 'localhost:7861' USER 'alibaba' IDENTIFIED BY 'open sesame'"
-                    + " STATEMENT 'SELECT 1 FROM \"DUAL\"'"));
+        assertThat(queryRewriter.rewrite(this.statement, this.exaMetadata, properties),
+                equalTo("IMPORT FROM EXA AT 'localhost:7861' USER 'alibaba' IDENTIFIED BY 'open sesame'"
+                        + " STATEMENT 'SELECT 1 FROM \"DUAL\"'"));
     }
 
     private void setImportFromExaProperty() {
@@ -83,6 +88,6 @@ class ExasolQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final SqlDialect dialect = new ExasolSqlDialect(null, AdapterProperties.emptyProperties());
         final QueryRewriter queryRewriter = new ExasolQueryRewriter(dialect, null, null);
         assertThat(getMethodReturnViaReflection(queryRewriter, "createConnectionDefinitionBuilder"),
-              instanceOf(ExasolConnectionDefinitionBuilder.class));
+                instanceOf(ExasolConnectionDefinitionBuilder.class));
     }
 }

@@ -1,10 +1,10 @@
 package com.exasol.adapter.dialects.rls;
 
+import java.sql.Connection;
+
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
-
-import java.sql.Connection;
 
 /**
  * Factory for the Row Level Security dialect.
@@ -25,4 +25,3 @@ public class RowLevelSecurityDialectFactory implements SqlDialectFactory {
         return new RowLevelSecurityDialect(connection, properties);
     }
 }
-

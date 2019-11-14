@@ -95,12 +95,12 @@ Covers:
 
 Needs: impl, utest, itest
 
-## `Query Rewriter` Determines User Roles
+## `QueryRewriter` Determines User Roles
 
-## `Query Rewriter` Identifies Protected Tables
+## `QueryRewriter` Identifies Protected Tables
 `dsn~query-rewriter-identifies-protected-tables~1`
 
-The `Query Rewriter` identifies a table as protected with row-level security, if that table has a column named `exa_row_roles` or a column named  `exa_row_tenants` or both.
+The `QueryRewriter` identifies a table as protected with row-level security, if that table has a column named `exa_row_roles` or a column named  `exa_row_tenants` or both.
 
 Covers:
 
@@ -109,11 +109,11 @@ Covers:
 
 Needs: impl, utest, itest
 
-## `Query Rewriter` Identifies Unprotected Tables
+## `QueryRewriter` Identifies Unprotected Tables
 `dsn~query-rewriter-identifies-unprotected-tables~1`
 
-The `Query Rewriter` identifies a table as unprotected, if that table does not have a column named `exa_row_roles` or `exa_row_tenants`.
-The `Query Rewriter` does not modify an unprotected table.
+The `QueryRewriter` identifies a table as unprotected, if that table does not have a column named `exa_row_roles` or `exa_row_tenants`.
+The `QueryRewriter` does not modify an unprotected table.
 
 Covers:
 
@@ -121,10 +121,10 @@ Covers:
 
 Needs: impl, utest, itest
 
-## `Query Rewriter Treats Protected Tables with Both Roles and Tenants Restrictions
+## `QueryRewriter` Treats Protected Tables with Both Roles and Tenants Restrictions
 `query-rewriter-treats-protected-tables-with-both-roles-and-tenants-restrictions~1`
 
-If a table contains both `exa_row_roles` and `exa_row_tenants`columns, then the `Query Rewriter` applies both security conceptions. 
+If a table contains both `exa_row_roles` and `exa_row_tenants`columns, then the `QueryRewriter` applies both security schemes. 
 That means a user has to be marked as a tenant and have the right role in due to see a row's content.
 
 Covers:
@@ -133,10 +133,10 @@ Covers:
 
 Needs: impl, utest, itest
 
-## `Query Rewriter` Replaces Tables
+## `QueryRewriter` Replaces Tables
 `dsn~query-rewriter-replaces-tables~1`
 
-If a table is protected with row level security, the `Query Rewriter` replaces this table with sub-select that only yields columns the user is allowed to read.
+If a table is protected with row level security, the `QueryRewriter` replaces this table with sub-select that only yields columns the user is allowed to read.
 
 Covers:
 
@@ -144,10 +144,10 @@ Covers:
 
 Needs: impl, utest, itest
 
-## `Query Rewriter` Adds Row Filter For Roles
+## `QueryRewriter` Adds Row Filter for Roles
 `dsn~query-rewriter-adds-row-filter-for-roles~1`
 
-The `Query Rewriter` adds a row filter to the injected sub-query that uses bitwise-`AND` against the users role mask and checks whether the result is not zero.
+The `QueryRewriter` adds a row filter to the injected sub-query that uses bitwise-`AND` against the users role mask and checks whether the result is not zero.
 
 Covers:
 

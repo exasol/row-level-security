@@ -154,7 +154,7 @@ Needs: dsn
 If a table contains both roles restrictions and tenants restrictions, both of them are applied.
 To access the data a user needs: 
     1. To be the right tenant.
-    2. To have the right role. 
+    2. To be assigned to at least one of the roles that the data owner granted access to.
 
 Covers:
 
