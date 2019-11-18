@@ -3,8 +3,8 @@ package com.exasol.adapter.dialects.rls;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -14,8 +14,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
@@ -30,36 +32,58 @@ import com.exasol.adapter.metadata.DataType.ExaCharset;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 
+@ExtendWith(MockitoExtension.class)
 class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
     private SqlDialect dialect;
-    private Connection connectionMock;
     private AdapterProperties properties;
     private RemoteMetadataReader metadataReader;
+    @Mock
+    private Connection connectionMock;
+    @Mock
+    private DatabaseMetaData databaseMetaDataMock;
 
     @BeforeEach
     void beforeEach() throws SQLException {
-        this.dialect = new RowLevelSecurityDialect(null, AdapterProperties.emptyProperties());
         this.exaMetadata = mock(ExaMetadata.class);
         this.rawProperties = new HashMap<>();
-        final ResultSetMetaData resultSetMetadataMock = Mockito.mock(ResultSetMetaData.class);
-        Mockito.when(resultSetMetadataMock.getColumnCount()).thenReturn(1);
-        Mockito.when(resultSetMetadataMock.getColumnType(1)).thenReturn(4);
-        final PreparedStatement preparedStatementMock = Mockito.mock(PreparedStatement.class);
-        Mockito.when(preparedStatementMock.getMetaData()).thenReturn(resultSetMetadataMock);
+        this.dialect = new RowLevelSecurityDialect(null, AdapterProperties.emptyProperties());
+        final ResultSetMetaData resultSetMetadataMock = mock(ResultSetMetaData.class);
+        when(resultSetMetadataMock.getColumnCount()).thenReturn(1);
+        when(resultSetMetadataMock.getColumnType(1)).thenReturn(4);
+        final PreparedStatement preparedStatementMock = mock(PreparedStatement.class);
+        when(preparedStatementMock.getMetaData()).thenReturn(resultSetMetadataMock);
         final ResultSet resultSetMock = mock(ResultSet.class);
-        when(resultSetMock.getLong(any())).thenReturn(3L);
-        when(resultSetMock.next()).thenReturn(true);
-        when(resultSetMock.last()).thenReturn(true);
-        when(preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
+        lenient().when(resultSetMock.getLong(any())).thenReturn(3L);
+        lenient().when(resultSetMock.next()).thenReturn(true);
+        lenient().when(resultSetMock.last()).thenReturn(true);
+        lenient().when(preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
         this.properties = new AdapterProperties(this.rawProperties);
-        this.connectionMock = Mockito.mock(Connection.class);
-        Mockito.when(this.connectionMock.prepareStatement(ArgumentMatchers.any())).thenReturn(preparedStatementMock);
+        this.connectionMock = mock(Connection.class);
+        when(this.connectionMock.getMetaData()).thenReturn(this.databaseMetaDataMock);
+        when(this.connectionMock.prepareStatement(ArgumentMatchers.any())).thenReturn(preparedStatementMock);
         setConnectionNameProperty();
         this.metadataReader = new ExasolMetadataReader(this.connectionMock, this.properties);
     }
 
+    @Test
+    void testRewriteUnprotectedTables() throws SQLException, AdapterException {
+        final SqlColumn left = new SqlColumn(1,
+                ColumnMetadata.builder().name("amount").type(DataType.createDecimal(20, 0)).build());
+        final SqlLiteralExactnumeric right = new SqlLiteralExactnumeric(BigDecimal.valueOf(2));
+        final SqlStatementSelect statement = createSelectStatement().whereClause(new SqlPredicateEqual(left, right))
+                .build();
+        final RowLevelSecurityQueryRewriter rewriter = new RowLevelSecurityQueryRewriter(this.dialect,
+                this.metadataReader, this.connectionMock);
+        assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties),
+                containsString("STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE \"amount\" = 2'"));
+    }
 
-    void testRewriteWithoutWhereClause() throws SQLException, AdapterException {
+    @Test
+    void testRewriteRolesWithoutWhereClause() throws SQLException, AdapterException {
+        final ResultSet resultSetColumnsMock = mock(ResultSet.class);
+        when(resultSetColumnsMock.next()).thenReturn(true);
+        when(this.databaseMetaDataMock.getColumns(any(), any(), any(), eq("EXA_ROW_ROLES")))
+                .thenReturn(resultSetColumnsMock);
         final SqlStatementSelect statement = createSelectStatement().build();
         final RowLevelSecurityQueryRewriter rewriter = new RowLevelSecurityQueryRewriter(this.dialect,
                 this.metadataReader, this.connectionMock);
@@ -67,8 +91,12 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
                 "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0'"));
     }
 
-
-    void testRewriteWithSimpleWhereClause() throws SQLException, AdapterException {
+    @Test
+    void testRewriteRolesWithSimpleWhereClause() throws SQLException, AdapterException {
+        final ResultSet resultSetColumnsMock = mock(ResultSet.class);
+        when(resultSetColumnsMock.next()).thenReturn(true);
+        when(this.databaseMetaDataMock.getColumns(any(), any(), any(), eq("EXA_ROW_ROLES")))
+                .thenReturn(resultSetColumnsMock);
         final SqlColumn left = new SqlColumn(1,
                 ColumnMetadata.builder().name("amount").type(DataType.createDecimal(20, 0)).build());
         final SqlLiteralExactnumeric right = new SqlLiteralExactnumeric(BigDecimal.valueOf(2));
@@ -77,12 +105,15 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final RowLevelSecurityQueryRewriter rewriter = new RowLevelSecurityQueryRewriter(this.dialect,
                 this.metadataReader, this.connectionMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
-                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0 "
-                        + "AND \"amount\" = 2)'"));
+                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (\"amount\" = 2 AND BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0)'"));
     }
 
-
-    void testRewriteWithWhereClauseWithMultipleValues() throws SQLException, AdapterException {
+    @Test
+    void testRewriteRolesWithWhereClauseWithMultipleValues() throws SQLException, AdapterException {
+        final ResultSet resultSetColumnsMock = mock(ResultSet.class);
+        when(resultSetColumnsMock.next()).thenReturn(true);
+        when(this.databaseMetaDataMock.getColumns(any(), any(), any(), eq("EXA_ROW_ROLES")))
+                .thenReturn(resultSetColumnsMock);
         final SqlColumn left1 = new SqlColumn(1,
                 ColumnMetadata.builder().name("amount").type(DataType.createDecimal(20, 0)).build());
         final SqlLiteralExactnumeric right1 = new SqlLiteralExactnumeric(BigDecimal.valueOf(2));
@@ -97,8 +128,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final RowLevelSecurityQueryRewriter rewriter = new RowLevelSecurityQueryRewriter(this.dialect,
                 this.metadataReader, this.connectionMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
-                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0 AND (\"amount\" ="
-                        + " 2 " + "AND \"item\" = ''Screwdriver''))'"));
+                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE ((\"amount\" = 2 AND \"item\" = ''Screwdriver'') AND BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0)'"));
     }
 
     private SqlStatementSelect.Builder createSelectStatement() {

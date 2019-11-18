@@ -2,6 +2,7 @@ package com.exasol.adapter.sql;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -31,21 +32,29 @@ class UserInformationTest {
     }
 
     @Test
-    void testIsTableSecuredTrue() throws SQLException {
+    void testIsTableSecuredWithRolesTrue() throws SQLException {
         final DatabaseMetaData metadataMock = Mockito.mock(DatabaseMetaData.class);
         final ResultSet resultSet = Mockito.mock(ResultSet.class);
         when(metadataMock.getColumns(any(), any(), any(), any())).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
-        assertThat(this.userInformation.isTableProtected("catalog", "table", metadataMock), equalTo(true));
+        assertAll(
+                () -> assertThat(this.userInformation.isTableProtectedWithExaRowRoles("", "", metadataMock),
+                        equalTo(true)),
+                () -> assertThat(this.userInformation.isTableProtectedWithRowTenants("", "", metadataMock),
+                        equalTo(true)));
     }
 
     @Test
-    void testIsTableSecuredFalse() throws SQLException {
+    void testIsTableSecuredWithRolesFalse() throws SQLException {
         final DatabaseMetaData metadataMock = Mockito.mock(DatabaseMetaData.class);
         final ResultSet resultSet = Mockito.mock(ResultSet.class);
         when(metadataMock.getColumns(any(), any(), any(), any())).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
-        assertThat(this.userInformation.isTableProtected("catalog", "table", metadataMock), equalTo(false));
+        assertAll(
+                () -> assertThat(this.userInformation.isTableProtectedWithExaRowRoles("", "", metadataMock),
+                        equalTo(false)),
+                () -> assertThat(this.userInformation.isTableProtectedWithRowTenants("", "", metadataMock),
+                        equalTo(false)));
     }
 
     @Test
@@ -61,28 +70,25 @@ class UserInformationTest {
 
     @Test
     void testGetRoleMaskEmptyResultSetWithDefaultMask() throws SQLException {
-        final UserInformation userInformation = new UserInformation("sys", "schema", "table");
         final ResultSet resultSet = null;
         when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSet);
-        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
+        assertThat(this.userInformation.getRoleMask(this.connectionMock), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
     }
 
     @Test
     void testGetRoleMaskInvalidMaskMoreThanOneResult() throws SQLException {
-        final UserInformation userInformation = new UserInformation("sys", "schema", "table");
         final ResultSet resultSetMock = mock(ResultSet.class);
         when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);
         when(resultSetMock.getLong(any())).thenReturn(3L);
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(false);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
-        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
+        assertThat(this.userInformation.getRoleMask(this.connectionMock), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
     }
 
     @Test
     void testGetRoleMaskInvalidMaskValue() throws SQLException {
-        final UserInformation userInformation = new UserInformation("sys", "schema", "table");
         final ResultSet resultSetMock = mock(ResultSet.class);
         when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);
         when(resultSetMock.getLong(any()))
@@ -90,6 +96,6 @@ class UserInformationTest {
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(true);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
-        assertThat(userInformation.getRoleMask(this.connectionMock), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
+        assertThat(this.userInformation.getRoleMask(this.connectionMock), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
     }
 }
