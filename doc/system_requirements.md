@@ -27,11 +27,11 @@ RLS's main quality goals are in descending order of importance:
 
 ### Data Owners
 
-TODO
+Data Owners are have full access to the data _before_ row-level security is applied. They also get to decide who is allowed to read it through RLS.
 
 ### Regular Users
 
-TODO
+Regular Users in the context of this project are consumers of row-level security-protected data.
 
 ### Terms and Abbreviations
 

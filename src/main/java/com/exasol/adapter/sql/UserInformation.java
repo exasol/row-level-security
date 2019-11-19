@@ -1,11 +1,11 @@
 package com.exasol.adapter.sql;
 
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.*;
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.DEFAULT_ROLE_MASK;
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.MAX_ROLE_VALUE;
 import static java.lang.Long.toUnsignedString;
 
 import java.math.BigInteger;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
@@ -27,45 +27,11 @@ public class UserInformation {
         this.currentUser = currentUser;
     }
 
+    /**
+     * @return current session's user
+     */
     public String getCurrentUser() {
         return this.currentUser;
-    }
-
-    /**
-     * Check if a table is protected with tenants security.
-     * 
-     * @param catalogName name of the database catalog
-     * @param tableName   name of the table to check
-     * @param metadata    database's metadata
-     * @return true if protected
-     */
-    public boolean isTableProtectedWithRowTenants(final String catalogName, final String tableName,
-            final DatabaseMetaData metadata) {
-        return containsColumn(metadata, catalogName, this.schemaName, tableName, EXA_ROW_TENANTS_COLUMN_NAME);
-    }
-
-    /**
-     * Check if a table is protected with roles security.
-     *
-     * @param catalogName name of the database catalog
-     * @param tableName   name of the table to check
-     * @param metadata    database's metadata
-     * @return true if protected
-     */
-    public boolean isTableProtectedWithExaRowRoles(final String catalogName, final String tableName,
-            final DatabaseMetaData metadata) {
-        return containsColumn(metadata, catalogName, this.schemaName, tableName, EXA_ROW_ROLES_COLUMN_NAME);
-    }
-
-    private boolean containsColumn(final DatabaseMetaData metadata, final String catalogName, final String schemaName,
-            final String tableName, final String columnName) {
-        try (final ResultSet column = metadata.getColumns(catalogName, schemaName, tableName, columnName)) {
-            return column != null && column.next();
-        } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException(
-                    "Checks for column  " + columnName + " was failed.  Caused by: " + exception.getMessage(),
-                    exception);
-        }
     }
 
     /**

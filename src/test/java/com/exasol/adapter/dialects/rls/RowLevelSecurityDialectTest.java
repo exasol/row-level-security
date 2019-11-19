@@ -8,18 +8,26 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.sql.Connection;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 
+@ExtendWith(MockitoExtension.class)
 class RowLevelSecurityDialectTest {
+    @Mock
+    Connection connectionMock;
     private RowLevelSecurityDialect dialect;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new RowLevelSecurityDialect(null, AdapterProperties.emptyProperties());
+        this.dialect = new RowLevelSecurityDialect(this.connectionMock, AdapterProperties.emptyProperties());
     }
 
     @Test

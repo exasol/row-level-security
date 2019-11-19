@@ -3,11 +3,13 @@ package com.exasol.adapter.dialects.rls;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.QueryRewriter;
 import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
+import com.exasol.adapter.sql.TableProtectionStatus;
 
 public class RowLevelSecurityDialect extends ExasolSqlDialect {
     static final String NAME = "EXASOL_RLS";
@@ -46,6 +48,12 @@ public class RowLevelSecurityDialect extends ExasolSqlDialect {
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new RowLevelSecurityQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        try {
+            TableProtectionStatus tableProtectionStatus = new TableProtectionStatus(connection.getMetaData());
+            return new RowLevelSecurityQueryRewriter(this, this.remoteMetadataReader, this.connection,
+                    tableProtectionStatus);
+        } catch (final SQLException exception) {
+            throw new IllegalArgumentException("Unable to read metadata for instantiating TableProtectionStatus.");
+        }
     }
 }

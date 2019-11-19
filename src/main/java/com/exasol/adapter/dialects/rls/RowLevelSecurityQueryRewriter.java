@@ -24,6 +24,7 @@ import com.exasol.adapter.sql.*;
 
 public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(RowLevelSecurityQueryRewriter.class.getName());
+    private final TableProtectionStatus tableProtectionStatus;
 
     /**
      * Create a new instance of a {@link BaseQueryRewriter}.
@@ -33,34 +34,39 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
      * @param connection           JDBC connection to remote data source
      */
     public RowLevelSecurityQueryRewriter(final SqlDialect dialect, final RemoteMetadataReader remoteMetadataReader,
-            final Connection connection) {
+            final Connection connection, final TableProtectionStatus tableProtectionStatus) {
         super(dialect, remoteMetadataReader, connection);
+        this.tableProtectionStatus = tableProtectionStatus;
     }
 
     @Override
     public String rewrite(final SqlStatement statement, final ExaMetadata exaMetadata,
             final AdapterProperties properties) throws AdapterException, SQLException {
         if (statement instanceof SqlStatementSelect) {
-            final SqlStatementSelect select = (SqlStatementSelect) statement;
-            final UserInformation userInformation = new UserInformation(exaMetadata.getCurrentUser(),
-                    properties.getSchemaName(), "EXA_RLS_USERS");
-            final boolean protectedWithExaRowRoles = userInformation.isTableProtectedWithExaRowRoles(
-                    properties.getCatalogName(), ((SqlTable) select.getFromClause()).getName(),
-                    this.connection.getMetaData());
-            final boolean protectedWithExaRowTenants = userInformation.isTableProtectedWithRowTenants(
-                    properties.getCatalogName(), ((SqlTable) select.getFromClause()).getName(),
-                    this.connection.getMetaData());
-            logTableProtectionInfo(protectedWithExaRowRoles, protectedWithExaRowTenants);
-            if (protectedWithExaRowRoles || protectedWithExaRowTenants) {
-                final SqlStatementSelect newSelectStatement = getNewSqlStatementSelect(select, userInformation,
-                        protectedWithExaRowRoles, protectedWithExaRowTenants);
-                return super.rewrite(newSelectStatement, exaMetadata, properties);
-            } else {
-                return super.rewrite(statement, exaMetadata, properties);
-            }
+            return rewriteStatement(statement, exaMetadata, properties);
         } else {
             throw new IllegalArgumentException(
                     "Modified SQL statement must be a SELECT statement, but was " + statement.getClass().getName());
+        }
+    }
+
+    private String rewriteStatement(final SqlStatement statement, final ExaMetadata exaMetadata,
+            final AdapterProperties properties) throws SQLException, AdapterException {
+        final SqlStatementSelect select = (SqlStatementSelect) statement;
+        String schemaName = properties.getSchemaName();
+        final UserInformation userInformation = new UserInformation(exaMetadata.getCurrentUser(), schemaName,
+                "EXA_RLS_USERS");
+        final boolean protectedWithExaRowRoles = tableProtectionStatus.isTableProtectedWithExaRowRoles(
+                properties.getCatalogName(), schemaName, ((SqlTable) select.getFromClause()).getName());
+        final boolean protectedWithExaRowTenants = tableProtectionStatus.isTableProtectedWithRowTenants(
+                properties.getCatalogName(), schemaName, ((SqlTable) select.getFromClause()).getName());
+        logTableProtectionInfo(protectedWithExaRowRoles, protectedWithExaRowTenants);
+        if (protectedWithExaRowRoles || protectedWithExaRowTenants) {
+            final SqlStatementSelect newSelectStatement = getNewSqlStatementSelect(select, userInformation,
+                    protectedWithExaRowRoles, protectedWithExaRowTenants);
+            return super.rewrite(newSelectStatement, exaMetadata, properties);
+        } else {
+            return super.rewrite(statement, exaMetadata, properties);
         }
     }
 

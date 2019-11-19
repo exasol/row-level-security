@@ -81,7 +81,7 @@ Covers:
 
 Needs: impl, utest, itest
 
-## `UserInformation` Read User Roles
+## `UserInformation` Reads User Roles
 `dsn~user-information-reads-user-roles`
 
 The `UserInformation` reads the current user's roles from a table with the following layout:

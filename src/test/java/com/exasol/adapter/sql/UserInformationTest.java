@@ -32,32 +32,6 @@ class UserInformationTest {
     }
 
     @Test
-    void testIsTableSecuredWithRolesTrue() throws SQLException {
-        final DatabaseMetaData metadataMock = Mockito.mock(DatabaseMetaData.class);
-        final ResultSet resultSet = Mockito.mock(ResultSet.class);
-        when(metadataMock.getColumns(any(), any(), any(), any())).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(true);
-        assertAll(
-                () -> assertThat(this.userInformation.isTableProtectedWithExaRowRoles("", "", metadataMock),
-                        equalTo(true)),
-                () -> assertThat(this.userInformation.isTableProtectedWithRowTenants("", "", metadataMock),
-                        equalTo(true)));
-    }
-
-    @Test
-    void testIsTableSecuredWithRolesFalse() throws SQLException {
-        final DatabaseMetaData metadataMock = Mockito.mock(DatabaseMetaData.class);
-        final ResultSet resultSet = Mockito.mock(ResultSet.class);
-        when(metadataMock.getColumns(any(), any(), any(), any())).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(false);
-        assertAll(
-                () -> assertThat(this.userInformation.isTableProtectedWithExaRowRoles("", "", metadataMock),
-                        equalTo(false)),
-                () -> assertThat(this.userInformation.isTableProtectedWithRowTenants("", "", metadataMock),
-                        equalTo(false)));
-    }
-
-    @Test
     void testGetRoleMaskValidMask() throws SQLException {
         final ResultSet resultSetMock = mock(ResultSet.class);
         when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);
