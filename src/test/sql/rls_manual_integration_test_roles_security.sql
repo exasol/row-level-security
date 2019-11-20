@@ -59,11 +59,12 @@ CREATE OR REPLACE TABLE row_level_security_test_schema.exa_rls_users
     exa_role_mask DECIMAL(20,0)
     );
 
-INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('RLS_USR_1', NULL);
-INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('RLS_USR_2', 1);
-INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('RLS_USR_3', 3);
-INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('RLS_USR_4', 15);
-INSERT INTO row_level_security_test_schema.exa_rls_users VALUES ('SYS', 15);
+INSERT INTO row_level_security_test_schema.exa_rls_users VALUES
+('RLS_USR_1', NULL),
+('RLS_USR_2', 1),
+('RLS_USR_3', 3),
+('RLS_USR_4', 15),
+('SYS', 15);
 
 --Create Virtual Schema
 CREATE CONNECTION jdbc_exasol_connection
