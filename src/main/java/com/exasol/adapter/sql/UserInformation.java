@@ -21,6 +21,13 @@ public class UserInformation {
     private final String schemaName;
     private final String currentUser;
 
+    /**
+     * Create a new instance of {@link UserInformation}
+     *
+     * @param currentUser name of the current user
+     * @param schemaName mane of the schema
+     * @param rlsUsersTableName name of the table representing RLS user's roles mapping
+     */
     public UserInformation(final String currentUser, final String schemaName, final String rlsUsersTableName) {
         this.schemaName = schemaName;
         this.rlsUsersTableName = rlsUsersTableName;
@@ -28,6 +35,8 @@ public class UserInformation {
     }
 
     /**
+     * Get current user.
+     *
      * @return current session's user
      */
     public String getCurrentUser() {

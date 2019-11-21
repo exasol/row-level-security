@@ -12,6 +12,9 @@ import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.TableProtectionStatus;
 
+/**
+ * This class implements Row Level Security dialect.
+ */
 public class RowLevelSecurityDialect extends ExasolSqlDialect {
     static final String NAME = "EXASOL_RLS";
     private static final Capabilities CAPABILITIES = createCapabilityList();
@@ -28,7 +31,7 @@ public class RowLevelSecurityDialect extends ExasolSqlDialect {
     }
 
     /**
-     * Create a new instance of the {@link ExasolSqlDialect}.
+     * Create a new instance of the {@link RowLevelSecurityDialect}.
      *
      * @param connection SQL connection
      * @param properties adapter properties

@@ -15,6 +15,11 @@ import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 public class TableProtectionStatus {
     private final DatabaseMetaData metadata;
 
+    /**
+     * Create a new instance of {@link TableProtectionStatus}.
+     *
+     * @param metadata database metadata
+     */
     public TableProtectionStatus(final DatabaseMetaData metadata) {
         this.metadata = metadata;
     }

@@ -14,9 +14,12 @@ import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.dialects.exasol.ExasolColumnMetadataReader;
 import com.exasol.adapter.metadata.ColumnMetadata;
 
+/**
+ * This class implements RLS-specific reading of column metadata.
+ */
 public class RowLevelSecurityColumnMetadataReader extends ExasolColumnMetadataReader {
     /**
-     * Create a new instance of the {@link ExasolColumnMetadataReader}.
+     * Create a new instance of the {@link RowLevelSecurityColumnMetadataReader}.
      *
      * @param connection          JDBC connection through which the column metadata is read from the remote database
      * @param properties          user-defined adapter properties

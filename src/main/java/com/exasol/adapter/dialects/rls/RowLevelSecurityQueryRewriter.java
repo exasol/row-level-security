@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.BaseQueryRewriter;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationHelper;
 import com.exasol.adapter.dialects.exasol.ExasolQueryRewriter;
@@ -24,12 +23,15 @@ import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 
+/**
+ * RLS-specific query rewriter.
+ */
 public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(RowLevelSecurityQueryRewriter.class.getName());
     private final TableProtectionStatus tableProtectionStatus;
 
     /**
-     * Create a new instance of a {@link BaseQueryRewriter}.
+     * Create a new instance of a {@link RowLevelSecurityQueryRewriter}.
      *
      * @param dialect              dialect
      * @param remoteMetadataReader remote metadata reader
