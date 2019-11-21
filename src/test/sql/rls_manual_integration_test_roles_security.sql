@@ -114,90 +114,90 @@ CREATE OR REPLACE SCRIPT row_level_security_test_schema.compare_table_contents (
 --Testing
 --Administrator
 SELECT * FROM virtual_schema_rls.rls_sales;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_admin(order_id, customer, product, quantity, exa_row_roles) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_admin(order_id, customer, product, quantity) AS
 SELECT * FROM VALUES
-(3, 'Donkey Inc', 'Carrot', 33, 1),
-(4, 'Chicken Inc', 'Wheat', 4, 2),
-(5, 'Chicken Inc', 'Wheat', 45, 3),
-(6, 'Donkey Inc', 'Carrot', 67, 4),
-(7, 'Goat Inc', 'Grass', 84, 5),
-(8, 'Chicken Inc', 'Wheat', 44, 6),
-(9, 'Chicken Inc', 'Wheat', 64, 7),
-(10, 'Donkey Inc', 'Carrot', 2, 8),
-(11, 'Goat Inc', 'Grass', 54, 9),
-(12, 'Chicken Inc', 'Wheat', 44, 10),
-(13, 'Chicken Inc', 'Wheat', 65, 11),
-(14, 'Donkey Inc', 'Carrot', 89, 12),
-(15, 'Chicken Inc', 'Wheat', 3, 13),
-(16, 'Goat Inc', 'Grass', 34, 14),
-(17, 'Donkey Inc', 'Carrot', 58, 15),
-(18, 'Donkey Inc', 'Wheat', 56, 9223372036854775808);
+(3, 'Donkey Inc', 'Carrot', 33),
+(4, 'Chicken Inc', 'Wheat', 4),
+(5, 'Chicken Inc', 'Wheat', 45),
+(6, 'Donkey Inc', 'Carrot', 67),
+(7, 'Goat Inc', 'Grass', 84),
+(8, 'Chicken Inc', 'Wheat', 44),
+(9, 'Chicken Inc', 'Wheat', 64),
+(10, 'Donkey Inc', 'Carrot', 2),
+(11, 'Goat Inc', 'Grass', 54),
+(12, 'Chicken Inc', 'Wheat', 44),
+(13, 'Chicken Inc', 'Wheat', 65),
+(14, 'Donkey Inc', 'Carrot', 89),
+(15, 'Chicken Inc', 'Wheat', 3),
+(16, 'Goat Inc', 'Grass', 34),
+(17, 'Donkey Inc', 'Carrot', 58),
+(18, 'Donkey Inc', 'Wheat', 56);
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_admin');
 
 --User rls_usr_1
 IMPERSONATE rls_usr_1;
 SELECT * FROM virtual_schema_rls.rls_sales;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_1(order_id, customer, product, quantity, exa_row_roles) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_1(order_id, customer, product, quantity) AS
 SELECT * FROM VALUES
-(18, 'Donkey Inc', 'Wheat', 56, 9223372036854775808);
+(18, 'Donkey Inc', 'Wheat', 56);
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_1');
 
 --User rls_usr_2
 IMPERSONATE rls_usr_2;
 SELECT * FROM virtual_schema_rls.rls_sales;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_2(order_id, customer, product, quantity, exa_row_roles) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_2(order_id, customer, product, quantity) AS
 SELECT * FROM VALUES
-(3, 'Donkey Inc', 'Carrot', 33, 1),
-(5, 'Chicken Inc', 'Wheat', 45, 3),
-(7, 'Goat Inc', 'Grass', 84, 5),
-(9, 'Chicken Inc', 'Wheat', 64, 7),
-(11, 'Goat Inc', 'Grass', 54, 9),
-(13, 'Chicken Inc', 'Wheat', 65, 11),
-(15, 'Chicken Inc', 'Wheat', 3, 13),
-(17, 'Donkey Inc', 'Carrot', 58, 15),
-(18, 'Donkey Inc', 'Wheat', 56, 9223372036854775808);
+(3, 'Donkey Inc', 'Carrot', 33),
+(5, 'Chicken Inc', 'Wheat', 45),
+(7, 'Goat Inc', 'Grass', 84),
+(9, 'Chicken Inc', 'Wheat', 64),
+(11, 'Goat Inc', 'Grass', 54),
+(13, 'Chicken Inc', 'Wheat', 65),
+(15, 'Chicken Inc', 'Wheat', 3),
+(17, 'Donkey Inc', 'Carrot', 58),
+(18, 'Donkey Inc', 'Wheat', 56);
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_2');
 
 --User rls_usr_3
 IMPERSONATE rls_usr_3;
 SELECT * FROM virtual_schema_rls.rls_sales;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_3(order_id, customer, product, quantity, exa_row_roles) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_3(order_id, customer, product, quantity) AS
 SELECT * FROM VALUES
-(3, 'Donkey Inc', 'Carrot', 33, 1),
-(4, 'Chicken Inc', 'Wheat', 4, 2),
-(5, 'Chicken Inc', 'Wheat', 45, 3),
-(7, 'Goat Inc', 'Grass', 84, 5),
-(8, 'Chicken Inc', 'Wheat', 44, 6),
-(9, 'Chicken Inc', 'Wheat', 64, 7),
-(11, 'Goat Inc', 'Grass', 54, 9),
-(12, 'Chicken Inc', 'Wheat', 44, 10),
-(13, 'Chicken Inc', 'Wheat', 65, 11),
-(15, 'Chicken Inc', 'Wheat', 3, 13),
-(16, 'Goat Inc', 'Grass', 34, 14),
-(17, 'Donkey Inc', 'Carrot', 58, 15),
-(18, 'Donkey Inc', 'Wheat', 56, 9223372036854775808);
+(3, 'Donkey Inc', 'Carrot', 33),
+(4, 'Chicken Inc', 'Wheat', 4),
+(5, 'Chicken Inc', 'Wheat', 45),
+(7, 'Goat Inc', 'Grass', 84),
+(8, 'Chicken Inc', 'Wheat', 44),
+(9, 'Chicken Inc', 'Wheat', 64),
+(11, 'Goat Inc', 'Grass', 54),
+(12, 'Chicken Inc', 'Wheat', 44),
+(13, 'Chicken Inc', 'Wheat', 65),
+(15, 'Chicken Inc', 'Wheat', 3),
+(16, 'Goat Inc', 'Grass', 34),
+(17, 'Donkey Inc', 'Carrot', 58),
+(18, 'Donkey Inc', 'Wheat', 56);
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_3');
 
 --User rls_usr_4
 IMPERSONATE rls_usr_4;
 SELECT * FROM virtual_schema_rls.rls_sales;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_4(order_id, customer, product, quantity, exa_row_roles) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_4(order_id, customer, product, quantity) AS
 SELECT * FROM VALUES
-(3, 'Donkey Inc', 'Carrot', 33, 1),
-(4, 'Chicken Inc', 'Wheat', 4, 2),
-(5, 'Chicken Inc', 'Wheat', 45, 3),
-(6, 'Donkey Inc', 'Carrot', 67, 4),
-(7, 'Goat Inc', 'Grass', 84, 5),
-(8, 'Chicken Inc', 'Wheat', 44, 6),
-(9, 'Chicken Inc', 'Wheat', 64, 7),
-(10, 'Donkey Inc', 'Carrot', 2, 8),
-(11, 'Goat Inc', 'Grass', 54, 9),
-(12, 'Chicken Inc', 'Wheat', 44, 10),
-(13, 'Chicken Inc', 'Wheat', 65, 11),
-(14, 'Donkey Inc', 'Carrot', 89, 12),
-(15, 'Chicken Inc', 'Wheat', 3, 13),
-(16, 'Goat Inc', 'Grass', 34, 14),
-(17, 'Donkey Inc', 'Carrot', 58, 15),
-(18, 'Donkey Inc', 'Wheat', 56, 9223372036854775808);
+(3, 'Donkey Inc', 'Carrot', 33),
+(4, 'Chicken Inc', 'Wheat', 4),
+(5, 'Chicken Inc', 'Wheat', 45),
+(6, 'Donkey Inc', 'Carrot', 67),
+(7, 'Goat Inc', 'Grass', 84),
+(8, 'Chicken Inc', 'Wheat', 44),
+(9, 'Chicken Inc', 'Wheat', 64),
+(10, 'Donkey Inc', 'Carrot', 2),
+(11, 'Goat Inc', 'Grass', 54),
+(12, 'Chicken Inc', 'Wheat', 44),
+(13, 'Chicken Inc', 'Wheat', 65),
+(14, 'Donkey Inc', 'Carrot', 89),
+(15, 'Chicken Inc', 'Wheat', 3),
+(16, 'Goat Inc', 'Grass', 34),
+(17, 'Donkey Inc', 'Carrot', 58),
+(18, 'Donkey Inc', 'Wheat', 56);
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_4');
 IMPERSONATE SYS;

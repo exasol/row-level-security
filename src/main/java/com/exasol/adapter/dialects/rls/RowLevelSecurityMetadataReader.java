@@ -13,7 +13,7 @@ public class RowLevelSecurityMetadataReader extends ExasolMetadataReader {
      * @param connection database connection through which the reader retrieves the metadata from the remote source
      * @param properties user-defined properties
      */
-    public RowLevelSecurityMetadataReader(Connection connection, AdapterProperties properties) {
+    public RowLevelSecurityMetadataReader(final Connection connection, final AdapterProperties properties) {
         super(connection, properties);
     }
 

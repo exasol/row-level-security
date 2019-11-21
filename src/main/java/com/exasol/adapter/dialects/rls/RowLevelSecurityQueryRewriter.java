@@ -110,7 +110,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         return rlsStatementBuilder.build();
     }
 
-    private SqlSelectList getSqlSelectList(SqlStatementSelect select) {
+    private SqlSelectList getSqlSelectList(final SqlStatementSelect select) {
         final SqlSelectList oldSelectList = select.getSelectList();
         if (oldSelectList.isSelectStar()) {
             final List<TableMetadata> tableMetadata = new ArrayList<>();

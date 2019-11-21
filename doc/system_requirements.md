@@ -1,4 +1,4 @@
-<head><link href="oft_spec.css" rel="stylesheet"></link></head>
+<head><link href="oft_spec.css" rel="stylesheet"></head>
 
 # System Requirement Specification Exasol Row Level Security
 
@@ -21,7 +21,7 @@ The RLS main goal is to provide fine-grained access control below the level of t
 RLS's main quality goals are in descending order of importance:
 
 1. Provide reliable security
-1. Work with an affordable performance hit compared to accessing the data without RCLS
+1. Work with an affordable performance hit compared to accessing the data without RLS
 
 ## Stakeholders
 

@@ -1,13 +1,7 @@
 package com.exasol.adapter.dialects.rls;
 
-import com.exasol.bucketfs.Bucket;
-import com.exasol.bucketfs.BucketAccessException;
-import com.exasol.containers.ExasolContainer;
-import com.exasol.containers.ExasolContainerConstants;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -16,25 +10,33 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.exasol.bucketfs.Bucket;
+import com.exasol.bucketfs.BucketAccessException;
+import com.exasol.containers.ExasolContainer;
+import com.exasol.containers.ExasolContainerConstants;
 
 @Testcontainers
 class RowLevelSecurityDialectIT {
     @Container
-    private static ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
+    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
     private static Statement statement;
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException {
-        Bucket bucket = container.getDefaultBucket();
-        Path pathToDriver = Path.of("src/test/resources/exajdbc.jar");
+        final Bucket bucket = container.getDefaultBucket();
+        final Path pathToDriver = Path.of("src/test/resources/exajdbc.jar");
         bucket.uploadFile(pathToDriver, "exasol-jdbc.jar");
         TimeUnit.SECONDS.sleep(10); // FIXME: add the jar file directly to the RLS jar
-        Path pathToRls = Path.of("target/row-level-security-0.1.0-all-dependencies.jar");
+        final Path pathToRls = Path.of("target/row-level-security-0.1.0-all-dependencies.jar");
         bucket.uploadFile(pathToRls, "row-level-security-0.1.0-all-dependencies.jar");
-        Connection connection = container.createConnectionForUser(container.getUsername(), container.getPassword());
+        final Connection connection = container.createConnectionForUser(container.getUsername(),
+                container.getPassword());
         statement = connection.createStatement();
         // Clean-up before tests
         statement.execute("DROP FORCE VIRTUAL SCHEMA IF EXISTS VIRTUAL_SCHEMA_RLS CASCADE");
@@ -196,7 +198,7 @@ class RowLevelSecurityDialectIT {
                         + "    )");
     }
 
-    private static void createUser(String userName) throws SQLException {
+    private static void createUser(final String userName) throws SQLException {
         statement.execute("DROP USER IF EXISTS " + userName + " CASCADE");
         statement.execute("CREATE USER " + userName + " IDENTIFIED BY \"" + userName + "\"");
         statement.execute("GRANT ALL PRIVILEGES TO " + userName + "");
@@ -210,7 +212,7 @@ class RowLevelSecurityDialectIT {
                 + "(2, 'Goat Inc', 'Carrot', 10), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_unprotected', 'RLS_SCHEMA.rls_sales_user_admin')");
         assertThat(resultSet.next(), equalTo(false));
     }
@@ -224,7 +226,7 @@ class RowLevelSecurityDialectIT {
                 + "(2, 'Goat Inc', 'Carrot', 10), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_unprotected', 'RLS_SCHEMA.rls_sales_user_1')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -239,7 +241,7 @@ class RowLevelSecurityDialectIT {
                 + "(2, 'Goat Inc', 'Carrot', 10), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_unprotected', 'RLS_SCHEMA.rls_sales_user_2')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -250,7 +252,7 @@ class RowLevelSecurityDialectIT {
         statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_admin" //
                 + "(order_id, customer, product, quantity) AS " //
                 + "SELECT * FROM virtual_schema_rls.rls_sales_tenants WHERE 1=0");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents" //
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents" //
                 + "('virtual_schema_rls.rls_sales_tenants', 'RLS_SCHEMA.rls_sales_user_admin')");
         assertThat(resultSet.next(), equalTo(false));
     }
@@ -262,7 +264,7 @@ class RowLevelSecurityDialectIT {
                 + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES" //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(10, 'Donkey Inc', 'Carrot', 2)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_tenants', 'RLS_SCHEMA.rls_sales_user_1')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -275,7 +277,7 @@ class RowLevelSecurityDialectIT {
                 + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES" //
                 + "(4, 'Chicken Inc', 'Wheat', 4), " //
                 + "(9, 'Chicken Inc', 'Wheat', 64)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_tenants', 'RLS_SCHEMA.rls_sales_user_2')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -288,7 +290,7 @@ class RowLevelSecurityDialectIT {
                 + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
                 + "(5, 'Chicken Inc', 'Wheat', 45), " //
                 + "(8, 'Chicken Inc', 'Wheat', 44)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_tenants', 'RLS_SCHEMA.rls_sales_user_3')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -301,7 +303,7 @@ class RowLevelSecurityDialectIT {
                 + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
                 + "(6, 'Donkey Inc', 'Carrot', 67), " //
                 + "(7, 'Goat Inc', 'Grass', 84)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_tenants', 'RLS_SCHEMA.rls_sales_user_4')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -327,7 +329,7 @@ class RowLevelSecurityDialectIT {
                 + "(16, 'Goat Inc', 'Grass', 34), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_roles', 'RLS_SCHEMA.rls_sales_user_admin')");
         assertThat(resultSet.next(), equalTo(false));
     }
@@ -338,7 +340,7 @@ class RowLevelSecurityDialectIT {
         statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_1" //
                 + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_roles', 'RLS_SCHEMA.rls_sales_user_1')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -358,7 +360,7 @@ class RowLevelSecurityDialectIT {
                 + "(15, 'Chicken Inc', 'Wheat', 3), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_roles', 'RLS_SCHEMA.rls_sales_user_2')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -382,7 +384,7 @@ class RowLevelSecurityDialectIT {
                 + "(16, 'Goat Inc', 'Grass', 34), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_roles', 'RLS_SCHEMA.rls_sales_user_3')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -409,7 +411,7 @@ class RowLevelSecurityDialectIT {
                 + "(16, 'Goat Inc', 'Grass', 34), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_roles', 'RLS_SCHEMA.rls_sales_user_4')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -420,7 +422,7 @@ class RowLevelSecurityDialectIT {
         statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_admin" //
                 + "(order_id, customer, product, quantity) AS " //
                 + "SELECT * FROM virtual_schema_rls.rls_sales_roles_and_tenants WHERE 1=0");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_roles_and_tenants', 'RLS_SCHEMA.rls_sales_user_admin')");
         assertThat(resultSet.next(), equalTo(false));
     }
@@ -431,7 +433,7 @@ class RowLevelSecurityDialectIT {
         statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_1" //
                 + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
                 + "(19, 'Donkey Inc', 'Wheat', 50)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_roles_and_tenants', 'RLS_SCHEMA.rls_sales_user_1')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -444,7 +446,7 @@ class RowLevelSecurityDialectIT {
                 + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
                 + "(5, 'Chicken Inc', 'Wheat', 45), " //
                 + "(7, 'Goat Inc', 'Grass', 84)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_roles_and_tenants', 'RLS_SCHEMA.rls_sales_user_2')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -458,7 +460,7 @@ class RowLevelSecurityDialectIT {
                 + "(8, 'Chicken Inc', 'Wheat', 44), " //
                 + "(9, 'Chicken Inc', 'Wheat', 64), " //
                 + "(11, 'Goat Inc', 'Grass', 54)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_roles_and_tenants', 'RLS_SCHEMA.rls_sales_user_3')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
@@ -473,7 +475,7 @@ class RowLevelSecurityDialectIT {
                 + "(13, 'Chicken Inc', 'Wheat', 65), " //
                 + "(14, 'Donkey Inc', 'Carrot', 89), " //
                 + "(15, 'Chicken Inc', 'Wheat', 3)");
-        ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
                 + "('virtual_schema_rls.rls_sales_roles_and_tenants', 'RLS_SCHEMA.rls_sales_user_4')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));

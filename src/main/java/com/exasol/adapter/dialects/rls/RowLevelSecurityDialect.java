@@ -50,7 +50,8 @@ public class RowLevelSecurityDialect extends ExasolSqlDialect {
     @Override
     protected QueryRewriter createQueryRewriter() {
         try {
-            TableProtectionStatus tableProtectionStatus = new TableProtectionStatus(connection.getMetaData());
+            final TableProtectionStatus tableProtectionStatus = new TableProtectionStatus(
+                    this.connection.getMetaData());
             return new RowLevelSecurityQueryRewriter(this, this.remoteMetadataReader, this.connection,
                     tableProtectionStatus);
         } catch (final SQLException exception) {

@@ -1,4 +1,4 @@
-<head><link href="oft_spec.css" rel="stylesheet"></link></head>
+<head><link href="oft_spec.css" rel="stylesheet"></head>
 
 # Introduction
 
@@ -167,7 +167,7 @@ This decision is architecture-relevant because it impacts:
 
 * Performance (query speed)
 * Resource Usage (memory and storage consumption)
-* Scaleability
+* Scalability
 
 We considered the following alternatives:
 
@@ -208,7 +208,7 @@ Needs: impl, utest
 ### All Users Have the Public Access Role
 `dsn~all-users-have-the-public-access-role~1`
 
-RCLS treats all users as if the public access role was assigned to them automatically. This means there is no need for data owners to assign this role to users.
+RLS treats all users as if the public access role was assigned to them automatically. This means there is no need for data owners to assign this role to users.
 
 Covers:
 

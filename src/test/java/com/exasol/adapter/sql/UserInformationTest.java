@@ -2,19 +2,20 @@ package com.exasol.adapter.sql;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,9 +45,8 @@ class UserInformationTest {
 
     @Test
     void testGetRoleMaskEmptyResultSetWithDefaultMask() throws SQLException {
-        final ResultSet resultSet = null;
         when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);
-        when(this.preparedStatementMock.executeQuery()).thenReturn(resultSet);
+        when(this.preparedStatementMock.executeQuery()).thenReturn(null);
         assertThat(this.userInformation.getRoleMask(this.connectionMock), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
     }
 

@@ -13,9 +13,9 @@ import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
  * This class provides information about tables' protection.
  */
 public class TableProtectionStatus {
-    private DatabaseMetaData metadata;
+    private final DatabaseMetaData metadata;
 
-    public TableProtectionStatus(DatabaseMetaData metadata) {
+    public TableProtectionStatus(final DatabaseMetaData metadata) {
         this.metadata = metadata;
     }
 
@@ -29,7 +29,7 @@ public class TableProtectionStatus {
      */
     public boolean isTableProtectedWithRowTenants(final String catalogName, final String schemaName,
             final String tableName) {
-        return containsColumn(metadata, catalogName, schemaName, tableName, EXA_ROW_TENANTS_COLUMN_NAME);
+        return containsColumn(this.metadata, catalogName, schemaName, tableName, EXA_ROW_TENANTS_COLUMN_NAME);
     }
 
     /**
@@ -42,7 +42,7 @@ public class TableProtectionStatus {
      */
     public boolean isTableProtectedWithExaRowRoles(final String catalogName, final String schemaName,
             final String tableName) {
-        return containsColumn(metadata, catalogName, schemaName, tableName, EXA_ROW_ROLES_COLUMN_NAME);
+        return containsColumn(this.metadata, catalogName, schemaName, tableName, EXA_ROW_ROLES_COLUMN_NAME);
     }
 
     private boolean containsColumn(final DatabaseMetaData metadata, final String catalogName, final String schemaName,

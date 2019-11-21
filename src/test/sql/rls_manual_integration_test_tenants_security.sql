@@ -92,43 +92,43 @@ CREATE OR REPLACE SCRIPT row_level_security_test_schema.compare_table_contents (
 --Testing
 --Administrator
 SELECT * FROM virtual_schema_rls.rls_sales;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_admin(order_id, customer, product, quantity, exa_row_tenants) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_admin(order_id, customer, product, quantity) AS
 SELECT * FROM virtual_schema_rls.rls_sales WHERE 1=0;
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_admin');
 
 --User rls_usr_1
 IMPERSONATE rls_usr_1;
 SELECT * FROM virtual_schema_rls.rls_sales;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_1(order_id, customer, product, quantity, exa_row_tenants) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_1(order_id, customer, product, quantity) AS
 SELECT * FROM VALUES
-(3, 'Donkey Inc', 'Carrot', 33, 'RLS_USR_1'),
-(10, 'Donkey Inc', 'Carrot', 2, 'RLS_USR_1');
+(3, 'Donkey Inc', 'Carrot', 33),
+(10, 'Donkey Inc', 'Carrot', 2);
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_1');
 
 --User rls_usr_2
 IMPERSONATE rls_usr_2;
 SELECT * FROM virtual_schema_rls.rls_sales;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_2(order_id, customer, product, quantity, exa_row_tenants) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_2(order_id, customer, product, quantity) AS
 SELECT * FROM VALUES
-(4, 'Chicken Inc', 'Wheat', 4, 'RLS_USR_2'),
-(9, 'Chicken Inc', 'Wheat', 64, 'RLS_USR_2');
+(4, 'Chicken Inc', 'Wheat', 4),
+(9, 'Chicken Inc', 'Wheat', 64);
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_2');
 
 --User rls_usr_3
 IMPERSONATE rls_usr_3;
 SELECT * FROM virtual_schema_rls.rls_sales;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_3(order_id, customer, product, quantity, exa_row_tenants) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_3(order_id, customer, product, quantity) AS
 SELECT * FROM VALUES
-(5, 'Chicken Inc', 'Wheat', 45, 'RLS_USR_3'),
-(8, 'Chicken Inc', 'Wheat', 44, 'RLS_USR_3');
+(5, 'Chicken Inc', 'Wheat', 45),
+(8, 'Chicken Inc', 'Wheat', 44);
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_3');
 
 --User rls_usr_4
 IMPERSONATE rls_usr_4;
 SELECT * FROM virtual_schema_rls.rls_sales;
-CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_4(order_id, customer, product, quantity, exa_row_tenants) AS
+CREATE OR REPLACE VIEW row_level_security_test_schema.rls_sales_user_4(order_id, customer, product, quantity) AS
 SELECT * FROM VALUES
-(6, 'Donkey Inc', 'Carrot', 67, 'RLS_USR_4'),
-(7, 'Goat Inc', 'Grass', 84, 'RLS_USR_4');
+(6, 'Donkey Inc', 'Carrot', 67),
+(7, 'Goat Inc', 'Grass', 84);
 EXECUTE SCRIPT row_level_security_test_schema.compare_table_contents('virtual_schema_rls.rls_sales', 'row_level_security_test_schema.rls_sales_user_4');
 IMPERSONATE SYS;
