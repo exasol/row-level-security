@@ -9,6 +9,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.QueryRewriter;
 import com.exasol.adapter.dialects.exasol.ExasolSqlDialect;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.TableProtectionStatus;
 
 public class RowLevelSecurityDialect extends ExasolSqlDialect {
@@ -55,5 +56,10 @@ public class RowLevelSecurityDialect extends ExasolSqlDialect {
         } catch (final SQLException exception) {
             throw new IllegalArgumentException("Unable to read metadata for instantiating TableProtectionStatus.");
         }
+    }
+
+    @Override
+    protected RemoteMetadataReader createRemoteMetadataReader() {
+        return new RowLevelSecurityMetadataReader(this.connection, this.properties);
     }
 }

@@ -16,10 +16,12 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.BaseQueryRewriter;
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.SqlGenerationHelper;
 import com.exasol.adapter.dialects.exasol.ExasolQueryRewriter;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.TableMetadata;
 import com.exasol.adapter.sql.*;
 
 public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
@@ -53,12 +55,12 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
     private String rewriteStatement(final SqlStatement statement, final ExaMetadata exaMetadata,
             final AdapterProperties properties) throws SQLException, AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) statement;
-        String schemaName = properties.getSchemaName();
+        final String schemaName = properties.getSchemaName();
         final UserInformation userInformation = new UserInformation(exaMetadata.getCurrentUser(), schemaName,
                 "EXA_RLS_USERS");
-        final boolean protectedWithExaRowRoles = tableProtectionStatus.isTableProtectedWithExaRowRoles(
+        final boolean protectedWithExaRowRoles = this.tableProtectionStatus.isTableProtectedWithExaRowRoles(
                 properties.getCatalogName(), schemaName, ((SqlTable) select.getFromClause()).getName());
-        final boolean protectedWithExaRowTenants = tableProtectionStatus.isTableProtectedWithRowTenants(
+        final boolean protectedWithExaRowTenants = this.tableProtectionStatus.isTableProtectedWithRowTenants(
                 properties.getCatalogName(), schemaName, ((SqlTable) select.getFromClause()).getName());
         logTableProtectionInfo(protectedWithExaRowRoles, protectedWithExaRowTenants);
         if (protectedWithExaRowRoles || protectedWithExaRowTenants) {
@@ -86,8 +88,9 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
     private SqlStatementSelect getNewSqlStatementSelect(final SqlStatementSelect select,
             final UserInformation userInformation, final boolean protectedWithExaRowRoles,
             final boolean protectedWithExaRowTenants) {
-        final SqlStatementSelect.Builder rlsStatementBuilder = SqlStatementSelect.builder()
-                .selectList(select.getSelectList()).fromClause(select.getFromClause());
+        final SqlSelectList sqlSelectList = getSqlSelectList(select);
+        final SqlStatementSelect.Builder rlsStatementBuilder = SqlStatementSelect.builder().selectList(sqlSelectList)
+                .fromClause(select.getFromClause());
         if (select.hasGroupBy()) {
             rlsStatementBuilder.groupBy(select.getGroupBy());
         }
@@ -105,6 +108,33 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
                 protectedWithExaRowTenants);
         rlsStatementBuilder.whereClause(whereClause);
         return rlsStatementBuilder.build();
+    }
+
+    private SqlSelectList getSqlSelectList(SqlStatementSelect select) {
+        final SqlSelectList oldSelectList = select.getSelectList();
+        if (oldSelectList.isSelectStar()) {
+            final List<TableMetadata> tableMetadata = new ArrayList<>();
+            final SqlStatementSelect newSelectStatement = (SqlStatementSelect) oldSelectList.getParent();
+            SqlGenerationHelper.addMetadata(newSelectStatement.getFromClause(), tableMetadata);
+            return SqlSelectList.createRegularSelectList(getSelectListWithColumns(tableMetadata));
+        } else {
+            return oldSelectList;
+        }
+    }
+
+    private List<SqlNode> getSelectListWithColumns(final List<TableMetadata> tableMetadata) {
+        final List<SqlNode> selectListElements = new ArrayList<>(tableMetadata.size());
+        for (int i = 0; i < tableMetadata.size(); i++) {
+            final TableMetadata tableMeta = tableMetadata.get(i);
+            for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                final SqlColumn sqlColumn = new SqlColumn(i, columnMeta);
+                if (!sqlColumn.getName().equals(EXA_ROW_ROLES_COLUMN_NAME)
+                        && !sqlColumn.getName().equals(EXA_ROW_TENANTS_COLUMN_NAME)) {
+                    selectListElements.add(sqlColumn);
+                }
+            }
+        }
+        return selectListElements;
     }
 
     private SqlNode createWhereClause(final SqlStatementSelect select, final UserInformation userInformation,
