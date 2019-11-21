@@ -57,7 +57,6 @@ class RowLevelSecurityDialectIT {
         statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.adapter_script_exasol_rls AS " //
                 + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/bfsdefault/default/row-level-security-0.1.0-all-dependencies.jar;\n" //
-                + "%jar /buckets/bfsdefault/default/exasol-jdbc.jar;\n" //
                 + "/");
         TimeUnit.SECONDS.sleep(20); // FIXME: need to be fixed in the container
         statement.execute("CREATE VIRTUAL SCHEMA virtual_schema_rls USING RLS_SCHEMA.adapter_script_exasol_rls " //

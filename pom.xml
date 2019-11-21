@@ -58,6 +58,11 @@
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
+            <artifactId>exasol-jdbc</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
             <version>1.1.0</version>
             <scope>test</scope>
@@ -73,12 +78,6 @@
             <artifactId>virtual-schema-common-jdbc</artifactId>
             <version>${vscjdbc.version}</version>
             <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.exasol</groupId>
-            <artifactId>exasol-jdbc</artifactId>
-            <version>6.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
