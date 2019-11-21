@@ -25,13 +25,15 @@ class RowLevelSecurityDialectIT {
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
+    private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-0.1.0-all-dependencies.jar";
     private static Statement statement;
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException {
         final Bucket bucket = container.getDefaultBucket();
-        final Path pathToRls = Path.of("target/row-level-security-0.1.0-all-dependencies.jar");
-        bucket.uploadFile(pathToRls, "row-level-security-0.1.0-all-dependencies.jar");
+        final Path pathToRls = Path.of("target/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
+        bucket.uploadFile(pathToRls, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
+        TimeUnit.SECONDS.sleep(20);
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
         statement = connection.createStatement();
@@ -53,7 +55,7 @@ class RowLevelSecurityDialectIT {
                 + "IDENTIFIED BY '" + container.getPassword() + "'");
         statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.adapter_script_exasol_rls AS " //
                 + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
-                + "%jar /buckets/bfsdefault/default/row-level-security-0.1.0-all-dependencies.jar;\n" //
+                + "%jar /buckets/bfsdefault/default/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";\n" //
                 + "/");
         TimeUnit.SECONDS.sleep(20); // FIXME: need to be fixed in the container
         statement.execute("CREATE VIRTUAL SCHEMA virtual_schema_rls USING RLS_SCHEMA.adapter_script_exasol_rls " //
