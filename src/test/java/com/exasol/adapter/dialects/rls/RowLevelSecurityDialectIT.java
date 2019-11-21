@@ -30,9 +30,6 @@ class RowLevelSecurityDialectIT {
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException {
         final Bucket bucket = container.getDefaultBucket();
-        final Path pathToDriver = Path.of("src/test/resources/exajdbc.jar");
-        bucket.uploadFile(pathToDriver, "exasol-jdbc.jar");
-        TimeUnit.SECONDS.sleep(10); // FIXME: add the jar file directly to the RLS jar
         final Path pathToRls = Path.of("target/row-level-security-0.1.0-all-dependencies.jar");
         bucket.uploadFile(pathToRls, "row-level-security-0.1.0-all-dependencies.jar");
         final Connection connection = container.createConnectionForUser(container.getUsername(),
