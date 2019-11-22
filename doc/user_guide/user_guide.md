@@ -1,36 +1,45 @@
 # Row Level Security
 
-Row Level Security is an extension of Virtual Schemas Exasol dialect. It allows database administrators to set an access to a table's row basing on user's roles and user's names.
-You don't have to install any JDBC driver, because it is already installed in the Exasol database and also included in the JAR of the JDBC adapter.
+Row-Level Security (short "RLS") is a security mechanism based on Exasol's Virtual Schemas. It allows database administrators to set an access to a table's row basing on user's roles and user's names.
+
+RLS only supports Exasol databases. That means you cannot use RLS between Exasol and a 3rd-party data source.
+
+The RLS installation package contains everything you need to extend an existing Exasol installation with row-level security.
 
 ## Row Level Security Tables Preparations
 
-### Roles security
+### Role-based security
 
-1. In case you want to use roles security, you must add an additional column EXA_ROW_ROLES DECIMAL(20,0) to the tables you want to secure. 
+Role-based security is a way to secure a table assigning roles to each user and specifying the roles which are allowed to see a row for each row in the table. 
+
+In case you want to use Role-based security, you must add an additional column `EXA_ROW_ROLES DECIMAL(20,0)` to the tables you want to secure. 
+
 Example:
+
 ```sql
-CREATE OR REPLACE TABLE row_level_security_test_schema.rls_sales 
+CREATE OR REPLACE TABLE ROW_LEVEL_SECURITY_TEST_SCHEMA.RLS_SALES 
     (  
-    order_id DECIMAL(18,0),  
-    customer VARCHAR(50),  
-    product VARCHAR(100),  
-    quantity DECIMAL(18,0),
-    exa_row_roles DECIMAL(20,0)  
+    ORDER_ID DECIMAL(18,0),  
+    CUSTOMER VARCHAR(50),  
+    PRODUCT VARCHAR(100),  
+    QUANTITY DECIMAL(18,0),
+    EXA_ROW_ROLES DECIMAL(20,0)  
     ); 
 ```
 
-Then fill the EXA_ROW_ROLES column with the roles.
+Then fill the `EXA_ROW_ROLES` column with the roles. 
+Later versions of RLS will provide UDF functions that make administration of RLS more user-friendly.
 
-2. Create a configure table with user roles and fill it with the roles:
+Create a configure table with user roles and fill it with the roles:
+
 ```sql
-CREATE OR REPLACE TABLE row_level_security_test_schema.exa_rls_users  
+CREATE OR REPLACE TABLE ROW_LEVEL_SECURITY_TEST_SCHEMA.EXA_RLS_USERS  
     (  
-    exa_user_name VARCHAR(200),
-    exa_role_mask DECIMAL(20,0)  
+    EXA_USER_NAME VARCHAR(200),
+    EXA_ROLE_MASK DECIMAL(20,0)  
     );  
 
-INSERT INTO row_level_security_test_schema.exa_rls_users VALUES 
+INSERT INTO ROW_LEVEL_SECURITY_TEST_SCHEMA.EXA_RLS_USERS VALUES 
 ('RLS_USR_1', NULL),
 ('RLS_USR_2', 1),
 ('RLS_USR_3', 3),
@@ -38,22 +47,26 @@ INSERT INTO row_level_security_test_schema.exa_rls_users VALUES
 ('SYS', 15);
 ```
 
-### Tenants security
+### Tenant-based security
 
-If you want to use tenant security, you must add an additional column EXA_ROW_TENANTS VARCHAR(128) to the tables you want to secure. 
+Tenant-based security is a way to secure a table assigning each row to only one user. 
+
+If you want to use tenant security, you must add an additional column `EXA_ROW_TENANTS VARCHAR(128)` to the tables you want to secure. 
+
 Example:
+
 ```sql
-CREATE OR REPLACE TABLE row_level_security_test_schema.rls_sales 
+CREATE OR REPLACE TABLE ROW_LEVEL_SECURITY_TEST_SCHEMA.RLS_SALES 
     (  
-    order_id DECIMAL(18,0),  
-    customer VARCHAR(50),  
-    product VARCHAR(100),  
-    quantity DECIMAL(18,0),
-    exa_row_tenants VARCHAR(128)  
+    ORDER_ID DECIMAL(18,0),  
+    CUSTOMER VARCHAR(50),  
+    PRODUCT VARCHAR(100),  
+    QUANTITY DECIMAL(18,0),
+    EXA_ROW_TENANTS VARCHAR(128)  
     );     
 ```
 
-Then fill the EXA_ROW_TENANTS column with the user's names.
+For each row define which tenant it belongs to.
 
 ## Creating Virtual Schema
 
@@ -97,7 +110,7 @@ CREATE VIRTUAL SCHEMA VIRTUAL_SCHEMA_RLS
 
 ### Defining a Named Connection
 
-Define the connection to the other Exasol cluster as shown below.
+Define the connection to the other Exasol instance as shown below.
 
 ```sql
 CREATE CONNECTION EXASOL_CONNECTION 
@@ -119,4 +132,5 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 
 ### Limitations
 
+- RLS only works with Exasol as source and destination of the Virtual Schema.
 - RLS Virtual Schema do not support JOIN capabilities.

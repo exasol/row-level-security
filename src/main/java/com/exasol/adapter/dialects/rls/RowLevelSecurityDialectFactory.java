@@ -5,6 +5,7 @@ import java.sql.Connection;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
+import com.exasol.logging.VersionCollector;
 
 /**
  * Factory for the Row Level Security dialect.
@@ -17,7 +18,9 @@ public class RowLevelSecurityDialectFactory implements SqlDialectFactory {
 
     @Override
     public String getSqlDialectVersion() {
-        return null; //FIXME: add the version
+        final VersionCollector versionCollector = new VersionCollector(
+                "META-INF/maven/com.exasol/row-level-security/pom.properties");
+        return versionCollector.getVersionNumber();
     }
 
     @Override

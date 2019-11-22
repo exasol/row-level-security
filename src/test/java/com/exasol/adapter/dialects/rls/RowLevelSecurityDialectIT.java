@@ -39,18 +39,21 @@ class RowLevelSecurityDialectIT {
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
         statement = connection.createStatement();
-        // Clean-up before tests
-        statement.execute("DROP FORCE VIRTUAL SCHEMA IF EXISTS VIRTUAL_SCHEMA_RLS CASCADE");
-        statement.execute("DROP SCHEMA IF EXISTS RLS_SCHEMA CASCADE");
-        statement.execute("DROP CONNECTION IF EXISTS jdbc_exasol_connection");
-        // Create test schema
-        statement.execute("CREATE SCHEMA RLS_SCHEMA");
-        // Create test tables
+        cleanUpBeforeTests();
+        createTestSchema();
         createUnprotectedTableTestTable();
         createTenantsTestTable();
         createRolesTestTables();
         createRolesAndTenantsTestTable();
-        // Create Virtual Schema
+        createVirtualSchema();
+        createComparingScript();
+        createUser("RLS_USR_1");
+        createUser("RLS_USR_2");
+        createUser("RLS_USR_3");
+        createUser("RLS_USR_4");
+    }
+
+    private static void createVirtualSchema() throws SQLException, InterruptedException {
         statement.execute("CREATE CONNECTION jdbc_exasol_connection " //
                 + "TO 'jdbc:exa:localhost:8888' " //
                 + "USER '" + container.getUsername().toLowerCase() + "' " //
@@ -65,13 +68,16 @@ class RowLevelSecurityDialectIT {
                 + "SQL_DIALECT     = 'EXASOL_RLS' " //
                 + "CONNECTION_NAME = 'jdbc_exasol_connection' " //
                 + "SCHEMA_NAME     = 'RLS_SCHEMA'");
-        // Create a script for comparing tables
-        createComparingScript();
-        // Create users
-        createUser("RLS_USR_1");
-        createUser("RLS_USR_2");
-        createUser("RLS_USR_3");
-        createUser("RLS_USR_4");
+    }
+
+    private static void createTestSchema() throws SQLException {
+        statement.execute("CREATE SCHEMA RLS_SCHEMA");
+    }
+
+    private static void cleanUpBeforeTests() throws SQLException {
+        statement.execute("DROP FORCE VIRTUAL SCHEMA IF EXISTS VIRTUAL_SCHEMA_RLS CASCADE");
+        statement.execute("DROP SCHEMA IF EXISTS RLS_SCHEMA CASCADE");
+        statement.execute("DROP CONNECTION IF EXISTS jdbc_exasol_connection");
     }
 
     private static void createUnprotectedTableTestTable() throws SQLException {
@@ -494,11 +500,10 @@ class RowLevelSecurityDialectIT {
     @Test
     void testRolesTableWithUser4WhereNotAllowedColumns() throws SQLException {
         statement.execute("IMPERSONATE rls_usr_4");
-        assertThrows(SQLException.class, () -> statement
-                .execute("SELECT * FROM virtual_schema_rls.rls_sales_roles WHERE rls_sales_roles = 5"));
+        assertThrows(SQLException.class,
+                () -> statement.execute("SELECT * FROM virtual_schema_rls.rls_sales_roles WHERE rls_sales_roles = 5"));
         statement.execute("IMPERSONATE SYS");
     }
-
 
     @Test
     void testRolesAndTenantsTableWithAdmin() throws SQLException {

@@ -4,7 +4,6 @@ import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.D
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.MAX_ROLE_VALUE;
 import static java.lang.Long.toUnsignedString;
 
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,8 +23,8 @@ public class UserInformation {
     /**
      * Create a new instance of {@link UserInformation}
      *
-     * @param currentUser name of the current user
-     * @param schemaName mane of the schema
+     * @param currentUser       name of the current user
+     * @param schemaName        mane of the schema
      * @param rlsUsersTableName name of the table representing RLS user's roles mapping
      */
     public UserInformation(final String currentUser, final String schemaName, final String rlsUsersTableName) {
@@ -71,14 +70,14 @@ public class UserInformation {
                 return DEFAULT_ROLE_MASK;
             }
         } else {
-            LOGGER.warning(() -> "Role mask for current user was not found in table " + this.rlsUsersTableName
+            LOGGER.fine(() -> "No role mask for current user found in table \"" + this.rlsUsersTableName
                     + ". The role will be set to the default.");
             return DEFAULT_ROLE_MASK;
         }
     }
 
     private long setPublicAccess(final long exaRoleMask) {
-        return exaRoleMask | BigInteger.valueOf(2).pow(63).longValue();
+        return exaRoleMask | DEFAULT_ROLE_MASK;
     }
 
     private boolean validateExaRoleMask(final ResultSet resultSet, final long exaRoleMask) throws SQLException {
@@ -88,7 +87,7 @@ public class UserInformation {
     private boolean returnsOnlyOneResult(final ResultSet resultSet) throws SQLException {
         final boolean isLast = resultSet.last();
         if (!isLast) {
-            LOGGER.warning(() -> "Role mask for current user was not found in table " + this.rlsUsersTableName
+            LOGGER.fine(() -> "No role mask for current user found in table \"" + this.rlsUsersTableName
                     + ". The role will be set to the default.");
         }
         return isLast;
@@ -97,9 +96,9 @@ public class UserInformation {
     private boolean maskIsInAllowedRange(final long exaRoleMask) {
         final boolean isInRange = exaRoleMask <= MAX_ROLE_VALUE && exaRoleMask >= 0;
         if (!isInRange) {
-            LOGGER.warning(() -> "Role mask for current user from table " + this.rlsUsersTableName
-                    + " exceeded allowed limit. Allowed limit: " + MAX_ROLE_VALUE + ", user mask:" + exaRoleMask
-                    + ". The role will be set to the default.");
+            LOGGER.warning(() -> "Role mask for current user from table \"" + this.rlsUsersTableName
+                    + "\" exceeds allowed limit " + MAX_ROLE_VALUE
+                    + ". Treating user as if no roles were assigned.");
         }
         return isInRange;
     }

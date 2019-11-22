@@ -35,11 +35,15 @@ public class RowLevelSecurityColumnMetadataReader extends ExasolColumnMetadataRe
         final List<ColumnMetadata> columnMetadataList = super.getColumnsFromResultSet(remoteColumns);
         final List<ColumnMetadata> newColumnMetadataList = new ArrayList<>(columnMetadataList.size());
         for (final ColumnMetadata columnMetadata : columnMetadataList) {
-            final String name = columnMetadata.getName();
-            if (!name.equals(EXA_ROW_ROLES_COLUMN_NAME) && !name.equals(EXA_ROW_TENANTS_COLUMN_NAME)) {
-                newColumnMetadataList.add(columnMetadata);
-            }
+            hideRlsSystemColumnsInMetadata(newColumnMetadataList, columnMetadata);
         }
         return newColumnMetadataList;
+    }
+
+    private void hideRlsSystemColumnsInMetadata(final List<ColumnMetadata> newColumnMetadataList, final ColumnMetadata columnMetadata) {
+        final String name = columnMetadata.getName();
+        if (!name.equals(EXA_ROW_ROLES_COLUMN_NAME) && !name.equals(EXA_ROW_TENANTS_COLUMN_NAME)) {
+            newColumnMetadataList.add(columnMetadata);
+        }
     }
 }

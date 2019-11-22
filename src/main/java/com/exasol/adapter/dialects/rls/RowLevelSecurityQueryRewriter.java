@@ -60,15 +60,17 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         final String schemaName = properties.getSchemaName();
         final UserInformation userInformation = new UserInformation(exaMetadata.getCurrentUser(), schemaName,
                 "EXA_RLS_USERS");
-        final boolean protectedWithExaRowRoles = this.tableProtectionStatus.isTableProtectedWithExaRowRoles(
-                properties.getCatalogName(), schemaName, ((SqlTable) select.getFromClause()).getName());
-        final boolean protectedWithExaRowTenants = this.tableProtectionStatus.isTableProtectedWithRowTenants(
-                properties.getCatalogName(), schemaName, ((SqlTable) select.getFromClause()).getName());
+        final String tableName = ((SqlTable) select.getFromClause()).getName();
+        final String catalogName = properties.getCatalogName();
+        final boolean protectedWithExaRowRoles = this.tableProtectionStatus.isTableProtectedWithExaRowRoles(catalogName,
+                schemaName, tableName);
+        final boolean protectedWithExaRowTenants = this.tableProtectionStatus
+                .isTableProtectedWithRowTenants(catalogName, schemaName, tableName);
         logTableProtectionInfo(protectedWithExaRowRoles, protectedWithExaRowTenants);
         if (protectedWithExaRowRoles || protectedWithExaRowTenants) {
-            final SqlStatementSelect newSelectStatement = getNewSqlStatementSelect(select, userInformation,
+            final SqlStatementSelect protectedSelectStatement = getProtectedSqlStatementSelect(select, userInformation,
                     protectedWithExaRowRoles, protectedWithExaRowTenants);
-            return super.rewrite(newSelectStatement, exaMetadata, properties);
+            return super.rewrite(protectedSelectStatement, exaMetadata, properties);
         } else {
             return super.rewrite(statement, exaMetadata, properties);
         }
@@ -87,10 +89,18 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         }
     }
 
-    private SqlStatementSelect getNewSqlStatementSelect(final SqlStatementSelect select,
+    private SqlStatementSelect getProtectedSqlStatementSelect(final SqlStatementSelect select,
             final UserInformation userInformation, final boolean protectedWithExaRowRoles,
             final boolean protectedWithExaRowTenants) {
         final SqlSelectList sqlSelectList = getSqlSelectList(select);
+        final SqlStatementSelect.Builder rlsStatementBuilder = copyOriginalClauses(select, sqlSelectList);
+        final SqlNode whereClause = createWhereClause(select, userInformation, protectedWithExaRowRoles,
+                protectedWithExaRowTenants);
+        rlsStatementBuilder.whereClause(whereClause);
+        return rlsStatementBuilder.build();
+    }
+
+    private SqlStatementSelect.Builder copyOriginalClauses(final SqlStatementSelect select, final SqlSelectList sqlSelectList) {
         final SqlStatementSelect.Builder rlsStatementBuilder = SqlStatementSelect.builder().selectList(sqlSelectList)
                 .fromClause(select.getFromClause());
         if (select.hasGroupBy()) {
@@ -105,11 +115,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         if (select.hasOrderBy()) {
             rlsStatementBuilder.orderBy(select.getOrderBy());
         }
-
-        final SqlNode whereClause = createWhereClause(select, userInformation, protectedWithExaRowRoles,
-                protectedWithExaRowTenants);
-        rlsStatementBuilder.whereClause(whereClause);
-        return rlsStatementBuilder.build();
+        return rlsStatementBuilder;
     }
 
     private SqlSelectList getSqlSelectList(final SqlStatementSelect select) {

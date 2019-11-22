@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class UserInformationTest {
     private static final String DEFAULT_MASK_WITH_PUBLIC_VALUE = "9223372036854775808";
+    public static final BigInteger MAX_ALLOWED_VALUE = BigInteger.valueOf(2).pow(63);
     @Mock
     private Connection connectionMock;
     @Mock
@@ -66,7 +67,7 @@ class UserInformationTest {
         final ResultSet resultSetMock = mock(ResultSet.class);
         when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);
         when(resultSetMock.getLong(any()))
-                .thenReturn(BigInteger.valueOf(2).pow(63).add(BigInteger.valueOf(1)).longValue());
+                .thenReturn(MAX_ALLOWED_VALUE.add(BigInteger.valueOf(1)).longValue());
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.last()).thenReturn(true);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);

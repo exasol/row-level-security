@@ -56,7 +56,7 @@ public class TableProtectionStatus {
             return column != null && column.next();
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException(
-                    "Checks for column  " + columnName + " was failed.  Caused by: " + exception.getMessage(),
+                    "Unable to check existence of column \"" + columnName + "\".  Caused by: " + exception.getMessage(),
                     exception);
         }
     }
