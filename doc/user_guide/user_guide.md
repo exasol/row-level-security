@@ -116,3 +116,7 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
     CONNECTION_NAME = 'EXASOL_CONNECTION'
     SCHEMA_NAME     = '<schema name>';
 ```
+
+### Limitations
+
+- RLS Virtual Schema do not support JOIN capabilities.

@@ -2,6 +2,8 @@ package com.exasol.adapter.dialects.rls;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -308,6 +310,47 @@ class RowLevelSecurityDialectIT {
     }
 
     @Test
+    void testTenantsTableWithUser1SelectAllowedColumns() throws SQLException {
+        statement.execute("IMPERSONATE rls_usr_1");
+        final ResultSet resultSet = statement.executeQuery("SELECT order_id FROM virtual_schema_rls.rls_sales_tenants");
+        statement.execute("IMPERSONATE SYS");
+        assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(1)),
+                () -> assertThat(resultSet.next(), equalTo(true)),
+                () -> assertThat(resultSet.getInt("order_id"), equalTo(3)),
+                () -> assertThat(resultSet.next(), equalTo(true)),
+                () -> assertThat(resultSet.getInt("order_id"), equalTo(10)),
+                () -> assertThat(resultSet.next(), equalTo(false)));
+    }
+
+    @Test
+    void testTenantsTableWithUser2SelectAllowedColumns() throws SQLException {
+        statement.execute("IMPERSONATE rls_usr_2");
+        final ResultSet resultSet = statement
+                .executeQuery("SELECT order_id, product FROM virtual_schema_rls.rls_sales_tenants WHERE order_id = 4");
+        statement.execute("IMPERSONATE SYS");
+        assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(2)),
+                () -> assertThat(resultSet.next(), equalTo(true)),
+                () -> assertThat(resultSet.getString("product"), equalTo("Wheat")),
+                () -> assertThat(resultSet.next(), equalTo(false)));
+    }
+
+    @Test
+    void testTenantsTableWithUser3SelectNotAllowedColumns() throws SQLException {
+        statement.execute("IMPERSONATE rls_usr_3");
+        assertThrows(SQLException.class,
+                () -> statement.execute("SELECT exa_row_tenants FROM virtual_schema_rls.rls_sales_tenants"));
+        statement.execute("IMPERSONATE SYS");
+    }
+
+    @Test
+    void testTenantsTableWithUser4WhereNotAllowedColumns() throws SQLException {
+        statement.execute("IMPERSONATE rls_usr_4");
+        assertThrows(SQLException.class, () -> statement
+                .execute("SELECT * FROM virtual_schema_rls.rls_sales_tenants WHERE exa_row_tenants = 'RLS_USR_2'"));
+        statement.execute("IMPERSONATE SYS");
+    }
+
+    @Test
     void testRolesTableWithAdmin() throws SQLException {
         statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_admin" //
                 + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
@@ -414,6 +457,48 @@ class RowLevelSecurityDialectIT {
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
+
+    @Test
+    void testRolesTableWithUser1SelectAllowedColumns() throws SQLException {
+        statement.execute("IMPERSONATE rls_usr_1");
+        final ResultSet resultSet = statement.executeQuery("SELECT order_id FROM virtual_schema_rls.rls_sales_roles");
+        statement.execute("IMPERSONATE SYS");
+        assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(1)),
+                () -> assertThat(resultSet.next(), equalTo(true)),
+                () -> assertThat(resultSet.getInt("order_id"), equalTo(18)),
+                () -> assertThat(resultSet.next(), equalTo(false)));
+    }
+
+    @Test
+    void testRolesTableWithUser2SelectAllowedColumns() throws SQLException {
+        statement.execute("IMPERSONATE rls_usr_2");
+        final ResultSet resultSet = statement
+                .executeQuery("SELECT order_id, product FROM virtual_schema_rls.rls_sales_roles WHERE order_id > 15");
+        statement.execute("IMPERSONATE SYS");
+        assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(2)),
+                () -> assertThat(resultSet.next(), equalTo(true)),
+                () -> assertThat(resultSet.getString("product"), equalTo("Carrot")),
+                () -> assertThat(resultSet.next(), equalTo(true)),
+                () -> assertThat(resultSet.getString("product"), equalTo("Wheat")),
+                () -> assertThat(resultSet.next(), equalTo(false)));
+    }
+
+    @Test
+    void testRolesTableWithUser3SelectNotAllowedColumns() throws SQLException {
+        statement.execute("IMPERSONATE rls_usr_3");
+        assertThrows(SQLException.class,
+                () -> statement.execute("SELECT rls_sales_roles FROM virtual_schema_rls.rls_sales_roles"));
+        statement.execute("IMPERSONATE SYS");
+    }
+
+    @Test
+    void testRolesTableWithUser4WhereNotAllowedColumns() throws SQLException {
+        statement.execute("IMPERSONATE rls_usr_4");
+        assertThrows(SQLException.class, () -> statement
+                .execute("SELECT * FROM virtual_schema_rls.rls_sales_roles WHERE rls_sales_roles = 5"));
+        statement.execute("IMPERSONATE SYS");
+    }
+
 
     @Test
     void testRolesAndTenantsTableWithAdmin() throws SQLException {

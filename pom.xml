@@ -19,16 +19,6 @@
         <vscjava.version>8.0.0</vscjava.version>
         <vscjdbc.version>2.0.0</vscjdbc.version>
     </properties>
-    <distributionManagement>
-        <repository>
-            <id>maven.exasol.com</id>
-            <url>https://maven.exasol.com/artifactory/exasol-releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>maven.exasol.com</id>
-            <url>https://maven.exasol.com/artifactory/exasol-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
     <repositories>
         <repository>
             <id>maven.exasol.com</id>
