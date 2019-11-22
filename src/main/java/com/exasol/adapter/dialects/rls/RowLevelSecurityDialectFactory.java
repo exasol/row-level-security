@@ -17,7 +17,7 @@ public class RowLevelSecurityDialectFactory implements SqlDialectFactory {
 
     @Override
     public String getSqlDialectVersion() {
-        return null;
+        return null; //FIXME: add the version
     }
 
     @Override

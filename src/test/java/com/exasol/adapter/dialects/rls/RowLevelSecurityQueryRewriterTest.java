@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.rls;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -43,21 +44,21 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @BeforeEach
     void beforeEach() throws SQLException {
         this.exaMetadata = mock(ExaMetadata.class);
-        when(this.exaMetadata.getCurrentUser()).thenReturn("USER_1");
+        lenient().when(this.exaMetadata.getCurrentUser()).thenReturn("USER_1");
         this.rawProperties = new HashMap<>();
         this.properties = new AdapterProperties(this.rawProperties);
         this.dialect = new RowLevelSecurityDialect(this.connectionMock, this.properties);
         final ResultSetMetaData resultSetMetadataMock = mock(ResultSetMetaData.class);
-        when(resultSetMetadataMock.getColumnCount()).thenReturn(1);
-        when(resultSetMetadataMock.getColumnType(1)).thenReturn(4);
+        lenient().when(resultSetMetadataMock.getColumnCount()).thenReturn(1);
+        lenient().when(resultSetMetadataMock.getColumnType(1)).thenReturn(4);
         final PreparedStatement preparedStatementMock = mock(PreparedStatement.class);
-        when(preparedStatementMock.getMetaData()).thenReturn(resultSetMetadataMock);
+        lenient().when(preparedStatementMock.getMetaData()).thenReturn(resultSetMetadataMock);
         final ResultSet resultSetMock = mock(ResultSet.class);
         lenient().when(resultSetMock.getLong(any())).thenReturn(3L);
         lenient().when(resultSetMock.next()).thenReturn(true);
         lenient().when(resultSetMock.last()).thenReturn(true);
         lenient().when(preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
-        when(this.connectionMock.prepareStatement(ArgumentMatchers.any())).thenReturn(preparedStatementMock);
+        lenient().when(this.connectionMock.prepareStatement(ArgumentMatchers.any())).thenReturn(preparedStatementMock);
         setConnectionNameProperty();
         this.metadataReader = new ExasolMetadataReader(this.connectionMock, this.properties);
     }
@@ -112,6 +113,31 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
                 this.metadataReader, this.connectionMock, this.tableProtectionStatusMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
                 "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (\"amount\" = 2 AND BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0)'"));
+    }
+
+    @Test
+    void testRewriteSelectStar() throws SQLException, AdapterException {
+        when(this.tableProtectionStatusMock.isTableProtectedWithExaRowRoles(any(), any(), any())).thenReturn(true);
+        when(this.tableProtectionStatusMock.isTableProtectedWithRowTenants(any(), any(), any())).thenReturn(false);
+        final SqlColumn left = new SqlColumn(1,
+                ColumnMetadata.builder().name("amount").type(DataType.createDecimal(20, 0)).build());
+        final SqlLiteralExactnumeric right = new SqlLiteralExactnumeric(BigDecimal.valueOf(2));
+        final ColumnMetadata columnMetadata = ColumnMetadata.builder().name("amount")
+                .type(DataType.createDecimal(10, 0)).build();
+        final ColumnMetadata columnMetadata2 = ColumnMetadata.builder().name("item")
+                .type(DataType.createVarChar(20, ExaCharset.UTF8)).build();
+        final ColumnMetadata columnMetadata3 = ColumnMetadata.builder().name("EXA_ROW_ROLES")
+                .type(DataType.createDecimal(20, 0)).build();
+        final TableMetadata tableMetadata = new TableMetadata("order_items", "",
+                Arrays.asList(columnMetadata, columnMetadata2, columnMetadata3), "");
+        final SqlNode fromClause = new SqlTable("order_items", tableMetadata);
+        final SqlStatementSelect statement = SqlStatementSelect.builder()
+                .selectList(SqlSelectList.createSelectStarSelectList()).fromClause(fromClause)
+                .whereClause(new SqlPredicateEqual(left, right)).build();
+        final RowLevelSecurityQueryRewriter rewriter = new RowLevelSecurityQueryRewriter(this.dialect,
+                this.metadataReader, this.connectionMock, this.tableProtectionStatusMock);
+        assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
+                "STATEMENT 'SELECT \"amount\", \"item\" FROM \"order_items\" WHERE (\"amount\" = 2 AND BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0)'"));
     }
 
     @Test
@@ -190,6 +216,13 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
                 this.metadataReader, this.connectionMock, this.tableProtectionStatusMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
                 "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE ((\"amount\" = 2 AND \"item\" = ''Screwdriver'') AND BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0 AND \"EXA_ROW_TENANTS\" = ''USER_1'')'"));
+    }
+
+    @Test
+    void testRewriteThrowsException() {
+        final RowLevelSecurityQueryRewriter rewriter = new RowLevelSecurityQueryRewriter(null, null, null, null);
+        assertThrows(IllegalArgumentException.class,
+                () -> rewriter.rewrite(new DummySqlStatement(), null, AdapterProperties.emptyProperties()));
     }
 
     private SqlStatementSelect.Builder createSelectStatement() {

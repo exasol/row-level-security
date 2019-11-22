@@ -1,5 +1,7 @@
 # Row and column level security
 
+-[User guide](doc/user_guide/user_guide.md)
+
 ### Run Time Dependencies
 
 Running the Virtual Schema requires a Java Runtime version 11 or later.
