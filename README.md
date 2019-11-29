@@ -3,7 +3,6 @@
 <img alt="row-level-security logo" src="doc/images/row-level-security_128x128.png" style="float:left; padding:0px 10px 10px 10px;"/>
 
 [![Build Status](https://api.travis-ci.com/exasol/row-level-security.svg?branch=master)](https://travis-ci.org/exasol/row-level-security)
-[![Maven Central](https://img.shields.io/maven-central/v/com.exasol/row-level-security)](https://search.maven.org/artifact/com.exasol/row-level-security)
 
 SonarCloud results:
 
