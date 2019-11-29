@@ -30,7 +30,7 @@ First of all, the regular protection mechanisms of Exasol apply. You can for exa
 
 RLS protects individual rows inside selected tables. Tables inside an Exasol RLS Virtual Schema can either be RLS-protected or public. In a public table all users who can access the Virtual Schema can see the data inside the table.
 
-On the lowest level RLS protects data per row (aka. dataset). To determine whether or not a user is allow to read a row, RLS checks the existence and contents of special system columns in that table. In the following section we discuss the details.
+On the lowest level RLS protects data per row (aka. dataset). To determine whether or not a user is allowed to read a row, RLS checks the existence and contents of special system columns in that table. In the following section we discuss the details.
 
 ## Administering Row Protection
 
@@ -196,7 +196,7 @@ GRANT SELECT ON SCHEMA <virtual schema name> TO <user>;
 
 Please refer the the documentation of the [`GRANT`](https://docs.exasol.com/sql/grant.htmhttps://docs.exasol.com/sql/grant.htm) statement for further details.
 
-The minimum requirements for a regular user able to access the RLS are:
+The minimum requirements for a regular user in order to be able to access the RLS are:
 
 * User must exist (`CREATE USER`)
 * User is allowed to create sessions (`GRANT CREATE SESSION`)
