@@ -6,9 +6,7 @@ import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.E
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 
 import com.exasol.ExaMetadata;
@@ -18,9 +16,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlGenerationHelper;
 import com.exasol.adapter.dialects.exasol.ExasolQueryRewriter;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
-import com.exasol.adapter.metadata.ColumnMetadata;
-import com.exasol.adapter.metadata.DataType;
-import com.exasol.adapter.metadata.TableMetadata;
+import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 
 /**
@@ -33,9 +29,10 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
     /**
      * Create a new instance of a {@link RowLevelSecurityQueryRewriter}.
      *
-     * @param dialect              dialect
-     * @param remoteMetadataReader remote metadata reader
-     * @param connection           JDBC connection to remote data source
+     * @param dialect               dialect
+     * @param remoteMetadataReader  remote metadata reader
+     * @param connection            JDBC connection to remote data source
+     * @param tableProtectionStatus table protection information
      */
     public RowLevelSecurityQueryRewriter(final SqlDialect dialect, final RemoteMetadataReader remoteMetadataReader,
             final Connection connection, final TableProtectionStatus tableProtectionStatus) {
@@ -100,7 +97,8 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         return rlsStatementBuilder.build();
     }
 
-    private SqlStatementSelect.Builder copyOriginalClauses(final SqlStatementSelect select, final SqlSelectList sqlSelectList) {
+    private SqlStatementSelect.Builder copyOriginalClauses(final SqlStatementSelect select,
+            final SqlSelectList sqlSelectList) {
         final SqlStatementSelect.Builder rlsStatementBuilder = SqlStatementSelect.builder().selectList(sqlSelectList)
                 .fromClause(select.getFromClause());
         if (select.hasGroupBy()) {
@@ -156,7 +154,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         }
         whereClauseForRoles.ifPresent(arguments::add);
         whereClauseForTenants.ifPresent(arguments::add);
-        if (arguments.size() == 2 || arguments.size() == 3) {
+        if ((arguments.size() == 2) || (arguments.size() == 3)) {
             return new SqlPredicateAnd(arguments);
         } else if (arguments.size() == 1) {
             return arguments.get(0);
