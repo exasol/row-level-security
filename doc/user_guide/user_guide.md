@@ -179,7 +179,8 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
     SCHEMA_NAME     = '<schema name>'
     IMPORT_FROM_EXA = 'true'
-    EXA_CONNECTION_STRING = '<host>:<port>';
+    EXA_CONNECTION_STRING = '<host>:<port>'
+    IS_LOCAL        = 'true';
 ```
 
 ### Granting Access to the Virtual Schema
