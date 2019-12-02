@@ -1,8 +1,5 @@
 package com.exasol.adapter.dialects.rls;
 
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_ROLES_COLUMN_NAME;
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_TENANT_COLUMN_NAME;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,6 +15,8 @@ import com.exasol.adapter.dialects.exasol.ExasolQueryRewriter;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
+
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.*;
 
 /**
  * RLS-specific query rewriter.
@@ -56,7 +55,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         final SqlStatementSelect select = (SqlStatementSelect) statement;
         final String schemaName = properties.getSchemaName();
         final UserInformation userInformation = new UserInformation(exaMetadata.getCurrentUser(), schemaName,
-                "EXA_RLS_USERS");
+                EXA_RLS_USERS_TABLE_NAME);
         final String tableName = ((SqlTable) select.getFromClause()).getName();
         final String catalogName = properties.getCatalogName();
         final boolean protectedWithExaRowRoles = this.tableProtectionStatus.isTableProtectedWithExaRowRoles(catalogName,

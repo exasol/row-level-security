@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.jdbc.BaseTableMetadataReader;
 
 class RowLevelSecurityMetadataReaderTest {
     private RowLevelSecurityMetadataReader metadataReader;
@@ -19,7 +18,7 @@ class RowLevelSecurityMetadataReaderTest {
 
     @Test
     void testGetTableMetadataReader() {
-        assertThat(this.metadataReader.getTableMetadataReader(), instanceOf(BaseTableMetadataReader.class));
+        assertThat(this.metadataReader.getTableMetadataReader(), instanceOf(RowLevelSecurityTableMetadataReader.class));
     }
 
     @Test
