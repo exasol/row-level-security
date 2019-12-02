@@ -24,7 +24,7 @@ class RowLevelSecurityDialectIT {
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
-    private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-0.1.1-all-dependencies.jar";
+    private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-0.2.0-all-dependencies.jar";
     private static Statement statement;
 
     @BeforeAll
@@ -51,19 +51,19 @@ class RowLevelSecurityDialectIT {
     }
 
     private static void createVirtualSchema() throws SQLException, InterruptedException {
-        statement.execute("CREATE CONNECTION jdbc_exasol_connection " //
+        statement.execute("CREATE CONNECTION JDBC_EXASOL_CONNECTION " //
                 + "TO 'jdbc:exa:localhost:8888' " //
-                + "USER '" + container.getUsername().toLowerCase() + "' " //
+                + "USER '" + container.getUsername() + "' " //
                 + "IDENTIFIED BY '" + container.getPassword() + "'");
-        statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.adapter_script_exasol_rls AS " //
+        statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.ADAPTER_SCRIPT_EXASOL_RLS AS " //
                 + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/bfsdefault/default/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";\n" //
                 + "/");
         TimeUnit.SECONDS.sleep(20); // FIXME: need to be fixed in the container
-        statement.execute("CREATE VIRTUAL SCHEMA virtual_schema_rls USING RLS_SCHEMA.adapter_script_exasol_rls " //
+        statement.execute("CREATE VIRTUAL SCHEMA virtual_schema_rls USING RLS_SCHEMA.ADAPTER_SCRIPT_EXASOL_RLS " //
                 + "WITH " //
                 + "SQL_DIALECT     = 'EXASOL_RLS' " //
-                + "CONNECTION_NAME = 'jdbc_exasol_connection' " //
+                + "CONNECTION_NAME = 'JDBC_EXASOL_CONNECTION' " //
                 + "SCHEMA_NAME     = 'RLS_SCHEMA'");
     }
 
@@ -74,16 +74,16 @@ class RowLevelSecurityDialectIT {
     private static void cleanUpBeforeTests() throws SQLException {
         statement.execute("DROP FORCE VIRTUAL SCHEMA IF EXISTS VIRTUAL_SCHEMA_RLS CASCADE");
         statement.execute("DROP SCHEMA IF EXISTS RLS_SCHEMA CASCADE");
-        statement.execute("DROP CONNECTION IF EXISTS jdbc_exasol_connection");
+        statement.execute("DROP CONNECTION IF EXISTS JDBC_EXASOL_CONNECTION");
     }
 
     private static void createUnprotectedTableTestTable() throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.rls_sales_unprotected " //
-                + "(order_id DECIMAL(18,0), " //
-                + "customer VARCHAR(50), " //
-                + "product VARCHAR(100), " //
-                + "quantity DECIMAL(18,0))");
-        statement.execute("INSERT INTO RLS_SCHEMA.rls_sales_unprotected VALUES " //
+        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.RLS_SALES_UNPROTECTED " //
+                + "(ORDER_ID DECIMAL(18,0), " //
+                + "CUSTOMER VARCHAR(50), " //
+                + "PRODUCT VARCHAR(100), " //
+                + "QUANTITY DECIMAL(18,0))");
+        statement.execute("INSERT INTO RLS_SCHEMA.RLS_SALES_UNPROTECTED VALUES " //
                 + "(1, 'Chicken Inc', 'Wheat', 100), " //
                 + "(2, 'Goat Inc', 'Carrot', 10), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
@@ -91,13 +91,13 @@ class RowLevelSecurityDialectIT {
     }
 
     private static void createTenantsTestTable() throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.rls_sales_tenants " //
-                + "(order_id DECIMAL(18,0), " //
-                + "customer VARCHAR(50), " //
-                + "product VARCHAR(100), " //
-                + "quantity DECIMAL(18,0), " //
-                + "exa_row_tenant VARCHAR(128))");
-        statement.execute("INSERT INTO RLS_SCHEMA.rls_sales_tenants VALUES " //
+        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.RLS_SALES_TENANTS " //
+                + "(ORDER_ID DECIMAL(18,0), " //
+                + "CUSTOMER VARCHAR(50), " //
+                + "PRODUCT VARCHAR(100), " //
+                + "QUANTITY DECIMAL(18,0), " //
+                + "EXA_ROW_TENANT VARCHAR(128))");
+        statement.execute("INSERT INTO RLS_SCHEMA.RLS_SALES_TENANTS VALUES " //
                 + "(1, 'Chicken Inc', 'Wheat', 100, NULL), " //
                 + "(2, 'Goat Inc', 'Carrot', 10, 'NOBODY'), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33, 'RLS_USR_1'), " //
@@ -111,13 +111,13 @@ class RowLevelSecurityDialectIT {
     }
 
     private static void createRolesTestTables() throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.rls_sales_roles " //
-                + "(order_id DECIMAL(18,0), " //
-                + "customer VARCHAR(50), " //
-                + "product VARCHAR(100), " //
-                + "quantity DECIMAL(18,0), " //
-                + "exa_row_roles DECIMAL(20,0))");
-        statement.execute("INSERT INTO RLS_SCHEMA.rls_sales_roles VALUES " //
+        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.RLS_SALES_ROLES " //
+                + "(ORDER_ID DECIMAL(18,0), " //
+                + "CUSTOMER VARCHAR(50), " //
+                + "PRODUCT VARCHAR(100), " //
+                + "QUANTITY DECIMAL(18,0), " //
+                + "EXA_ROW_ROLES DECIMAL(20,0))");
+        statement.execute("INSERT INTO RLS_SCHEMA.RLS_SALES_ROLES VALUES " //
                 + "(1, 'Chicken Inc', 'Wheat', 100, NULL), " //
                 + "(2, 'Goat Inc', 'Grass', 2, 0), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33, 1), " //
@@ -135,10 +135,10 @@ class RowLevelSecurityDialectIT {
                 + "(16, 'Goat Inc', 'Grass', 34, 14), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58, 15), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56, 9223372036854775808)");
-        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.exa_rls_users " //
-                + "(exa_user_name VARCHAR(200), " //
-                + "exa_role_mask DECIMAL(20,0))");
-        statement.execute("INSERT INTO RLS_SCHEMA.exa_rls_users VALUES " //
+        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.EXA_RLS_USERS " //
+                + "(EXA_USER_NAME VARCHAR(200), " //
+                + "EXA_ROLE_MASK DECIMAL(20,0))");
+        statement.execute("INSERT INTO RLS_SCHEMA.EXA_RLS_USERS VALUES " //
                 + "('RLS_USR_1', NULL), " //
                 + "('RLS_USR_2', 1), " //
                 + "('RLS_USR_3', 3), " //
@@ -147,14 +147,14 @@ class RowLevelSecurityDialectIT {
     }
 
     private static void createRolesAndTenantsTestTable() throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.rls_sales_roles_and_tenants " //
-                + "(order_id DECIMAL(18,0), " //
-                + "customer VARCHAR(50), " //
-                + "product VARCHAR(100), " //
-                + "quantity DECIMAL(18,0), " //
-                + "exa_row_roles DECIMAL(20,0), " //
-                + "exa_row_tenant VARCHAR(128))");
-        statement.execute("INSERT INTO RLS_SCHEMA.rls_sales_roles_and_tenants VALUES " //
+        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.RLS_SALES_ROLES_AND_TENANTS " //
+                + "(ORDER_ID DECIMAL(18,0), " //
+                + "CUSTOMER VARCHAR(50), " //
+                + "PRODUCT VARCHAR(100), " //
+                + "QUANTITY DECIMAL(18,0), " //
+                + "EXA_ROW_ROLES DECIMAL(20,0), " //
+                + "EXA_ROW_TENANT VARCHAR(128))");
+        statement.execute("INSERT INTO RLS_SCHEMA.RLS_SALES_ROLES_AND_TENANTS VALUES " //
                 + "(1, 'Chicken Inc', 'Wheat', 100, NULL, 'RLS_USR_1'), " //
                 + "(2, 'Goat Inc', 'Grass', 2, 0, 'RLS_USR_1'), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33, 1, 'RLS_USR_1'), " //
@@ -178,7 +178,7 @@ class RowLevelSecurityDialectIT {
 
     private static void createComparingScript() throws SQLException {
         statement.execute(
-                "CREATE OR REPLACE SCRIPT RLS_SCHEMA.compare_table_contents (table_a, table_b) " + "RETURNS TABLE AS " //
+                "CREATE OR REPLACE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS (table_a, table_b) " + "RETURNS TABLE AS " //
                         + "    exit( " //
                         + "       query([[ " //
                         + "           (SELECT '<<<', A.* " //
@@ -209,113 +209,113 @@ class RowLevelSecurityDialectIT {
 
     @Test
     void testUnprotectedTableWithAdmin() throws SQLException {
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_admin" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_ADMIN" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(1, 'Chicken Inc', 'Wheat', 100), " //
                 + "(2, 'Goat Inc', 'Carrot', 10), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_unprotected', 'RLS_SCHEMA.rls_sales_user_admin')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_UNPROTECTED', 'RLS_SCHEMA.RLS_SALES_USER_ADMIN')");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testUnprotectedTableWithUser1() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_1");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_1" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_1");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_1" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(1, 'Chicken Inc', 'Wheat', 100), " //
                 + "(2, 'Goat Inc', 'Carrot', 10), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_unprotected', 'RLS_SCHEMA.rls_sales_user_1')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_UNPROTECTED', 'RLS_SCHEMA.RLS_SALES_USER_1')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testUnprotectedTableWithUser2() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_2");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_2"
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_2");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_2"
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(1, 'Chicken Inc', 'Wheat', 100), " //
                 + "(2, 'Goat Inc', 'Carrot', 10), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_unprotected', 'RLS_SCHEMA.rls_sales_user_2')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_UNPROTECTED', 'RLS_SCHEMA.RLS_SALES_USER_2')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testTenantsTableWithAdmin() throws SQLException {
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_admin" //
-                + "(order_id, customer, product, quantity) AS " //
-                + "SELECT * FROM virtual_schema_rls.rls_sales_tenants WHERE 1=0");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents" //
-                + "('virtual_schema_rls.rls_sales_tenants', 'RLS_SCHEMA.rls_sales_user_admin')");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_ADMIN" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS " //
+                + "SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS WHERE 1=0");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS" //
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS', 'RLS_SCHEMA.RLS_SALES_USER_ADMIN')");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testTenantsTableWithUser1() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_1");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_1" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES" //
+        statement.execute("IMPERSONATE RLS_USR_1");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_1" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES" //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(10, 'Donkey Inc', 'Carrot', 2)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_tenants', 'RLS_SCHEMA.rls_sales_user_1')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS', 'RLS_SCHEMA.RLS_SALES_USER_1')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testTenantsTableWithUser2() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_2");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_2" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES" //
+        statement.execute("IMPERSONATE RLS_USR_2");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_2" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES" //
                 + "(4, 'Chicken Inc', 'Wheat', 4), " //
                 + "(9, 'Chicken Inc', 'Wheat', 64)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_tenants', 'RLS_SCHEMA.rls_sales_user_2')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS', 'RLS_SCHEMA.RLS_SALES_USER_2')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testTenantsTableWithUser3() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_3");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_3" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_3");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_3" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(5, 'Chicken Inc', 'Wheat', 45), " //
                 + "(8, 'Chicken Inc', 'Wheat', 44)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_tenants', 'RLS_SCHEMA.rls_sales_user_3')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS', 'RLS_SCHEMA.RLS_SALES_USER_3')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testTenantsTableWithUser4() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_4");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_4" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_4");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_4" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(6, 'Donkey Inc', 'Carrot', 67), " //
                 + "(7, 'Goat Inc', 'Grass', 84)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_tenants', 'RLS_SCHEMA.rls_sales_user_4')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS', 'RLS_SCHEMA.RLS_SALES_USER_4')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testTenantsTableWithUser1SelectAllowedColumns() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_1");
-        final ResultSet resultSet = statement.executeQuery("SELECT order_id FROM virtual_schema_rls.rls_sales_tenants");
+        statement.execute("IMPERSONATE RLS_USR_1");
+        final ResultSet resultSet = statement.executeQuery("SELECT ORDER_ID FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS");
         statement.execute("IMPERSONATE SYS");
         assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(1)),
                 () -> assertThat(resultSet.next(), equalTo(true)),
@@ -327,9 +327,9 @@ class RowLevelSecurityDialectIT {
 
     @Test
     void testTenantsTableWithUser2SelectAllowedColumns() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_2");
+        statement.execute("IMPERSONATE RLS_USR_2");
         final ResultSet resultSet = statement
-                .executeQuery("SELECT order_id, product FROM virtual_schema_rls.rls_sales_tenants WHERE order_id = 4");
+                .executeQuery("SELECT ORDER_ID, PRODUCT FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS WHERE ORDER_ID = 4");
         statement.execute("IMPERSONATE SYS");
         assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(2)),
                 () -> assertThat(resultSet.next(), equalTo(true)),
@@ -339,24 +339,24 @@ class RowLevelSecurityDialectIT {
 
     @Test
     void testTenantsTableWithUser3SelectNotAllowedColumns() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_3");
+        statement.execute("IMPERSONATE RLS_USR_3");
         assertThrows(SQLException.class,
-                () -> statement.execute("SELECT EXA_ROW_TENANT FROM virtual_schema_rls.rls_sales_tenants"));
+                () -> statement.execute("SELECT EXA_ROW_TENANT FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS"));
         statement.execute("IMPERSONATE SYS");
     }
 
     @Test
     void testTenantsTableWithUser4WhereNotAllowedColumns() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_4");
+        statement.execute("IMPERSONATE RLS_USR_4");
         assertThrows(SQLException.class, () -> statement
-                .execute("SELECT * FROM virtual_schema_rls.rls_sales_tenants WHERE EXA_ROW_TENANT = 'RLS_USR_2'"));
+                .execute("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS WHERE EXA_ROW_TENANT = 'RLS_USR_2'"));
         statement.execute("IMPERSONATE SYS");
     }
 
     @Test
     void testRolesTableWithAdmin() throws SQLException {
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_admin" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_ADMIN" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4), " //
                 + "(5, 'Chicken Inc', 'Wheat', 45), " //
@@ -373,28 +373,28 @@ class RowLevelSecurityDialectIT {
                 + "(16, 'Goat Inc', 'Grass', 34), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_roles', 'RLS_SCHEMA.rls_sales_user_admin')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES', 'RLS_SCHEMA.RLS_SALES_USER_ADMIN')");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testRolesTableWithUser1() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_1");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_1" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_1");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_1" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_roles', 'RLS_SCHEMA.rls_sales_user_1')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES', 'RLS_SCHEMA.RLS_SALES_USER_1')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testRolesTableWithUser2() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_2");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_2"
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_2");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_2"
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(5, 'Chicken Inc', 'Wheat', 45), " //
                 + "(7, 'Goat Inc', 'Grass', 84), " //
@@ -404,17 +404,17 @@ class RowLevelSecurityDialectIT {
                 + "(15, 'Chicken Inc', 'Wheat', 3), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_roles', 'RLS_SCHEMA.rls_sales_user_2')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES', 'RLS_SCHEMA.RLS_SALES_USER_2')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testRolesTableWithUser3() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_3");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_3" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_3");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_3" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4), " //
                 + "(5, 'Chicken Inc', 'Wheat', 45), " //
@@ -428,17 +428,17 @@ class RowLevelSecurityDialectIT {
                 + "(16, 'Goat Inc', 'Grass', 34), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_roles', 'RLS_SCHEMA.rls_sales_user_3')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES', 'RLS_SCHEMA.RLS_SALES_USER_3')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testRolesTableWithUser4() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_4");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_4" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_4");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_4" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4), " //
                 + "(5, 'Chicken Inc', 'Wheat', 45), " //
@@ -455,16 +455,16 @@ class RowLevelSecurityDialectIT {
                 + "(16, 'Goat Inc', 'Grass', 34), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_roles', 'RLS_SCHEMA.rls_sales_user_4')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES', 'RLS_SCHEMA.RLS_SALES_USER_4')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testRolesTableWithUser1SelectAllowedColumns() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_1");
-        final ResultSet resultSet = statement.executeQuery("SELECT order_id FROM virtual_schema_rls.rls_sales_roles");
+        statement.execute("IMPERSONATE RLS_USR_1");
+        final ResultSet resultSet = statement.executeQuery("SELECT ORDER_ID FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES");
         statement.execute("IMPERSONATE SYS");
         assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(1)),
                 () -> assertThat(resultSet.next(), equalTo(true)),
@@ -474,9 +474,9 @@ class RowLevelSecurityDialectIT {
 
     @Test
     void testRolesTableWithUser2SelectAllowedColumns() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_2");
+        statement.execute("IMPERSONATE RLS_USR_2");
         final ResultSet resultSet = statement
-                .executeQuery("SELECT order_id, product FROM virtual_schema_rls.rls_sales_roles WHERE order_id > 15");
+                .executeQuery("SELECT ORDER_ID, PRODUCT FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES WHERE ORDER_ID > 15");
         statement.execute("IMPERSONATE SYS");
         assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(2)),
                 () -> assertThat(resultSet.next(), equalTo(true)),
@@ -488,80 +488,80 @@ class RowLevelSecurityDialectIT {
 
     @Test
     void testRolesTableWithUser3SelectNotAllowedColumns() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_3");
+        statement.execute("IMPERSONATE RLS_USR_3");
         assertThrows(SQLException.class,
-                () -> statement.execute("SELECT rls_sales_roles FROM virtual_schema_rls.rls_sales_roles"));
+                () -> statement.execute("SELECT RLS_SALES_ROLES FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES"));
         statement.execute("IMPERSONATE SYS");
     }
 
     @Test
     void testRolesTableWithUser4WhereNotAllowedColumns() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_4");
+        statement.execute("IMPERSONATE RLS_USR_4");
         assertThrows(SQLException.class,
-                () -> statement.execute("SELECT * FROM virtual_schema_rls.rls_sales_roles WHERE rls_sales_roles = 5"));
+                () -> statement.execute("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES WHERE RLS_SALES_ROLES = 5"));
         statement.execute("IMPERSONATE SYS");
     }
 
     @Test
     void testRolesAndTenantsTableWithAdmin() throws SQLException {
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_admin" //
-                + "(order_id, customer, product, quantity) AS " //
-                + "SELECT * FROM virtual_schema_rls.rls_sales_roles_and_tenants WHERE 1=0");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_roles_and_tenants', 'RLS_SCHEMA.rls_sales_user_admin')");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_ADMIN" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS " //
+                + "SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS WHERE 1=0");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS', 'RLS_SCHEMA.RLS_SALES_USER_ADMIN')");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testRolesAndTenantsTableWithUser1() throws SQLException {
         statement.execute("IMPERSONATE rls_usr_1");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_1" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_1" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(19, 'Donkey Inc', 'Wheat', 50)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_roles_and_tenants', 'RLS_SCHEMA.rls_sales_user_1')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS', 'RLS_SCHEMA.RLS_SALES_USER_1')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testRolesAndTenantsTableWithUser2() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_2");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_2" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_2");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_2" //
+                + "(ORDER_ID, customer, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(5, 'Chicken Inc', 'Wheat', 45), " //
                 + "(7, 'Goat Inc', 'Grass', 84)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_roles_and_tenants', 'RLS_SCHEMA.rls_sales_user_2')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS', 'RLS_SCHEMA.RLS_SALES_USER_2')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testRolesAndTenantsTableWithUser3() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_3");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_3" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_3");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_3" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(8, 'Chicken Inc', 'Wheat', 44), " //
                 + "(9, 'Chicken Inc', 'Wheat', 64), " //
                 + "(11, 'Goat Inc', 'Grass', 54)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_roles_and_tenants', 'RLS_SCHEMA.rls_sales_user_3')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS', 'RLS_SCHEMA.RLS_SALES_USER_3')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
 
     @Test
     void testRolesAndTenantsTableWithUser4() throws SQLException {
-        statement.execute("IMPERSONATE rls_usr_4");
-        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.rls_sales_user_4" //
-                + "(order_id, customer, product, quantity) AS SELECT * FROM VALUES " //
+        statement.execute("IMPERSONATE RLS_USR_4");
+        statement.execute("CREATE OR REPLACE VIEW RLS_SCHEMA.RLS_SALES_USER_4" //
+                + "(ORDER_ID, CUSTOMER, PRODUCT, QUANTITY) AS SELECT * FROM VALUES " //
                 + "(12, 'Chicken Inc', 'Wheat', 44), " //
                 + "(13, 'Chicken Inc', 'Wheat', 65), " //
                 + "(14, 'Donkey Inc', 'Carrot', 89), " //
                 + "(15, 'Chicken Inc', 'Wheat', 3)");
-        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.compare_table_contents"
-                + "('virtual_schema_rls.rls_sales_roles_and_tenants', 'RLS_SCHEMA.rls_sales_user_4')");
+        final ResultSet resultSet = statement.executeQuery("EXECUTE SCRIPT RLS_SCHEMA.COMPARE_TABLE_CONTENTS"
+                + "('VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS', 'RLS_SCHEMA.RLS_SALES_USER_4')");
         statement.execute("IMPERSONATE SYS");
         assertThat(resultSet.next(), equalTo(false));
     }
