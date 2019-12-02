@@ -1,7 +1,7 @@
 package com.exasol.adapter.dialects.rls;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_ROLES_COLUMN_NAME;
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_TENANTS_COLUMN_NAME;
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_TENANT_COLUMN_NAME;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -42,7 +42,7 @@ public class RowLevelSecurityColumnMetadataReader extends ExasolColumnMetadataRe
 
     private void hideRlsSystemColumnsInMetadata(final List<ColumnMetadata> newColumnMetadataList, final ColumnMetadata columnMetadata) {
         final String name = columnMetadata.getName();
-        if (!name.equals(EXA_ROW_ROLES_COLUMN_NAME) && !name.equals(EXA_ROW_TENANTS_COLUMN_NAME)) {
+        if (!name.equals(EXA_ROW_ROLES_COLUMN_NAME) && !name.equals(EXA_ROW_TENANT_COLUMN_NAME)) {
             newColumnMetadataList.add(columnMetadata);
         }
     }

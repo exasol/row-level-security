@@ -112,7 +112,7 @@ INSERT INTO SIMPLE_SALES.ORDER_ITEM VALUES
 
 Tenant-based security is a way to secure a table assigning each row to only one user. 
 
-If you want to use tenant security, you must add an additional column `EXA_ROW_TENANTS VARCHAR(128)` to the tables you want to secure. 
+If you want to use tenant security, you must add an additional column `EXA_ROW_TENANT VARCHAR(128)` to the tables you want to secure. 
 
 Example:
 
@@ -123,7 +123,7 @@ CREATE OR REPLACE TABLE SIMPLE_SALES.ORDER_ITEM_WITH_TENANT
     CUSTOMER VARCHAR(50),
     PRODUCT VARCHAR(100),
     QUANTITY DECIMAL(18,0),
-    EXA_ROW_TENANTS VARCHAR(128)
+    EXA_ROW_TENANT VARCHAR(128)
 );
 ```
 

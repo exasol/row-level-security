@@ -96,7 +96,7 @@ class RowLevelSecurityDialectIT {
                 + "customer VARCHAR(50), " //
                 + "product VARCHAR(100), " //
                 + "quantity DECIMAL(18,0), " //
-                + "exa_row_tenants VARCHAR(128))");
+                + "exa_row_tenant VARCHAR(128))");
         statement.execute("INSERT INTO RLS_SCHEMA.rls_sales_tenants VALUES " //
                 + "(1, 'Chicken Inc', 'Wheat', 100, NULL), " //
                 + "(2, 'Goat Inc', 'Carrot', 10, 'NOBODY'), " //
@@ -153,7 +153,7 @@ class RowLevelSecurityDialectIT {
                 + "product VARCHAR(100), " //
                 + "quantity DECIMAL(18,0), " //
                 + "exa_row_roles DECIMAL(20,0), " //
-                + "exa_row_tenants VARCHAR(128))");
+                + "exa_row_tenant VARCHAR(128))");
         statement.execute("INSERT INTO RLS_SCHEMA.rls_sales_roles_and_tenants VALUES " //
                 + "(1, 'Chicken Inc', 'Wheat', 100, NULL, 'RLS_USR_1'), " //
                 + "(2, 'Goat Inc', 'Grass', 2, 0, 'RLS_USR_1'), " //
@@ -341,7 +341,7 @@ class RowLevelSecurityDialectIT {
     void testTenantsTableWithUser3SelectNotAllowedColumns() throws SQLException {
         statement.execute("IMPERSONATE rls_usr_3");
         assertThrows(SQLException.class,
-                () -> statement.execute("SELECT exa_row_tenants FROM virtual_schema_rls.rls_sales_tenants"));
+                () -> statement.execute("SELECT EXA_ROW_TENANT FROM virtual_schema_rls.rls_sales_tenants"));
         statement.execute("IMPERSONATE SYS");
     }
 
@@ -349,7 +349,7 @@ class RowLevelSecurityDialectIT {
     void testTenantsTableWithUser4WhereNotAllowedColumns() throws SQLException {
         statement.execute("IMPERSONATE rls_usr_4");
         assertThrows(SQLException.class, () -> statement
-                .execute("SELECT * FROM virtual_schema_rls.rls_sales_tenants WHERE exa_row_tenants = 'RLS_USR_2'"));
+                .execute("SELECT * FROM virtual_schema_rls.rls_sales_tenants WHERE EXA_ROW_TENANT = 'RLS_USR_2'"));
         statement.execute("IMPERSONATE SYS");
     }
 

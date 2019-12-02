@@ -100,7 +100,7 @@ Needs: impl, utest, itest
 ## `QueryRewriter` Identifies Protected Tables
 `dsn~query-rewriter-identifies-protected-tables~1`
 
-The `QueryRewriter` identifies a table as protected with row-level security, if that table has a column named `exa_row_roles` or a column named  `exa_row_tenants` or both.
+The `QueryRewriter` identifies a table as protected with row-level security, if that table has a column named `exa_row_roles` or a column named  `exa_row_tenant` or both.
 
 Covers:
 
@@ -112,7 +112,7 @@ Needs: impl, utest, itest
 ## `QueryRewriter` Identifies Unprotected Tables
 `dsn~query-rewriter-identifies-unprotected-tables~1`
 
-The `QueryRewriter` identifies a table as unprotected, if that table does not have a column named `exa_row_roles` or `exa_row_tenants`.
+The `QueryRewriter` identifies a table as unprotected, if that table does not have a column named `exa_row_roles` or `exa_row_tenant`.
 The `QueryRewriter` does not modify an unprotected table.
 
 Covers:
@@ -124,7 +124,7 @@ Needs: impl, utest, itest
 ## `QueryRewriter` Treats Protected Tables with Both Roles and Tenants Restrictions
 `query-rewriter-treats-protected-tables-with-both-roles-and-tenants-restrictions~1`
 
-If a table contains both `exa_row_roles` and `exa_row_tenants`columns, then the `QueryRewriter` applies both security schemes. 
+If a table contains both `exa_row_roles` and `exa_row_tenant`columns, then the `QueryRewriter` applies both security schemes. 
 That means a user has to be marked as a tenant and have the right role in due to see a row's content.
 
 Covers:

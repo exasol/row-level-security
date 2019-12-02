@@ -9,7 +9,7 @@ public final class RowLevelSecurityDialectConstants {
     public static final long MAX_ROLE_VALUE = BigInteger.valueOf(2).pow(63).subtract(BigInteger.valueOf(1)).longValue();
     public static final long DEFAULT_ROLE_MASK = BigInteger.valueOf(2).pow(63).longValue();
     public static final String EXA_ROW_ROLES_COLUMN_NAME = "EXA_ROW_ROLES";
-    public static final String EXA_ROW_TENANTS_COLUMN_NAME = "EXA_ROW_TENANTS";
+    public static final String EXA_ROW_TENANT_COLUMN_NAME = "EXA_ROW_TENANT";
 
     private RowLevelSecurityDialectConstants() {
         // prevent instantiation
