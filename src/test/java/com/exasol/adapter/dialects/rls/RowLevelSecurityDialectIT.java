@@ -24,7 +24,7 @@ class RowLevelSecurityDialectIT {
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
-    private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-0.1.0-all-dependencies.jar";
+    private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-0.1.1-all-dependencies.jar";
     private static Statement statement;
 
     @BeforeAll
