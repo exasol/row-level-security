@@ -1,7 +1,7 @@
 package com.exasol.adapter.sql;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_ROLES_COLUMN_NAME;
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_TENANTS_COLUMN_NAME;
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_TENANT_COLUMN_NAME;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -34,7 +34,7 @@ public class TableProtectionStatus {
      */
     public boolean isTableProtectedWithRowTenants(final String catalogName, final String schemaName,
             final String tableName) {
-        return containsColumn(this.metadata, catalogName, schemaName, tableName, EXA_ROW_TENANTS_COLUMN_NAME);
+        return containsColumn(this.metadata, catalogName, schemaName, tableName, EXA_ROW_TENANT_COLUMN_NAME);
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.exasol.adapter.dialects.rls;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_ROLES_COLUMN_NAME;
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_TENANTS_COLUMN_NAME;
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_TENANT_COLUMN_NAME;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -79,7 +79,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
             LOGGER.info(() -> "Table is protected with " + EXA_ROW_ROLES_COLUMN_NAME);
         }
         if (protectedWithExaRowTenants) {
-            LOGGER.info(() -> "Table is protected with " + EXA_ROW_TENANTS_COLUMN_NAME);
+            LOGGER.info(() -> "Table is protected with " + EXA_ROW_TENANT_COLUMN_NAME);
         }
         if (!protectedWithExaRowRoles && !protectedWithExaRowTenants) {
             LOGGER.info(() -> "Table is unprotected");
@@ -135,7 +135,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
             for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
                 final SqlColumn sqlColumn = new SqlColumn(i, columnMeta);
                 if (!sqlColumn.getName().equals(EXA_ROW_ROLES_COLUMN_NAME)
-                        && !sqlColumn.getName().equals(EXA_ROW_TENANTS_COLUMN_NAME)) {
+                        && !sqlColumn.getName().equals(EXA_ROW_TENANT_COLUMN_NAME)) {
                     selectListElements.add(sqlColumn);
                 }
             }
@@ -174,7 +174,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
 
     private SqlNode getExaRowTenantsNode(final UserInformation userInformation) {
         final SqlNode left = new SqlColumn(1,
-                ColumnMetadata.builder().name(EXA_ROW_TENANTS_COLUMN_NAME).type(DataType.createDecimal(20, 0)).build());
+                ColumnMetadata.builder().name(EXA_ROW_TENANT_COLUMN_NAME).type(DataType.createDecimal(20, 0)).build());
         final SqlNode right = new SqlLiteralString(userInformation.getCurrentUser());
         return new SqlPredicateEqual(left, right);
     }

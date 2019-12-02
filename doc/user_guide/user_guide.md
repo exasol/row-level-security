@@ -112,7 +112,7 @@ INSERT INTO SIMPLE_SALES.ORDER_ITEM VALUES
 
 Tenant-based security is a way to secure a table assigning each row to only one user. 
 
-If you want to use tenant security, you must add an additional column `EXA_ROW_TENANTS VARCHAR(128)` to the tables you want to secure. 
+If you want to use tenant security, you must add an additional column `EXA_ROW_TENANT VARCHAR(128)` to the tables you want to secure. 
 
 Example:
 
@@ -123,7 +123,7 @@ CREATE OR REPLACE TABLE SIMPLE_SALES.ORDER_ITEM_WITH_TENANT
     CUSTOMER VARCHAR(50),
     PRODUCT VARCHAR(100),
     QUANTITY DECIMAL(18,0),
-    EXA_ROW_TENANTS VARCHAR(128)
+    EXA_ROW_TENANT VARCHAR(128)
 );
 ```
 
@@ -152,7 +152,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_VSADAPTER_SCHEMA.RLS_VSADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/row-level-security-<version>-all-dependencies.jar;
+    %jar /buckets/<BFS service>/<bucket>/row-level-security-0.2.0-all-dependencies.jar;
 /
 ;
 ```

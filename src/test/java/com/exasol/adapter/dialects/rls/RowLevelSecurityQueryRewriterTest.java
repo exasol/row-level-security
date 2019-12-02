@@ -97,7 +97,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final RowLevelSecurityQueryRewriter rewriter = new RowLevelSecurityQueryRewriter(this.dialect,
                 this.metadataReader, this.connectionMock, this.tableProtectionStatusMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
-                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE \"EXA_ROW_TENANTS\" = ''USER_1'''"));
+                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE \"EXA_ROW_TENANT\" = ''USER_1'''"));
     }
 
     @Test
@@ -152,7 +152,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final RowLevelSecurityQueryRewriter rewriter = new RowLevelSecurityQueryRewriter(this.dialect,
                 this.metadataReader, this.connectionMock, this.tableProtectionStatusMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
-                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (\"amount\" = 2 AND \"EXA_ROW_TENANTS\" = ''USER_1'')'"));
+                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE (\"amount\" = 2 AND \"EXA_ROW_TENANT\" = ''USER_1'')'"));
     }
 
     @Test
@@ -194,7 +194,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final RowLevelSecurityQueryRewriter rewriter = new RowLevelSecurityQueryRewriter(this.dialect,
                 this.metadataReader, this.connectionMock, this.tableProtectionStatusMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
-                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE ((\"amount\" = 2 AND \"item\" = ''Screwdriver'') AND \"EXA_ROW_TENANTS\" = ''USER_1'')'"));
+                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE ((\"amount\" = 2 AND \"item\" = ''Screwdriver'') AND \"EXA_ROW_TENANT\" = ''USER_1'')'"));
     }
 
     @Test
@@ -215,7 +215,7 @@ class RowLevelSecurityQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final RowLevelSecurityQueryRewriter rewriter = new RowLevelSecurityQueryRewriter(this.dialect,
                 this.metadataReader, this.connectionMock, this.tableProtectionStatusMock);
         assertThat(rewriter.rewrite(statement, this.exaMetadata, this.properties), containsString(
-                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE ((\"amount\" = 2 AND \"item\" = ''Screwdriver'') AND BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0 AND \"EXA_ROW_TENANTS\" = ''USER_1'')'"));
+                "STATEMENT 'SELECT \"item\" FROM \"order_items\" WHERE ((\"amount\" = 2 AND \"item\" = ''Screwdriver'') AND BIT_AND(\"EXA_ROW_ROLES\", 9223372036854775811) <> 0 AND \"EXA_ROW_TENANT\" = ''USER_1'')'"));
     }
 
     @Test

@@ -12,7 +12,7 @@ CREATE OR REPLACE TABLE row_level_security_test_schema.rls_sales
     customer VARCHAR(50),
     product VARCHAR(100),
     quantity DECIMAL(18,0),
-    exa_row_tenants VARCHAR(128)
+    exa_row_tenant VARCHAR(128)
     );
 
 INSERT INTO row_level_security_test_schema.rls_sales VALUES
