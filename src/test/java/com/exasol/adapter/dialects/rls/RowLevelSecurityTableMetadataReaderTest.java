@@ -1,7 +1,7 @@
 package com.exasol.adapter.dialects.rls;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,11 +19,11 @@ class RowLevelSecurityTableMetadataReaderTest {
 
     @Test
     void testIsTableIncludedByMappingTrue() {
-        assertTrue(this.metadataReader.isTableIncludedByMapping("MY_TABLE"));
+        assertThat(this.metadataReader.isTableIncludedByMapping("MY_TABLE"), equalTo(true));
     }
 
     @Test
     void testIsTableIncludedByMappingFalse() {
-        assertFalse(this.metadataReader.isTableIncludedByMapping("EXA_RLS_USERS"));
+        assertThat(this.metadataReader.isTableIncludedByMapping("EXA_RLS_USERS"), equalTo(false));
     }
 }
