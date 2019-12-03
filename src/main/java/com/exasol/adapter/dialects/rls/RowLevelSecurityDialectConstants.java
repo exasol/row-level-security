@@ -10,6 +10,7 @@ public final class RowLevelSecurityDialectConstants {
     public static final long DEFAULT_ROLE_MASK = BigInteger.valueOf(2).pow(63).longValue();
     public static final String EXA_ROW_ROLES_COLUMN_NAME = "EXA_ROW_ROLES";
     public static final String EXA_ROW_TENANT_COLUMN_NAME = "EXA_ROW_TENANT";
+    public static final String EXA_RLS_USERS_TABLE_NAME = "EXA_RLS_USERS";
 
     private RowLevelSecurityDialectConstants() {
         // prevent instantiation

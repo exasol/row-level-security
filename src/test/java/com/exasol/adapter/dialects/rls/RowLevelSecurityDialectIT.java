@@ -9,7 +9,9 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -205,6 +207,11 @@ class RowLevelSecurityDialectIT {
         statement.execute("DROP USER IF EXISTS " + userName + " CASCADE");
         statement.execute("CREATE USER " + userName + " IDENTIFIED BY \"" + userName + "\"");
         statement.execute("GRANT ALL PRIVILEGES TO " + userName + "");
+    }
+
+    @Test
+    void testSelectFromExaRlsUsersThrowwsException() {
+        assertThrows(SQLException.class, () -> statement.execute("SELECT * FROM EXA_RLS_USERS"));
     }
 
     @Test
