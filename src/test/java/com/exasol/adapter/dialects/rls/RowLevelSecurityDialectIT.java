@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
-import static com.exasol.matcher.ResultSetMatcher.assertEqualResultSets;
+import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -189,8 +189,8 @@ class RowLevelSecurityDialectIT {
                 + "(2, 'Goat Inc', 'Carrot', 10), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4)");
-        assertEqualResultSets(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_UNPROTECTED_ADMIN"),
-                statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_UNPROTECTED"));
+        assertThat(statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_UNPROTECTED"),
+                matchesResultSet(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_UNPROTECTED_ADMIN")));
     }
 
     private void createExpectedTable(final String tableName) throws SQLException {
@@ -215,7 +215,7 @@ class RowLevelSecurityDialectIT {
         final ResultSet actualResultSet = statement
                 .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_UNPROTECTED");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -232,14 +232,15 @@ class RowLevelSecurityDialectIT {
         final ResultSet actualResultSet = statement
                 .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_UNPROTECTED");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
     void testTenantsTableWithAdmin() throws SQLException {
         createExpectedTable("EXPECTED_TENANTS_ADMIN");
-        assertEqualResultSets(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_ADMIN"),
-                statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS"));
+        assertThat(statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS"),
+                matchesResultSet(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_ADMIN")));
+
     }
 
     @Test
@@ -252,7 +253,7 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_USER_1");
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -265,7 +266,7 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_USER_2");
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -278,7 +279,7 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_USER_3");
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -291,7 +292,7 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_USER_4");
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -355,8 +356,9 @@ class RowLevelSecurityDialectIT {
                 + "(16, 'Goat Inc', 'Grass', 34), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        assertEqualResultSets(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_ADMIN"),
-                statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES"));
+        assertThat(statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES"),
+                matchesResultSet(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_ADMIN")));
+
     }
 
     @Test
@@ -368,7 +370,7 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_USER_1");
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -388,7 +390,7 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_USER_2");
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -412,7 +414,7 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_USER_3");
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -439,7 +441,7 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_USER_4");
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -486,8 +488,9 @@ class RowLevelSecurityDialectIT {
     @Test
     void testRolesAndTenantsTableWithAdmin() throws SQLException {
         createExpectedTable("EXPECTED_ROLES_TENANTS_ADMIN");
-        assertEqualResultSets(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_ADMIN"),
-                statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS"));
+        assertThat(statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS"),
+                matchesResultSet(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_ADMIN")));
+
     }
 
     @Test
@@ -496,10 +499,12 @@ class RowLevelSecurityDialectIT {
         createExpectedTable("EXPECTED_ROLES_TENANTS_USER_1");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_1 VALUES " //
                 + "(19, 'Donkey Inc', 'Wheat', 50)");
-        final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_1");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
+        final ResultSet expectedResultSet = statement
+                .executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_1");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -509,10 +514,12 @@ class RowLevelSecurityDialectIT {
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_2 VALUES " //
                 + "(5, 'Chicken Inc', 'Wheat', 45), " //
                 + "(7, 'Goat Inc', 'Grass', 84)");
-        final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_2");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
+        final ResultSet expectedResultSet = statement
+                .executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_2");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -523,10 +530,12 @@ class RowLevelSecurityDialectIT {
                 + "(8, 'Chicken Inc', 'Wheat', 44), " //
                 + "(9, 'Chicken Inc', 'Wheat', 64), " //
                 + "(11, 'Goat Inc', 'Grass', 54)");
-        final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_3");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
+        final ResultSet expectedResultSet = statement
+                .executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_3");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
     @Test
@@ -538,9 +547,11 @@ class RowLevelSecurityDialectIT {
                 + "(13, 'Chicken Inc', 'Wheat', 65), " //
                 + "(14, 'Donkey Inc', 'Carrot', 89), " //
                 + "(15, 'Chicken Inc', 'Wheat', 3)");
-        final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_4");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
+        final ResultSet expectedResultSet = statement
+                .executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_4");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
         statement.execute("IMPERSONATE SYS");
-        assertEqualResultSets(expectedResultSet, actualResultSet);
+        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 }
