@@ -231,6 +231,30 @@ Covers:
 
 Needs: impl, utest, itest
 
+## Administration Convenience Scripts
+ 
+RLS adapter provides scripts which make administration of RLS more user-friendly.
+
+### Add a new role
+
+`ADD_RLS_ROLE(role_name, role_id)` allows administrators to add a new RLS role to the table named `EXA_ROLES_MAPPING`.
+If table already exists, it adds a role to the existing table. If not it creates a new table and adds a role.
+It also checks if the `role_id` is in the allowed range (from 1 to 63) and checks that the `role_id` and `role_name`
+are unique and the table is not full yet.
+
+### Delete a role
+
+`DELETE_RLS_ROLE(role_name)` allows administrators to delete an RLS role from the table named `EXA_ROLES_MAPPING`.
+It checks if the table exists and the role exists. 
+The script also removes the role's bit from all users assigned to the role in the table `EXA_RLS_USERS`.
+
+### Assign list of roles to user
+
+`ASSIGN_ROLES_TO_USER(user_name, roles)` allows administrators to assign roles to a user in the table `EXA_RLS_USERS`.
+`EXA_RLS_USERS` contains two columns: `EXA_USER_NAME VARCHAR(200)` and `EXA_ROLE_MASK DECIMAL(20,0)`.
+Each role from the given list means one bit which should be set to 1.
+For example, if we use the script with next parameters `ASSIGN_ROLES_TO_USER(USER_1, {'SALES', 'DEVELOPMENT', 'SUPPORT'})`
+and 'SALES', 'DEVELOPMENT' and 'SUPPORT' have `role_id`'s 1, 2, 4 accordingly, a new row `'USER_1', 11` must be created in table `EXA_RLS_USERS`.
 
 # Quality Scenarios
 
