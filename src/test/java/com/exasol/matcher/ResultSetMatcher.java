@@ -81,11 +81,11 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
         return true;
     }
 
-    private boolean doesFieldMatch(final ResultSet actualResultSet, final int column) throws SQLException {
+    private boolean doesFieldMatch(final ResultSet actualRow, final int column) throws SQLException {
         final int resultSetTypeExpected = this.expectedResultSet.getMetaData().getColumnType(column);
-        final int resultSetTypeActual = actualResultSet.getMetaData().getColumnType(column);
+        final int resultSetTypeActual = actualRow.getMetaData().getColumnType(column);
         if (resultSetTypeExpected == resultSetTypeActual) {
-            return doesValueMatch(actualResultSet, column, resultSetTypeExpected);
+            return doesValueMatch(actualRow, column, resultSetTypeExpected);
         } else {
             return false;
         }
@@ -110,15 +110,15 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
         return true;
     }
 
-    private boolean doesStringMatch(final ResultSet actualResultSet, final int column) throws SQLException {
+    private boolean doesStringMatch(final ResultSet actualRow, final int column) throws SQLException {
         final String expectedString = this.expectedResultSet.getString(column);
-        final String actualString = actualResultSet.getString(column);
+        final String actualString = actualRow.getString(column);
         return expectedString.equals(actualString);
     }
 
-    private boolean doesIntMatch(final ResultSet actualResultSet, final int column) throws SQLException {
+    private boolean doesIntMatch(final ResultSet actualRow, final int column) throws SQLException {
         final int expectedInt = this.expectedResultSet.getInt(column);
-        final int actualInt = actualResultSet.getInt(column);
+        final int actualInt = actualRow.getInt(column);
         return expectedInt == actualInt;
     }
 }
