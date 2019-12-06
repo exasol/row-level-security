@@ -198,7 +198,7 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 
 Property                    | Value
 --------------------------- | -----------
-**IS_LOCAL**                | Only relevant if your data source is the same Exasol database where you create the virtual schema. Either `TRUE` or `FALSE` (default). If true, you are connecting to the local Exasol database (e.g. for testing purposes). In this case, the adapter can avoid the `IMPORT FROM JDBC` overhead.
+**IS_LOCAL**                | Only relevant if your data source is the same Exasol database where you create the Virtual Schema. Either `TRUE` or `FALSE` (default). If `TRUE`, you are connecting to the local Exasol database (e.g. for testing purposes). In this case, the adapter can avoid the `IMPORT FROM JDBC` overhead.
 **EXCLUDED_CAPABILITIES**   | A comma-separated list of capabilities that you want to deactivate (although the adapter might support them).
 
 ### Granting Access to the Virtual Schema
