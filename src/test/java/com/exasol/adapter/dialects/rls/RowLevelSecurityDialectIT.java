@@ -8,11 +8,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.file.Path;
 import java.sql.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -28,6 +32,10 @@ class RowLevelSecurityDialectIT {
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
     private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-0.2.0-all-dependencies.jar";
+    private static final String VIRTUAL_SCHEMA_RLS_JDBC_NAME = "VIRTUAL_SCHEMA_RLS_JDBC";
+    private static final String VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME = "VIRTUAL_SCHEMA_RLS_JDBC_LOCAL";
+    private static final String VIRTUAL_SCHEMA_RLS_EXA_NAME = "VIRTUAL_SCHEMA_RLS_EXA";
+    private static final String VIRTUAL_SCHEMA_RLS_EXA_LOCAL_NAME = "VIRTUAL_SCHEMA_RLS_EXA_LOCAL";
     private static Statement statement;
 
     @BeforeAll
@@ -44,28 +52,43 @@ class RowLevelSecurityDialectIT {
         createTenantsTestTable();
         createRolesTestTables();
         createRolesAndTenantsTestTable();
-        createVirtualSchema();
-        createUser("RLS_USR_1");
-        createUser("RLS_USR_2");
-        createUser("RLS_USR_3");
-        createUser("RLS_USR_4");
+        createConnection();
+        createAdapterScript();
+        createVirtualSchema(VIRTUAL_SCHEMA_RLS_JDBC_NAME, Optional.empty());
+        createVirtualSchema(VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME, Optional.of("IS_LOCAL = 'true'"));
+        createVirtualSchema(VIRTUAL_SCHEMA_RLS_EXA_NAME,
+                Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
+        createVirtualSchema(VIRTUAL_SCHEMA_RLS_EXA_LOCAL_NAME,
+                Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888' IS_LOCAL = 'true'"));
+        createUser(List.of("RLS_USR_1", "RLS_USR_2", "RLS_USR_3", "RLS_USR_4"));
     }
 
-    private static void createVirtualSchema() throws SQLException, InterruptedException {
+    private static void createConnection() throws SQLException {
         statement.execute("CREATE CONNECTION JDBC_EXASOL_CONNECTION " //
                 + "TO 'jdbc:exa:localhost:8888' " //
                 + "USER '" + container.getUsername() + "' " //
                 + "IDENTIFIED BY '" + container.getPassword() + "'");
+    }
+
+    private static void createAdapterScript() throws SQLException, InterruptedException {
         statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.ADAPTER_SCRIPT_EXASOL_RLS AS " //
                 + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/bfsdefault/default/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";\n" //
                 + "/");
         TimeUnit.SECONDS.sleep(20); // FIXME: need to be fixed in the container
-        statement.execute("CREATE VIRTUAL SCHEMA virtual_schema_rls USING RLS_SCHEMA.ADAPTER_SCRIPT_EXASOL_RLS " //
-                + "WITH " //
-                + "SQL_DIALECT     = 'EXASOL_RLS' " //
-                + "CONNECTION_NAME = 'JDBC_EXASOL_CONNECTION' " //
-                + "SCHEMA_NAME     = 'RLS_SCHEMA'");
+    }
+
+    private static void createVirtualSchema(final String virtualSchemaName, final Optional<String> additionalParameters)
+            throws SQLException {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CREATE VIRTUAL SCHEMA ");
+        builder.append(virtualSchemaName);
+        builder.append(" USING RLS_SCHEMA.ADAPTER_SCRIPT_EXASOL_RLS WITH ");
+        builder.append("SQL_DIALECT     = 'EXASOL_RLS' ");
+        builder.append("CONNECTION_NAME = 'JDBC_EXASOL_CONNECTION' ");
+        builder.append("SCHEMA_NAME     = 'RLS_SCHEMA' ");
+        additionalParameters.ifPresent(builder::append);
+        statement.execute(builder.toString());
     }
 
     private static void createTestSchema() throws SQLException {
@@ -171,25 +194,35 @@ class RowLevelSecurityDialectIT {
                 + "(19, 'Donkey Inc', 'Wheat', 50, 9223372036854775808, 'RLS_USR_1')");
     }
 
-    private static void createUser(final String userName) throws SQLException {
-        statement.execute("CREATE USER " + userName + " IDENTIFIED BY \"" + userName + "\"");
-        statement.execute("GRANT ALL PRIVILEGES TO " + userName + "");
+    private static void createUser(final List<String> userNames) throws SQLException {
+        for (String userName : userNames) {
+            statement.execute("CREATE USER " + userName + " IDENTIFIED BY \"" + userName + "\"");
+            statement.execute("GRANT ALL PRIVILEGES TO " + userName + "");
+        }
     }
 
-    @Test
-    void testSelectFromExaRlsUsersThrowsException() {
-        assertThrows(SQLException.class, () -> statement.execute("SELECT * FROM EXA_RLS_USERS"));
+    private static Stream<String> getVirtualSchemaVariants() {
+        return Stream.of(VIRTUAL_SCHEMA_RLS_JDBC_NAME, VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME, VIRTUAL_SCHEMA_RLS_EXA_NAME,
+                VIRTUAL_SCHEMA_RLS_EXA_LOCAL_NAME);
     }
 
-    @Test
-    void testUnprotectedTableWithAdmin() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testSelectFromExaRlsUsersThrowsException(final String virtualSchemaName) {
+        assertThrows(SQLException.class,
+                () -> statement.execute("SELECT * FROM " + virtualSchemaName + "EXA_RLS_USERS"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testUnprotectedTableWithAdmin(final String virtualSchemaName) throws SQLException {
         createExpectedTable("EXPECTED_UNPROTECTED_ADMIN");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_UNPROTECTED_ADMIN VALUES " //
                 + "(1, 'Chicken Inc', 'Wheat', 100), " //
                 + "(2, 'Goat Inc', 'Carrot', 10), " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(4, 'Chicken Inc', 'Wheat', 4)");
-        assertThat(statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_UNPROTECTED"),
+        assertThat(statement.executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_UNPROTECTED"),
                 matchesResultSet(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_UNPROTECTED_ADMIN")));
     }
 
@@ -201,8 +234,9 @@ class RowLevelSecurityDialectIT {
                 + "QUANTITY DECIMAL(18,0))");
     }
 
-    @Test
-    void testUnprotectedTableWithUser1() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testUnprotectedTableWithUser1(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_1");
         createExpectedTable("EXPECTED_UNPROTECTED_USER_1");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_UNPROTECTED_USER_1 VALUES " //
@@ -213,13 +247,14 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement
                 .executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_UNPROTECTED_USER_1");
         final ResultSet actualResultSet = statement
-                .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_UNPROTECTED");
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_UNPROTECTED");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testUnprotectedTableWithUser2() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testUnprotectedTableWithUser2(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_2");
         createExpectedTable("EXPECTED_UNPROTECTED_USER_2");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_UNPROTECTED_USER_2 VALUES " //
@@ -230,75 +265,86 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement
                 .executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_UNPROTECTED_USER_2");
         final ResultSet actualResultSet = statement
-                .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_UNPROTECTED");
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_UNPROTECTED");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testTenantsTableWithAdmin() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testTenantsTableWithAdmin(final String virtualSchemaName) throws SQLException {
         createExpectedTable("EXPECTED_TENANTS_ADMIN");
-        assertThat(statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS"),
+        assertThat(statement.executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_TENANTS"),
                 matchesResultSet(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_ADMIN")));
 
     }
 
-    @Test
-    void testTenantsTableWithUser1() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testTenantsTableWithUser1(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_1");
         createExpectedTable("EXPECTED_TENANTS_USER_1");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_TENANTS_USER_1 VALUES " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
                 + "(10, 'Donkey Inc', 'Carrot', 2)");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_USER_1");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_TENANTS");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testTenantsTableWithUser2() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testTenantsTableWithUser2(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_2");
         createExpectedTable("EXPECTED_TENANTS_USER_2");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_TENANTS_USER_2 VALUES " //
                 + "(4, 'Chicken Inc', 'Wheat', 4), " //
                 + "(9, 'Chicken Inc', 'Wheat', 64)");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_USER_2");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_TENANTS");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testTenantsTableWithUser3() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testTenantsTableWithUser3(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_3");
         createExpectedTable("EXPECTED_TENANTS_USER_3");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_TENANTS_USER_3 VALUES " //
                 + "(5, 'Chicken Inc', 'Wheat', 45), " //
                 + "(8, 'Chicken Inc', 'Wheat', 44)");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_USER_3");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_TENANTS");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testTenantsTableWithUser4() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testTenantsTableWithUser4(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_4");
         createExpectedTable("EXPECTED_TENANTS_USER_4");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_TENANTS_USER_4 VALUES " //
                 + "(6, 'Donkey Inc', 'Carrot', 67), " //
                 + "(7, 'Goat Inc', 'Grass', 84)");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_TENANTS_USER_4");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_TENANTS");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testTenantsTableWithUser1SelectAllowedColumns() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testTenantsTableWithUser1SelectAllowedColumns(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_1");
-        final ResultSet resultSet = statement.executeQuery("SELECT ORDER_ID FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS");
+        final ResultSet resultSet = statement
+                .executeQuery("SELECT ORDER_ID FROM " + virtualSchemaName + ".RLS_SALES_TENANTS");
         statement.execute("IMPERSONATE SYS");
         assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(1)),
                 () -> assertThat(resultSet.next(), equalTo(true)),
@@ -308,11 +354,12 @@ class RowLevelSecurityDialectIT {
                 () -> assertThat(resultSet.next(), equalTo(false)));
     }
 
-    @Test
-    void testTenantsTableWithUser2SelectAllowedColumns() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testTenantsTableWithUser2SelectAllowedColumns(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_2");
-        final ResultSet resultSet = statement
-                .executeQuery("SELECT ORDER_ID, PRODUCT FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS WHERE ORDER_ID = 4");
+        final ResultSet resultSet = statement.executeQuery(
+                "SELECT ORDER_ID, PRODUCT FROM " + virtualSchemaName + ".RLS_SALES_TENANTS WHERE ORDER_ID = 4");
         statement.execute("IMPERSONATE SYS");
         assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(2)),
                 () -> assertThat(resultSet.next(), equalTo(true)),
@@ -320,24 +367,27 @@ class RowLevelSecurityDialectIT {
                 () -> assertThat(resultSet.next(), equalTo(false)));
     }
 
-    @Test
-    void testTenantsTableWithUser3SelectNotAllowedColumns() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testTenantsTableWithUser3SelectNotAllowedColumns(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_3");
         assertThrows(SQLException.class,
-                () -> statement.execute("SELECT EXA_ROW_TENANT FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS"));
+                () -> statement.execute("SELECT EXA_ROW_TENANT FROM " + virtualSchemaName + ".RLS_SALES_TENANTS"));
         statement.execute("IMPERSONATE SYS");
     }
 
-    @Test
-    void testTenantsTableWithUser4WhereNotAllowedColumns() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testTenantsTableWithUser4WhereNotAllowedColumns(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_4");
-        assertThrows(SQLException.class, () -> statement
-                .execute("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_TENANTS WHERE EXA_ROW_TENANT = 'RLS_USR_2'"));
+        assertThrows(SQLException.class, () -> statement.execute(
+                "SELECT * FROM " + virtualSchemaName + ".RLS_SALES_TENANTS WHERE EXA_ROW_TENANT = 'RLS_USR_2'"));
         statement.execute("IMPERSONATE SYS");
     }
 
-    @Test
-    void testRolesTableWithAdmin() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesTableWithAdmin(final String virtualSchemaName) throws SQLException {
         createExpectedTable("EXPECTED_ROLES_ADMIN");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_ADMIN VALUES " //
                 + "(3, 'Donkey Inc', 'Carrot', 33), " //
@@ -356,25 +406,28 @@ class RowLevelSecurityDialectIT {
                 + "(16, 'Goat Inc', 'Grass', 34), " //
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
-        assertThat(statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES"),
+        assertThat(statement.executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES"),
                 matchesResultSet(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_ADMIN")));
 
     }
 
-    @Test
-    void testRolesTableWithUser1() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesTableWithUser1(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_1");
         createExpectedTable("EXPECTED_ROLES_USER_1");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_USER_1 VALUES " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_USER_1");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testRolesTableWithUser2() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesTableWithUser2(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_2");
         createExpectedTable("EXPECTED_ROLES_USER_2");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_USER_2 VALUES " //
@@ -388,13 +441,15 @@ class RowLevelSecurityDialectIT {
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_USER_2");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testRolesTableWithUser3() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesTableWithUser3(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_3");
         createExpectedTable("EXPECTED_ROLES_USER_3");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_USER_3 VALUES " //
@@ -412,13 +467,15 @@ class RowLevelSecurityDialectIT {
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_USER_3");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testRolesTableWithUser4() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesTableWithUser4(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_4");
         createExpectedTable("EXPECTED_ROLES_USER_4");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_USER_4 VALUES " //
@@ -439,15 +496,18 @@ class RowLevelSecurityDialectIT {
                 + "(17, 'Donkey Inc', 'Carrot', 58), " //
                 + "(18, 'Donkey Inc', 'Wheat', 56)");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_USER_4");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES");
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testRolesTableWithUser1SelectAllowedColumns() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesTableWithUser1SelectAllowedColumns(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_1");
-        final ResultSet resultSet = statement.executeQuery("SELECT ORDER_ID FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES");
+        final ResultSet resultSet = statement
+                .executeQuery("SELECT ORDER_ID FROM " + virtualSchemaName + ".RLS_SALES_ROLES");
         statement.execute("IMPERSONATE SYS");
         assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(1)),
                 () -> assertThat(resultSet.next(), equalTo(true)),
@@ -455,11 +515,12 @@ class RowLevelSecurityDialectIT {
                 () -> assertThat(resultSet.next(), equalTo(false)));
     }
 
-    @Test
-    void testRolesTableWithUser2SelectAllowedColumns() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesTableWithUser2SelectAllowedColumns(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_2");
-        final ResultSet resultSet = statement
-                .executeQuery("SELECT ORDER_ID, PRODUCT FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES WHERE ORDER_ID > 15");
+        final ResultSet resultSet = statement.executeQuery(
+                "SELECT ORDER_ID, PRODUCT FROM " + virtualSchemaName + ".RLS_SALES_ROLES WHERE ORDER_ID > 15");
         statement.execute("IMPERSONATE SYS");
         assertAll(() -> assertThat(resultSet.getMetaData().getColumnCount(), equalTo(2)),
                 () -> assertThat(resultSet.next(), equalTo(true)),
@@ -469,32 +530,36 @@ class RowLevelSecurityDialectIT {
                 () -> assertThat(resultSet.next(), equalTo(false)));
     }
 
-    @Test
-    void testRolesTableWithUser3SelectNotAllowedColumns() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesTableWithUser3SelectNotAllowedColumns(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_3");
         assertThrows(SQLException.class,
-                () -> statement.execute("SELECT RLS_SALES_ROLES FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES"));
+                () -> statement.execute("SELECT RLS_SALES_ROLES FROM " + virtualSchemaName + ".RLS_SALES_ROLES"));
         statement.execute("IMPERSONATE SYS");
     }
 
-    @Test
-    void testRolesTableWithUser4WhereNotAllowedColumns() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesTableWithUser4WhereNotAllowedColumns(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_4");
-        assertThrows(SQLException.class,
-                () -> statement.execute("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES WHERE RLS_SALES_ROLES = 5"));
+        assertThrows(SQLException.class, () -> statement
+                .execute("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES WHERE RLS_SALES_ROLES = 5"));
         statement.execute("IMPERSONATE SYS");
     }
 
-    @Test
-    void testRolesAndTenantsTableWithAdmin() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesAndTenantsTableWithAdmin(final String virtualSchemaName) throws SQLException {
         createExpectedTable("EXPECTED_ROLES_TENANTS_ADMIN");
-        assertThat(statement.executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS"),
+        assertThat(statement.executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES_AND_TENANTS"),
                 matchesResultSet(statement.executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_ADMIN")));
 
     }
 
-    @Test
-    void testRolesAndTenantsTableWithUser1() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesAndTenantsTableWithUser1(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE rls_usr_1");
         createExpectedTable("EXPECTED_ROLES_TENANTS_USER_1");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_1 VALUES " //
@@ -502,13 +567,14 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement
                 .executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_1");
         final ResultSet actualResultSet = statement
-                .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES_AND_TENANTS");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testRolesAndTenantsTableWithUser2() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesAndTenantsTableWithUser2(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_2");
         createExpectedTable("EXPECTED_ROLES_TENANTS_USER_2");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_2 VALUES " //
@@ -517,13 +583,14 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement
                 .executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_2");
         final ResultSet actualResultSet = statement
-                .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES_AND_TENANTS");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testRolesAndTenantsTableWithUser3() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesAndTenantsTableWithUser3(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_3");
         createExpectedTable("EXPECTED_ROLES_TENANTS_USER_3");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_3 VALUES " //
@@ -533,13 +600,14 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement
                 .executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_3");
         final ResultSet actualResultSet = statement
-                .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES_AND_TENANTS");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
-    @Test
-    void testRolesAndTenantsTableWithUser4() throws SQLException {
+    @ParameterizedTest
+    @MethodSource("getVirtualSchemaVariants")
+    void testRolesAndTenantsTableWithUser4(final String virtualSchemaName) throws SQLException {
         statement.execute("IMPERSONATE RLS_USR_4");
         createExpectedTable("EXPECTED_ROLES_TENANTS_USER_4");
         statement.execute("INSERT INTO RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_4 VALUES " //
@@ -550,7 +618,7 @@ class RowLevelSecurityDialectIT {
         final ResultSet expectedResultSet = statement
                 .executeQuery("SELECT * FROM RLS_SCHEMA.EXPECTED_ROLES_TENANTS_USER_4");
         final ResultSet actualResultSet = statement
-                .executeQuery("SELECT * FROM VIRTUAL_SCHEMA_RLS.RLS_SALES_ROLES_AND_TENANTS");
+                .executeQuery("SELECT * FROM " + virtualSchemaName + ".RLS_SALES_ROLES_AND_TENANTS");
         statement.execute("IMPERSONATE SYS");
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
