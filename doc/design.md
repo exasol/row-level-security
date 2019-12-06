@@ -72,8 +72,7 @@ Covers:
 
 The `RowLevelSecurityDialect` reads the following custom properties:
 
-1. `ROLE_ASSIGNMENT_TABLE`: name of the table that contains the mapping of users to the roles the have
-2. `SCHEMA_NAME`: name of the schema where tables are placed
+1. `SCHEMA_NAME`: name of the schema where tables are placed
 
 Covers:
 
@@ -233,28 +232,89 @@ Needs: impl, utest, itest
 
 ## Administration Convenience Scripts
  
-RLS adapter provides scripts which make administration of RLS more user-friendly.
+RLS project provides scripts which make administration of RLS more user-friendly.
 
 ### Add a new role
+`dsn~add-new-role~1`
 
-`ADD_RLS_ROLE(role_name, role_id)` allows administrators to add a new RLS role to the table named `EXA_ROLES_MAPPING`.
-If table already exists, it adds a role to the existing table. If not it creates a new table and adds a role.
-It also checks if the `role_id` is in the allowed range (from 1 to 63) and checks that the `role_id` and `role_name`
-are unique and the table is not full yet.
+Administrators create new roles using `ADD_RLS_ROLES` with the following parameters:
+
+* Name of the role
+* ID associated with the role (between 1 and 63)
+
+`ADD_RLS_ROLES` creates a table `EXA_ROLES_MAPPING (EXA_ROLE VARCHAR(128), EXA_ROLE_ID DECIMAL(2, 0)` if it does not exist.
+
+`ADD_RLS_ROLES` checks if all of the following criteria are met, otherwise throws an error:
+
+1. Role ID ranges between 1 and 63
+2. Role ID is unique in the role mapping
+3. Role name is unique independently of its case
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+### Get a role mask
+`dsn~get-role-mask~1`
+
+Administrators get role masks using `ROLE_MASK` with the following parameters:
+
+* List of roles' names
+
+`ROLE_MASK` returns a decimal value.
+
+`ROLE_MASK` checks if all of the following criteria are met, otherwise throws an error:
+
+1. `EXA_ROLES_MAPPING` table exists
+2. `EXA_ROLES_MAPPING` contains all roles from the list of roles' names
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+### Assign roles to a user
+`dsn~assign-roles-to-user~1`
+
+Administrators assign roles to users using `ASSIGN_ROLES_TO_USER` with the following parameters:
+
+* Name of the user
+* List of roles' names
+
+`ASSIGN_ROLES_TO_USER` uses `ROLE_MASK` script for calculation a role mask.
+
+`ASSIGN_ROLES_TO_USER` creates a table `EXA_RLS_USERS (EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK DECIMAL(20,0)` if it does not exist.
+
+`ASSIGN_ROLES_TO_USER` creates a new row with the user name and the role mask if the user name is not in the `EXA_RLS_USERS` table yet. 
+Otherwise it updates `EXA_ROLE_MASK` value. 
+
+`ASSIGN_ROLES_TO_USER` checks if all of the following criteria are met, otherwise throws an error:
+
+1. `EXA_RLS_USERS` table exists
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
 
 ### Delete a role
+`dsn~delete-role~1`
 
-`DELETE_RLS_ROLE(role_name)` allows administrators to delete an RLS role from the table named `EXA_ROLES_MAPPING`.
-It checks if the table exists and the role exists. 
-The script also removes the role's bit from all users assigned to the role in the table `EXA_RLS_USERS`.
+Administrators delete existing roles using `DELETE_RLS_ROLE` with the following parameters:
 
-### Assign list of roles to user
+* Name of the role
 
-`ASSIGN_ROLES_TO_USER(user_name, roles)` allows administrators to assign roles to a user in the table `EXA_RLS_USERS`.
-`EXA_RLS_USERS` contains two columns: `EXA_USER_NAME VARCHAR(200)` and `EXA_ROLE_MASK DECIMAL(20,0)`.
-Each role from the given list means one bit which should be set to 1.
-For example, if we use the script with next parameters `ASSIGN_ROLES_TO_USER(USER_1, {'SALES', 'DEVELOPMENT', 'SUPPORT'})`
-and 'SALES', 'DEVELOPMENT' and 'SUPPORT' have `role_id`'s 1, 2, 4 accordingly, a new row `'USER_1', 11` must be created in table `EXA_RLS_USERS`.
+`DELETE_RLS_ROLE` removes the role from `EXA_ROLES_MAPPING`, `EXA_RLS_USERS` and all the tables which are secured with roles.
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
 
 # Quality Scenarios
 
