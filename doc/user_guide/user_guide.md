@@ -84,7 +84,7 @@ In case you want to use Role-based security, add a column called `EXA_ROW_ROLES 
 For our example we will create very simple order item list as shown below.
 
 ```sql
-CREATE OR REPLACE SIMPLE_SALES.ORDER_ITEM 
+CREATE OR REPLACE TABLE SIMPLE_SALES.ORDER_ITEM 
 (  
     ORDER_ID DECIMAL(18,0),  
     CUSTOMER VARCHAR(50),  
