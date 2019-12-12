@@ -84,7 +84,7 @@ In case you want to use Role-based security, add a column called `EXA_ROW_ROLES 
 For our example we will create very simple order item list as shown below.
 
 ```sql
-CREATE OR REPLACE SIMPLE_SALES.ORDER_ITEM 
+CREATE OR REPLACE TABLE SIMPLE_SALES.ORDER_ITEM 
 (  
     ORDER_ID DECIMAL(18,0),  
     CUSTOMER VARCHAR(50),  
@@ -144,13 +144,13 @@ Check out our [Virtual Schema deployment guide](https://github.com/exasol/virtua
 Create a schema or use an existing one to hold the adapter script.
 
 ```sql
-CREATE SCHEMA RLS_VSADAPTER_SCHEMA;
+CREATE SCHEMA RLS_SCHEMA;
 ```
 
 The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
 
 ```sql
-CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_VSADAPTER_SCHEMA.RLS_VSADAPTER AS
+CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
     %jar /buckets/<BFS service>/<bucket>/row-level-security-0.2.0-all-dependencies.jar;
 /
@@ -170,17 +170,36 @@ USER '<user>'
 IDENTIFIED BY '<password>';
 ```
 
-### Creating a Virtual Schema
+### Creating a Virtual Schema with Import From Exa
 
 ```sql
 CREATE VIRTUAL SCHEMA <virtual schema name> 
-    USING RLS_VSADAPTER_SCHEMA.RLS_VSADAPTER
+    USING RLS_SCHEMA.RLS_VS_ADAPTER
+    WITH
     SQL_DIALECT     = 'EXASOL_RLS'
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
     SCHEMA_NAME     = '<schema name>'
     IMPORT_FROM_EXA = 'true'
-    EXA_CONNECTION_STRING = '<host>:<port>';
+    EXA_CONNECTION_STRING = 'localhost:<port>';
 ```
+
+### Creating a Virtual Schema with Import From JDBC
+
+```sql
+CREATE VIRTUAL SCHEMA <virtual schema name> 
+    USING RLS_SCHEMA.RLS_VS_ADAPTER
+    WITH
+    SQL_DIALECT     = 'EXASOL_RLS'
+    CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
+    SCHEMA_NAME     = '<schema name>';
+```
+
+### Additional optional properties
+
+Property                    | Value
+--------------------------- | -----------
+**IS_LOCAL**                | Only relevant if your data source is the same Exasol database where you create the Virtual Schema. Either `TRUE` or `FALSE` (default). If `TRUE`, you are connecting to the local Exasol database (e.g. for testing purposes). In this case, the adapter can avoid the `IMPORT FROM JDBC` overhead.
+**EXCLUDED_CAPABILITIES**   | A comma-separated list of capabilities that you want to deactivate (although the adapter might support them).
 
 ### Granting Access to the Virtual Schema
 
