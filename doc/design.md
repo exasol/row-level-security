@@ -235,7 +235,7 @@ Needs: impl, utest, itest
 The RLS project provides scripts which make administration of RLS more user-friendly.
 
 ### Add a new role
-`dsn~add-new-role~1`
+`dsn~add-a-new-role~1`
 
 Administrators create new roles using `ADD_RLS_ROLE` with the following parameters:
 
@@ -249,7 +249,7 @@ Covers:
 Needs: impl, itest
 
 #### `ADD_RLS_ROLE` creates a table
-`dsn~add-rls-role-creates-table~1`
+`dsn~add-rls-role-creates-a-table~1`
 
 `ADD_RLS_ROLE` creates a table `EXA_ROLES_MAPPING (EXA_ROLE VARCHAR(128), EXA_ROLE_ID DECIMAL(2, 0)` if it does not exist.
 
@@ -275,7 +275,7 @@ Covers:
 Needs: impl, itest
 
 ### Get a role mask
-`dsn~get-role-mask~1`
+`dsn~get-a-role-mask~1`
 
 Administrators get role masks using `ROLE_MASK` with the following parameters:
 
@@ -283,8 +283,8 @@ Administrators get role masks using `ROLE_MASK` with the following parameters:
 
 `ROLE_MASK` returns a decimal value.
 
-#### `ROLE_MASK` checks parameters
-`dsn~add-rls-roles-checks-parameters~1`
+#### `ROLE_MASK` checks tables
+`dsn~add-rls-roles-checks-tables~1`
 
 `ROLE_MASK` checks if all of the following criteria are met, otherwise throws an error:
 
@@ -298,7 +298,7 @@ Covers:
 Needs: impl, itest
 
 ### Assign roles to a user
-`dsn~assign-roles-to-user~1`
+`dsn~assign-roles-to-a-user~1`
 
 Administrators assign roles to users using `ASSIGN_ROLES_TO_USER` with the following parameters:
 
@@ -348,7 +348,7 @@ Covers:
 Needs: impl, itest
 
 ### Delete a role
-`dsn~delete-role~1`
+`dsn~delete-a-role~1`
 
 Administrators delete existing roles using `DELETE_RLS_ROLE` with the following parameters:
 
@@ -363,7 +363,7 @@ Needs: impl, itest
 #### `DELETE_RLS_ROLE` removes a role from administrative tables
 `dsn~delete-rls-role-removes-a-role-from-administrative-tables~1`
 
-`DELETE_RLS_ROLE` removes the role from `EXA_ROLES_MAPPING`, `EXA_RLS_USERS`.
+`DELETE_RLS_ROLE` removes a role from `EXA_ROLES_MAPPING` and `EXA_RLS_USERS` tables if the role exists.
 
 Covers:
 

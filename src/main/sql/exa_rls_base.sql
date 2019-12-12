@@ -1,19 +1,19 @@
 --/
-CREATE OR REPLACE SCRIPT MY_SCHEMA.EXA_RLS_BASE AS
+CREATE OR REPLACE SCRIPT EXA_RLS_BASE AS
 function get_role_id_by_name(role_name)
    res = query([[SELECT role_id FROM ::s.EXA_ROLES_MAPPING WHERE role_name = :r]],
                { s = exa.meta.script_schema, r = role_name })
    if #res>0 then return res[1][1] else return nil end
 end
-​
+
 function get_role_name_by_id(role_id)
    res = query([[SELECT role_name FROM ::s.EXA_ROLES_MAPPING WHERE role_id = :i]],
                { s = exa.meta.script_schema, i = role_id })
    if #res>0 then return res[1][1] else return nil end
 end
-​
+
 function get_roles_mask(roles)
-   in_list = ''   -- will look like this: ':r1, :r2, :r3, :r4, ...'
+   in_list = ''
    query_params = {s = exa.meta.script_schema}
    for i=1, #roles do
         if in_list~="" then in_list = in_list..', ' end
@@ -28,9 +28,9 @@ function get_roles_mask(roles)
 
    return role_mask
 end
-​
+
 query([[CREATE TABLE IF NOT EXISTS ::s.EXA_ROLES_MAPPING(ROLE_NAME VARCHAR(128), ROLE_ID INT)]],
       { s = exa.meta.script_schema })
 query([[CREATE TABLE IF NOT EXISTS ::s.EXA_RLS_USERS(EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK DECIMAL(20,0))]],
       { s = exa.meta.script_schema })
-/;
+/
