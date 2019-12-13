@@ -17,6 +17,8 @@ import java.sql.Statement;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -61,6 +63,7 @@ public class AddRlsRoleIT {
         createExaRolesMappingProjection("('Sales', 1), ('Development', 2), ('Finance', 3)");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM EXA_ROLES_MAPPING_PROJECTION");
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM EXA_ROLES_MAPPING");
+        cleanUpExaRolesMapping();
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
@@ -69,6 +72,7 @@ public class AddRlsRoleIT {
         statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', 1)");
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Finance', 1)"));
+        cleanUpExaRolesMapping();
         assertThat(thrown.getMessage(), containsString("role_id \"1\" already exists"));
     }
 
@@ -77,7 +81,17 @@ public class AddRlsRoleIT {
         statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', 1)");
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', 2)"));
+        cleanUpExaRolesMapping();
         assertThat(thrown.getMessage(), containsString("role_name \"Sales\" already exists"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { -5, 0, 64, 70 })
+    void testAddRlsRoleInvalidRoleIdException(int rlsRole) throws SQLException {
+        final SQLException thrown = assertThrows(SQLException.class,
+                () -> statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', " + rlsRole + ")"));
+        cleanUpExaRolesMapping();
+        assertThat(thrown.getMessage(), containsString("role_id must be between 1 and 63"));
     }
 
     private void createExaRolesMappingProjection(final String tableContent) throws SQLException {
@@ -85,6 +99,10 @@ public class AddRlsRoleIT {
                 + "(EXA_USER_NAME VARCHAR(128), " //
                 + "ROLE_ID INT)");
         statement.execute("INSERT INTO RLS_SCHEMA.EXA_ROLES_MAPPING_PROJECTION VALUES " + tableContent);
+    }
+
+    private void cleanUpExaRolesMapping() throws SQLException {
+        statement.execute("DROP TABLE RLS_SCHEMA.EXA_ROLES_MAPPING CASCADE");
     }
 
     private void createExaRlsUsersProjection(final String tableContent) throws SQLException {
