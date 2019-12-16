@@ -48,8 +48,8 @@ public class AssignRolesToUserIT {
 
     @ParameterizedTest
     @MethodSource("provideValuesForTestAssignRolesToUser")
-    void testAssignRolesToUser(final String arrayContent, final int maskValue) throws SQLException {
-        statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY(" + arrayContent + "))");
+    void testAssignRolesToUser(final String rolesToAssign, final int maskValue) throws SQLException {
+        statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY(" + rolesToAssign + "))");
         ScriptsSqlManager.createExaRlsUsersProjection(statement, EXA_RLS_USERS_PROJECTION,
                 "('RLS_USR_1', " + maskValue + ")");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS_PROJECTION);

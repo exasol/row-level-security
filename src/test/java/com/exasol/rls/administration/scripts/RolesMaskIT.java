@@ -43,9 +43,9 @@ public class RolesMaskIT {
 
     @ParameterizedTest
     @MethodSource("provideValuesForTestRolesMask")
-    void testRolesMask(final String arrayContent, final int maskValue) throws SQLException {
-        final ResultSet actualResultSet = statement.executeQuery(
-                "SELECT ROLES_MASK(ROLE_ID) from EXA_ROLES_MAPPING WHERE ROLE_NAME IN (" + arrayContent + ")");
+    void testRolesMask(final String roles, final int maskValue) throws SQLException {
+        final ResultSet actualResultSet = statement
+                .executeQuery("SELECT ROLES_MASK(ROLE_ID) from EXA_ROLES_MAPPING WHERE ROLE_NAME IN (" + roles + ")");
         actualResultSet.next();
         assertThat(actualResultSet.getInt(1), equalTo(maskValue));
     }
