@@ -21,14 +21,14 @@ import com.exasol.containers.ExasolContainerConstants;
 @Tag("integration")
 @Testcontainers
 public class AddRlsRoleIT {
-    @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
     private static final Path PATH_TO_ADD_RLS_ROLE = Path.of("src/main/sql/add_rls_role.sql");
     private static final Path PATH_TO_EXA_RLS_BASE = Path.of("src/main/sql/exa_rls_base.sql");
     private static final String RLS_SCHEMA_NAME = "RLS_SCHEMA";
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_ROLES_MAPPING_PROJECTION = "EXA_ROLES_MAPPING_PROJECTION";
+    @Container
+    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
+            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
     private static Statement statement;
 
     @BeforeAll

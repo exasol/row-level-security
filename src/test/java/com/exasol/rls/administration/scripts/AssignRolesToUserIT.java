@@ -23,15 +23,15 @@ import com.exasol.containers.ExasolContainerConstants;
 @Tag("integration")
 @Testcontainers
 public class AssignRolesToUserIT {
-    @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
     private static final Path PATH_TO_ASSIGN_ROLES_TO_USER = Path.of("src/main/sql/assign_roles_to_user.sql");
     private static final Path PATH_TO_EXA_RLS_BASE = Path.of("src/main/sql/exa_rls_base.sql");
     private static final String RLS_SCHEMA_NAME = "RLS_SCHEMA";
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_RLS_USERS = "EXA_RLS_USERS";
     private static final String EXA_RLS_USERS_PROJECTION = "EXA_RLS_USERS_PROJECTION";
+    @Container
+    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
+            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
     private static Statement statement;
 
     @BeforeAll
