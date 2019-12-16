@@ -1,4 +1,4 @@
-package com.exasol.adapter.sql;
+package com.exasol.rls.administration.scripts;
 
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -6,17 +6,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.junit.jupiter.Container;
@@ -33,6 +26,9 @@ public class AddRlsRoleIT {
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
     private static final Path PATH_TO_ADD_RLS_ROLE = Path.of("src/main/sql/add_rls_role.sql");
     private static final Path PATH_TO_EXA_RLS_BASE = Path.of("src/main/sql/exa_rls_base.sql");
+    private static final String RLS_SCHEMA_NAME = "RLS_SCHEMA";
+    private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
+    private static final String EXA_ROLES_MAPPING_PROJECTION = "EXA_ROLES_MAPPING_PROJECTION";
     private static Statement statement;
 
     @BeforeAll
@@ -40,19 +36,9 @@ public class AddRlsRoleIT {
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
         statement = connection.createStatement();
-        createTestSchema();
-        createScript(PATH_TO_EXA_RLS_BASE);
-        createScript(PATH_TO_ADD_RLS_ROLE);
-    }
-
-    private static void createTestSchema() throws SQLException {
-        statement.execute("CREATE SCHEMA RLS_SCHEMA");
-        statement.execute("OPEN SCHEMA RLS_SCHEMA");
-    }
-
-    private static void createScript(final Path pathToScript) throws SQLException, IOException {
-        final String script = Files.readString(pathToScript, StandardCharsets.UTF_8);
-        statement.execute(script);
+        ScriptsSqlManager.createTestSchema(statement, RLS_SCHEMA_NAME);
+        ScriptsSqlManager.createScript(statement, PATH_TO_EXA_RLS_BASE);
+        ScriptsSqlManager.createScript(statement, PATH_TO_ADD_RLS_ROLE);
     }
 
     @Test
@@ -60,10 +46,12 @@ public class AddRlsRoleIT {
         statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', 1)");
         statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Development', 2)");
         statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Finance', 3)");
-        createExaRolesMappingProjection("('Sales', 1), ('Development', 2), ('Finance', 3)");
-        final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM EXA_ROLES_MAPPING_PROJECTION");
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM EXA_ROLES_MAPPING");
-        cleanUpExaRolesMapping();
+        ScriptsSqlManager.createExaRolesMappingProjection(statement, EXA_ROLES_MAPPING_PROJECTION,
+                "('Sales', 1), ('Development', 2), ('Finance', 3)");
+        final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM " + EXA_ROLES_MAPPING_PROJECTION);
+        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM " + EXA_ROLES_MAPPING);
+        ScriptsSqlManager.dropTable(statement, EXA_ROLES_MAPPING);
+        ScriptsSqlManager.dropTable(statement, EXA_ROLES_MAPPING_PROJECTION);
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
     }
 
@@ -72,7 +60,7 @@ public class AddRlsRoleIT {
         statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', 1)");
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Finance', 1)"));
-        cleanUpExaRolesMapping();
+        ScriptsSqlManager.dropTable(statement, EXA_ROLES_MAPPING);
         assertThat(thrown.getMessage(), containsString("role_id \"1\" already exists"));
     }
 
@@ -81,34 +69,16 @@ public class AddRlsRoleIT {
         statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', 1)");
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', 2)"));
-        cleanUpExaRolesMapping();
+        ScriptsSqlManager.dropTable(statement, EXA_ROLES_MAPPING);
         assertThat(thrown.getMessage(), containsString("role_name \"Sales\" already exists"));
     }
 
     @ParameterizedTest
     @ValueSource(ints = { -5, 0, 64, 70 })
-    void testAddRlsRoleInvalidRoleIdException(int rlsRole) throws SQLException {
+    void testAddRlsRoleInvalidRoleIdException(final int rlsRole) throws SQLException {
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', " + rlsRole + ")"));
-        cleanUpExaRolesMapping();
+        ScriptsSqlManager.dropTable(statement, EXA_ROLES_MAPPING);
         assertThat(thrown.getMessage(), containsString("role_id must be between 1 and 63"));
-    }
-
-    private void createExaRolesMappingProjection(final String tableContent) throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.EXA_ROLES_MAPPING_PROJECTION " //
-                + "(EXA_USER_NAME VARCHAR(128), " //
-                + "ROLE_ID INT)");
-        statement.execute("INSERT INTO RLS_SCHEMA.EXA_ROLES_MAPPING_PROJECTION VALUES " + tableContent);
-    }
-
-    private void cleanUpExaRolesMapping() throws SQLException {
-        statement.execute("DROP TABLE RLS_SCHEMA.EXA_ROLES_MAPPING CASCADE");
-    }
-
-    private void createExaRlsUsersProjection(final String tableContent) throws SQLException {
-        statement.execute("CREATE OR REPLACE TABLE RLS_SCHEMA.EXA_RLS_USERS_PROJECTION " //
-                + "(ROLE_NAME VARCHAR(128), " //
-                + "EXA_ROLE_MASK DECIMAL(20,0))");
-        statement.execute("INSERT INTO RLS_SCHEMA.EXA_RLS_USERS_PROJECTION VALUES " + tableContent);
     }
 }

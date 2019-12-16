@@ -314,7 +314,7 @@ Needs: impl, itest
 #### `ASSIGN_ROLES_TO_USER` creates a table
 `dsn~assign-roles-to-user-creates-a-table~1`
 
-`ASSIGN_ROLES_TO_USER` creates a table `EXA_RLS_USERS (EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK DECIMAL(20,0)` if it does not exist.
+`ASSIGN_ROLES_TO_USER` creates a table `EXA_RLS_USERS (EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK INT` if it does not exist.
 
 Covers:
 
@@ -339,7 +339,7 @@ Needs: impl, itest
 
 `ASSIGN_ROLES_TO_USER` checks if all of the following criteria are met, otherwise throws an error:
 
-1. `EXA_RLS_USERS` table exists.
+1. `EXA_ROLES_MAPPING` contains all roles from the list.
 
 Covers:
 
