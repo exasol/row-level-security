@@ -127,8 +127,15 @@
                 <version>0.8.5</version>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>prepare-agend-integration</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
                         </goals>
                     </execution>
                     <execution>
@@ -136,6 +143,13 @@
                         <phase>test</phase>
                         <goals>
                             <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report-integration</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report-integration</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -154,7 +168,7 @@
                 <version>3.1.1</version>
                 <configuration>
                     <descriptors>
-                        <descriptor>src/main/assembly/all-dependencies.xml</descriptor>
+                        <descriptor>assembly/all-dependencies.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>

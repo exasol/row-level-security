@@ -1,12 +1,12 @@
 package com.exasol.rls.administration.scripts;
 
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
+import static com.exasol.rls.administration.scripts.IntegrationTestsConstants.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.sql.*;
 import java.util.stream.Stream;
 
@@ -23,13 +23,11 @@ import com.exasol.containers.ExasolContainerConstants;
 @Tag("integration")
 @Testcontainers
 public class DeleteRlsRoleIT {
-    private static final Path PATH_TO_DELETE_RLS_ROLE = Path.of("src/main/sql/delete_rls_role.sql");
-    private static final Path PATH_TO_EXA_RLS_BASE = Path.of("src/main/sql/exa_rls_base.sql");
-    private static final String RLS_SCHEMA_NAME = "RLS_SCHEMA";
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_ROLES_MAPPING_PROJECTION = "EXA_ROLES_MAPPING_PROJECTION";
     private static final String EXA_RLS_USERS = "EXA_RLS_USERS";
     private static final String EXA_RLS_USERS_PROJECTION = "EXA_RLS_USERS_PROJECTION";
+    private static SqlTestSetupManager sqlTestSetupManager;
 
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
@@ -41,26 +39,25 @@ public class DeleteRlsRoleIT {
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
         statement = connection.createStatement();
-        ScriptsSqlManager.createTestSchema(statement, RLS_SCHEMA_NAME);
-        ScriptsSqlManager.createScript(statement, PATH_TO_EXA_RLS_BASE);
-        ScriptsSqlManager.createScript(statement, PATH_TO_DELETE_RLS_ROLE);
+        sqlTestSetupManager = new SqlTestSetupManager(statement);
+        sqlTestSetupManager.createTestSchema(RLS_SCHEMA_NAME);
+        sqlTestSetupManager.createScript(PATH_TO_EXA_RLS_BASE);
+        sqlTestSetupManager.createScript(PATH_TO_DELETE_RLS_ROLE);
     }
 
     @ParameterizedTest
     @MethodSource("provideValuesForTestDeleteRlsRoleFromExaRolesMapping")
     void testDeleteRlsRoleFromExaRolesMapping(final String roleToDelete, final String expectedTableContent)
             throws SQLException {
-        ScriptsSqlManager.createExaRolesMappingProjection(statement, EXA_ROLES_MAPPING,
+        sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
                 "('Sales', 1), ('Development', 2), ('Finance', 3),  ('Support', 4)");
         statement.execute("EXECUTE SCRIPT DELETE_RLS_ROLE(" + roleToDelete + ")");
-        ScriptsSqlManager.createExaRolesMappingProjection(statement, EXA_ROLES_MAPPING_PROJECTION,
-                expectedTableContent);
+        sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING_PROJECTION, expectedTableContent);
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM " + EXA_ROLES_MAPPING_PROJECTION);
         final ResultSet actualResultSet = statement
                 .executeQuery("SELECT * FROM " + EXA_ROLES_MAPPING + " ORDER BY ROLE_ID");
-        ScriptsSqlManager.dropTable(statement, EXA_ROLES_MAPPING);
-        ScriptsSqlManager.dropTable(statement, EXA_ROLES_MAPPING_PROJECTION);
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
+        sqlTestSetupManager.cleanUpTables(EXA_ROLES_MAPPING, EXA_ROLES_MAPPING_PROJECTION);
     }
 
     private static Stream<Arguments> provideValuesForTestDeleteRlsRoleFromExaRolesMapping() {
@@ -71,29 +68,26 @@ public class DeleteRlsRoleIT {
 
     @Test
     void testDeleteRlsRoleUnknownRole() throws SQLException {
-        ScriptsSqlManager.createExaRolesMappingProjection(statement, EXA_ROLES_MAPPING,
-                "('Sales', 1), ('Development', 2)");
+        sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING, "('Sales', 1), ('Development', 2)");
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("EXECUTE SCRIPT DELETE_RLS_ROLE('Support')"));
-        ScriptsSqlManager.dropTable(statement, EXA_ROLES_MAPPING);
         assertThat(thrown.getMessage(), containsString("No such role_name: \"Support\""));
+        sqlTestSetupManager.cleanUpTables(EXA_ROLES_MAPPING);
     }
 
     @ParameterizedTest
     @MethodSource("provideValuesForTestDeleteRlsRoleFromExaRlsUsers")
     void testDeleteRlsRoleFromExaRlsUsers(final String roleToDelete, final String expectedTableContent)
             throws SQLException {
-        ScriptsSqlManager.createExaRolesMappingProjection(statement, EXA_ROLES_MAPPING,
+        sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
                 "('Sales', 1), ('Development', 2), ('Finance', 3),  ('Support', 4)");
-        ScriptsSqlManager.createExaRlsUsersProjection(statement, EXA_RLS_USERS, "('RLS_USR_1', 15), ('RLS_USR_2', 9)");
+        sqlTestSetupManager.createExaRlsUsersProjection(EXA_RLS_USERS, "('RLS_USR_1', 15), ('RLS_USR_2', 9)");
         statement.execute("EXECUTE SCRIPT DELETE_RLS_ROLE(" + roleToDelete + ")");
-        ScriptsSqlManager.createExaRlsUsersProjection(statement, EXA_RLS_USERS_PROJECTION, expectedTableContent);
+        sqlTestSetupManager.createExaRlsUsersProjection(EXA_RLS_USERS_PROJECTION, expectedTableContent);
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS_PROJECTION);
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS);
-        ScriptsSqlManager.dropTable(statement, EXA_ROLES_MAPPING);
-        ScriptsSqlManager.dropTable(statement, EXA_RLS_USERS);
-        ScriptsSqlManager.dropTable(statement, EXA_RLS_USERS_PROJECTION);
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
+        sqlTestSetupManager.cleanUpTables(EXA_ROLES_MAPPING, EXA_RLS_USERS, EXA_RLS_USERS_PROJECTION);
     }
 
     private static Stream<Arguments> provideValuesForTestDeleteRlsRoleFromExaRlsUsers() {
@@ -107,7 +101,7 @@ public class DeleteRlsRoleIT {
     @MethodSource("provideValuesForTestDeleteRlsRoleFromPayloadTable")
     void testDeleteRlsRoleFromUserTable(final String roleToDelete, final String expectedTableContent)
             throws SQLException {
-        ScriptsSqlManager.createExaRolesMappingProjection(statement, EXA_ROLES_MAPPING,
+        sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
                 "('Sales', 1), ('Development', 2), ('Finance', 3),  ('Support', 4)");
         final String test_table_name = "TEST_TABLE";
         createUserTable(test_table_name, "('Row1', 1), ('Row2', 6), ('Row3', 9),  ('Row4', 15)");
@@ -116,10 +110,8 @@ public class DeleteRlsRoleIT {
         statement.execute("EXECUTE SCRIPT DELETE_RLS_ROLE(" + roleToDelete + ")");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM " + test_table_projection_name);
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM " + test_table_name);
-        ScriptsSqlManager.dropTable(statement, EXA_ROLES_MAPPING);
-        ScriptsSqlManager.dropTable(statement, test_table_name);
-        ScriptsSqlManager.dropTable(statement, test_table_projection_name);
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
+        sqlTestSetupManager.cleanUpTables(EXA_ROLES_MAPPING, test_table_name, test_table_projection_name);
     }
 
     private void createUserTable(final String tableName, final String tableContent) throws SQLException {
@@ -130,7 +122,7 @@ public class DeleteRlsRoleIT {
                 + tableContent);
     }
 
-    private static Stream<Arguments> provideValuesForTestDeleteRlsRoleFromUserTable() {
+    private static Stream<Arguments> provideValuesForTestDeleteRlsRoleFromPayloadTable() {
         return Stream.of(Arguments.of("'Sales'", "('Row1', 0), ('Row2', 6), ('Row3', 9),  ('Row4', 14)"), //
                 Arguments.of("'Development'", "('Row1', 1), ('Row2', 4), ('Row3', 9),  ('Row4', 13)"), //
                 Arguments.of("'Finance'", "('Row1', 1), ('Row2', 2), ('Row3', 9),  ('Row4', 11)"), //

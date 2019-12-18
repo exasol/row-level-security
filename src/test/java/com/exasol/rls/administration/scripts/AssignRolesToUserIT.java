@@ -1,12 +1,12 @@
 package com.exasol.rls.administration.scripts;
 
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
+import static com.exasol.rls.administration.scripts.IntegrationTestsConstants.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.sql.*;
 import java.util.stream.Stream;
 
@@ -23,9 +23,6 @@ import com.exasol.containers.ExasolContainerConstants;
 @Tag("integration")
 @Testcontainers
 public class AssignRolesToUserIT {
-    private static final Path PATH_TO_ASSIGN_ROLES_TO_USER = Path.of("src/main/sql/assign_roles_to_user.sql");
-    private static final Path PATH_TO_EXA_RLS_BASE = Path.of("src/main/sql/exa_rls_base.sql");
-    private static final String RLS_SCHEMA_NAME = "RLS_SCHEMA";
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_RLS_USERS = "EXA_RLS_USERS";
     private static final String EXA_RLS_USERS_PROJECTION = "EXA_RLS_USERS_PROJECTION";
@@ -33,30 +30,33 @@ public class AssignRolesToUserIT {
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
     private static Statement statement;
+    private static SqlTestSetupManager sqlTestSetupManager;
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
         statement = connection.createStatement();
-        ScriptsSqlManager.createTestSchema(statement, RLS_SCHEMA_NAME);
-        ScriptsSqlManager.createScript(statement, PATH_TO_EXA_RLS_BASE);
-        ScriptsSqlManager.createScript(statement, PATH_TO_ASSIGN_ROLES_TO_USER);
-        ScriptsSqlManager.createExaRolesMappingProjection(statement, EXA_ROLES_MAPPING,
+        sqlTestSetupManager = new SqlTestSetupManager(statement);
+        sqlTestSetupManager.createTestSchema(RLS_SCHEMA_NAME);
+        sqlTestSetupManager.createScript(PATH_TO_EXA_RLS_BASE);
+        sqlTestSetupManager.createScript(PATH_TO_ASSIGN_ROLES_TO_USER);
+        sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
                 "('Sales', 1), ('Development', 2), ('Finance', 3),  ('Support', 4)");
     }
 
     @ParameterizedTest
     @MethodSource("provideValuesForTestAssignRolesToUser")
     void testAssignRolesToUser(final String rolesToAssign, final int maskValue) throws SQLException {
+        final SQLException thrown = assertThrows(SQLException.class,
+                () -> statement.execute("SELECT * FROM " + EXA_RLS_USERS));
+        assertThat(thrown.getMessage(), containsString("object EXA_RLS_USERS not found"));
         statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY(" + rolesToAssign + "))");
-        ScriptsSqlManager.createExaRlsUsersProjection(statement, EXA_RLS_USERS_PROJECTION,
-                "('RLS_USR_1', " + maskValue + ")");
+        sqlTestSetupManager.createExaRlsUsersProjection(EXA_RLS_USERS_PROJECTION, "('RLS_USR_1', " + maskValue + ")");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS_PROJECTION);
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS);
-        ScriptsSqlManager.dropTable(statement, EXA_RLS_USERS_PROJECTION);
-        ScriptsSqlManager.dropTable(statement, EXA_RLS_USERS);
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
+        sqlTestSetupManager.cleanUpTables(EXA_RLS_USERS_PROJECTION, EXA_RLS_USERS);
     }
 
     private static Stream<Arguments> provideValuesForTestAssignRolesToUser() {
@@ -70,18 +70,24 @@ public class AssignRolesToUserIT {
     void testAssignRolesToUserUpdatesUserRoles() throws SQLException {
         statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Sales', 'Development'))");
         statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Sales'))");
-        ScriptsSqlManager.createExaRlsUsersProjection(statement, EXA_RLS_USERS_PROJECTION, "('RLS_USR_1', 1)");
+        sqlTestSetupManager.createExaRlsUsersProjection(EXA_RLS_USERS_PROJECTION, "('RLS_USR_1', 1)");
         final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS_PROJECTION);
         final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS);
-        ScriptsSqlManager.dropTable(statement, EXA_RLS_USERS_PROJECTION);
-        ScriptsSqlManager.dropTable(statement, EXA_RLS_USERS);
         assertThat(actualResultSet, matchesResultSet(expectedResultSet));
+        sqlTestSetupManager.cleanUpTables(EXA_RLS_USERS_PROJECTION, EXA_RLS_USERS);
     }
 
-    @Test
-    void testAssignUnknownRoleToUserThrowsRoleNotFoundException() {
+    @ParameterizedTest
+    @MethodSource("provideValuesForTestAssignUnknownRoleToUserThrowsRoleNotFoundException")
+    void testAssignUnknownRoleToUserThrowsRoleNotFoundException(final String allRoles, final String unknownRoles) {
         final SQLException thrown = assertThrows(SQLException.class,
-                () -> statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Cats'))"));
-        assertThat(thrown.getMessage(), containsString("Role name not found"));
+                () -> statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY(" + allRoles + "))"));
+        assertThat(thrown.getMessage(), containsString("The following roles were not found: " + unknownRoles));
+    }
+
+    private static Stream<Arguments> provideValuesForTestAssignUnknownRoleToUserThrowsRoleNotFoundException() {
+        return Stream.of(Arguments.of("'Cats'", "Cats"), //
+                Arguments.of("'Cats', 'Sales'", "Cats"), //
+                Arguments.of("'Sales', 'Cats', 'Dogs'", "Dogs, Cats"));
     }
 }

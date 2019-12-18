@@ -93,8 +93,10 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
 
     private boolean doesValueMatch(final ResultSet actualRow, final int column, final int resultSetTypeExpected)
             throws SQLException {
+        System.out.println(resultSetTypeExpected);
         switch (resultSetTypeExpected) {
         case Types.BIGINT:
+        case Types.SMALLINT:
         case Types.DECIMAL:
             if (!doesIntMatch(actualRow, column)) {
                 return false;

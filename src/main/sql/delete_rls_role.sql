@@ -7,7 +7,7 @@ if _role_id==nil then error('No such role_name: "'..role_name) end
 query([[DELETE FROM ::s.EXA_ROLES_MAPPING WHERE role_id = :i]],
       {s = exa.meta.script_schema, i = _role_id })
 -- Remove role from all users
-query([[UPDATE ::s.EXA_RLS_USERS SET EXA_ROLE_MASK = EXA_ROLE_MASK - POWER(2,:i-1)
+query([[UPDATE ::s.EXA_RLS_USERS SET EXA_ROLE_MASK = BIT_AND(EXA_ROLE_MASK,BIT_NOT(POWER(2,:i-1)))
         WHERE BIT_AND(EXA_ROLE_MASK, POWER(2,:i-1)) != 0]],
         {s = exa.meta.script_schema, i = _role_id })
 -- Remove role from all rows in each role-secured table
