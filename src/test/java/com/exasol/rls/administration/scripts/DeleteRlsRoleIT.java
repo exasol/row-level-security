@@ -22,6 +22,7 @@ import com.exasol.containers.ExasolContainerConstants;
 
 @Tag("integration")
 @Testcontainers
+// [itest->dsn~delete-a-role~1]
 public class DeleteRlsRoleIT {
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_ROLES_MAPPING_PROJECTION = "EXA_ROLES_MAPPING_PROJECTION";
@@ -47,6 +48,7 @@ public class DeleteRlsRoleIT {
 
     @ParameterizedTest
     @MethodSource("provideValuesForTestDeleteRlsRoleFromExaRolesMapping")
+    // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
     void testDeleteRlsRoleFromExaRolesMapping(final String roleToDelete, final String expectedTableContent)
             throws SQLException {
         sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
@@ -67,6 +69,7 @@ public class DeleteRlsRoleIT {
     }
 
     @Test
+    // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
     void testDeleteRlsRoleUnknownRole() throws SQLException {
         sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING, "('Sales', 1), ('Development', 2)");
         final SQLException thrown = assertThrows(SQLException.class,
@@ -77,6 +80,7 @@ public class DeleteRlsRoleIT {
 
     @ParameterizedTest
     @MethodSource("provideValuesForTestDeleteRlsRoleFromExaRlsUsers")
+    // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
     void testDeleteRlsRoleFromExaRlsUsers(final String roleToDelete, final String expectedTableContent)
             throws SQLException {
         sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
@@ -99,7 +103,8 @@ public class DeleteRlsRoleIT {
 
     @ParameterizedTest
     @MethodSource("provideValuesForTestDeleteRlsRoleFromPayloadTable")
-    void testDeleteRlsRoleFromUserTable(final String roleToDelete, final String expectedTableContent)
+    // [itest->dsn~delete-rls-role-removes-a-role-from-user-tables~1]
+    void testDeleteRlsRoleFromPayloadTable(final String roleToDelete, final String expectedTableContent)
             throws SQLException {
         sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
                 "('Sales', 1), ('Development', 2), ('Finance', 3),  ('Support', 4)");

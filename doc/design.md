@@ -277,25 +277,11 @@ Needs: impl, itest
 ### Get a role mask
 `dsn~get-a-role-mask~1`
 
-Administrators get role masks using `ROLE_MASK` with the following parameters:
+Administrators get role masks using `ROLES_MASK` with the following parameters:
 
 * List of role names
 
-`ROLE_MASK` returns a decimal value.
-
-#### `ROLE_MASK` checks tables
-`dsn~add-rls-roles-checks-tables~1`
-
-`ROLE_MASK` checks if all of the following criteria are met, otherwise throws an error:
-
-1. `EXA_ROLES_MAPPING` table exists
-2. `EXA_ROLES_MAPPING` contains all roles from the list of roles' names
-
-Covers:
-
-* `req~user-roles~1`
-
-Needs: impl, itest
+`ROLES_MASK` returns a decimal value.
 
 ### Assign roles to a user
 `dsn~assign-roles-to-a-user~1`
@@ -334,19 +320,6 @@ Covers:
 
 Needs: impl, itest
 
-#### `ASSIGN_ROLES_TO_USER` checks a table
-`dsn~assign-roles-to-user-checks-a-table~1`
-
-`ASSIGN_ROLES_TO_USER` checks if all of the following criteria are met, otherwise throws an error:
-
-1. `EXA_ROLES_MAPPING` contains all roles from the list.
-
-Covers:
-
-* `req~user-roles~1`
-
-Needs: impl, itest
-
 ### Delete a role
 `dsn~delete-a-role~1`
 
@@ -371,8 +344,8 @@ Covers:
 
 Needs: impl, itest
 
-#### `DELETE_RLS_ROLE` removes a role from user tables
-`dsn~delete-rls-role-removes-a-role-from-user-tables~1`
+#### `DELETE_RLS_ROLE` removes a role from roles-secured tables
+`dsn~delete-rls-role-removes-a-role-from-roles-secured-tables~1`
 
 `DELETE_RLS_ROLE` removes a deleted role from all tables that contain `EXA_ROW_ROLES` column.
 

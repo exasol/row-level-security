@@ -22,6 +22,7 @@ import com.exasol.containers.ExasolContainerConstants;
 
 @Tag("integration")
 @Testcontainers
+// [itest->dsn~get-a-role-mask~1]
 public class RolesMaskIT {
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     @Container
@@ -34,7 +35,7 @@ public class RolesMaskIT {
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
         statement = connection.createStatement();
-        SqlTestSetupManager sqlTestSetupManager = new SqlTestSetupManager(statement);
+        final SqlTestSetupManager sqlTestSetupManager = new SqlTestSetupManager(statement);
         sqlTestSetupManager.createTestSchema(RLS_SCHEMA_NAME);
         sqlTestSetupManager.createScript(PATH_TO_ROLES_MASK);
         sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
@@ -43,6 +44,7 @@ public class RolesMaskIT {
 
     @ParameterizedTest
     @MethodSource("provideValuesForTestRolesMask")
+    // [itest->dsn~get-a-role-mask~1]
     void testRolesMask(final String roles, final int maskValue) throws SQLException {
         final ResultSet actualResultSet = statement
                 .executeQuery("SELECT ROLES_MASK(ROLE_ID) from EXA_ROLES_MAPPING WHERE ROLE_NAME IN (" + roles + ")");
