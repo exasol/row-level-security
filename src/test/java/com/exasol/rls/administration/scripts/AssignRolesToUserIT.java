@@ -67,7 +67,7 @@ public class AssignRolesToUserIT {
     }
 
     @Test
-    void testAssignRolesToUserUpdateUSerRole() throws SQLException {
+    void testAssignRolesToUserUpdatesUserRoles() throws SQLException {
         statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Sales', 'Development'))");
         statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Sales'))");
         ScriptsSqlManager.createExaRlsUsersProjection(statement, EXA_RLS_USERS_PROJECTION, "('RLS_USR_1', 1)");
@@ -79,7 +79,7 @@ public class AssignRolesToUserIT {
     }
 
     @Test
-    void testAssignRolesToUserRoleNotFoundException() {
+    void testAssignUnknownRoleToUserThrowsRoleNotFoundException() {
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Cats'))"));
         assertThat(thrown.getMessage(), containsString("Role name not found"));

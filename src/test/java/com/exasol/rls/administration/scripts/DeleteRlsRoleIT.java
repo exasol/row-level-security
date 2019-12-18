@@ -104,7 +104,7 @@ public class DeleteRlsRoleIT {
     }
 
     @ParameterizedTest
-    @MethodSource("provideValuesForTestDeleteRlsRoleFromUserTable")
+    @MethodSource("provideValuesForTestDeleteRlsRoleFromPayloadTable")
     void testDeleteRlsRoleFromUserTable(final String roleToDelete, final String expectedTableContent)
             throws SQLException {
         ScriptsSqlManager.createExaRolesMappingProjection(statement, EXA_ROLES_MAPPING,

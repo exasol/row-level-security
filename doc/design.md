@@ -279,7 +279,7 @@ Needs: impl, itest
 
 Administrators get role masks using `ROLE_MASK` with the following parameters:
 
-* List of roles' names
+* List of role names
 
 `ROLE_MASK` returns a decimal value.
 
@@ -303,7 +303,7 @@ Needs: impl, itest
 Administrators assign roles to users using `ASSIGN_ROLES_TO_USER` with the following parameters:
 
 * Name of the user
-* List of roles' names
+* List of role names
 
 Covers:
 
@@ -314,7 +314,7 @@ Needs: impl, itest
 #### `ASSIGN_ROLES_TO_USER` creates a table
 `dsn~assign-roles-to-user-creates-a-table~1`
 
-`ASSIGN_ROLES_TO_USER` creates a table `EXA_RLS_USERS (EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK INT` if it does not exist.
+`ASSIGN_ROLES_TO_USER` creates a table `EXA_RLS_USERS (EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK DECIMAL(18,0)` if it does not exist.
 
 Covers:
 
