@@ -18,9 +18,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 
+// [itest->dsn~add-a-new-role~1]
 @Tag("integration")
 @Testcontainers
-// [itest->dsn~add-a-new-role~1]
 public class AddRlsRoleIT {
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_ROLES_MAPPING_PROJECTION = "EXA_ROLES_MAPPING_PROJECTION";
@@ -41,8 +41,8 @@ public class AddRlsRoleIT {
         sqlTestSetupManager.createScript(PATH_TO_ADD_RLS_ROLE);
     }
 
-    @Test
     // [itest->dsn~add-rls-role-creates-a-table~1]
+    @Test
     void testAddRlsRole() throws SQLException {
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("SELECT * FROM " + EXA_ROLES_MAPPING));
@@ -58,8 +58,8 @@ public class AddRlsRoleIT {
         sqlTestSetupManager.cleanUpTables(EXA_ROLES_MAPPING, EXA_ROLES_MAPPING_PROJECTION);
     }
 
-    @Test
     // [itest->dsn~add-rls-roles-checks-parameters~1]
+    @Test
     void testAddRlsRoleExistingIdException() throws SQLException {
         statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', 1)");
         final SQLException thrown = assertThrows(SQLException.class,
@@ -68,9 +68,9 @@ public class AddRlsRoleIT {
         sqlTestSetupManager.cleanUpTables(EXA_ROLES_MAPPING);
     }
 
+    // [itest->dsn~add-rls-roles-checks-parameters~1]
     @ParameterizedTest
     @ValueSource(strings = { "SALES", "Sales", "sales" })
-    // [itest->dsn~add-rls-roles-checks-parameters~1]
     void testAddRlsRoleExistingNameException(final String role_name) throws SQLException {
         statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', 1)");
         final SQLException thrown = assertThrows(SQLException.class,
@@ -79,9 +79,9 @@ public class AddRlsRoleIT {
         sqlTestSetupManager.cleanUpTables(EXA_ROLES_MAPPING);
     }
 
+    // [itest->dsn~add-rls-roles-checks-parameters~1]
     @ParameterizedTest
     @ValueSource(ints = { -5, 0, 64, 70 })
-    // [itest->dsn~add-rls-roles-checks-parameters~1]
     void testAddRlsRoleInvalidRoleIdException(final int rlsRole) throws SQLException {
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("EXECUTE SCRIPT ADD_RLS_ROLE('Sales', " + rlsRole + ")"));

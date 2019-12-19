@@ -20,9 +20,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 
+// [itest->dsn~get-a-role-mask~1]
 @Tag("integration")
 @Testcontainers
-// [itest->dsn~get-a-role-mask~1]
 public class RolesMaskIT {
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     @Container
@@ -42,9 +42,9 @@ public class RolesMaskIT {
                 "('Sales', 1), ('Development', 2), ('Finance', 3),  ('Support', 4)");
     }
 
+    // [itest->dsn~get-a-role-mask~1]
     @ParameterizedTest
     @MethodSource("provideValuesForTestRolesMask")
-    // [itest->dsn~get-a-role-mask~1]
     void testRolesMask(final String roles, final int maskValue) throws SQLException {
         final ResultSet actualResultSet = statement
                 .executeQuery("SELECT ROLES_MASK(ROLE_ID) from EXA_ROLES_MAPPING WHERE ROLE_NAME IN (" + roles + ")");

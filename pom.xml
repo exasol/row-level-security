@@ -168,7 +168,7 @@
                 <version>3.1.1</version>
                 <configuration>
                     <descriptors>
-                        <descriptor>assembly/all-dependencies.xml</descriptor>
+                        <descriptor>src/assembly/all-dependencies.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>

@@ -20,9 +20,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 
+// [itest->dsn~assign-roles-to-a-user~1]
 @Tag("integration")
 @Testcontainers
-// [itest->dsn~assign-roles-to-a-user~1]
 public class AssignRolesToUserIT {
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_RLS_USERS = "EXA_RLS_USERS";
@@ -46,10 +46,10 @@ public class AssignRolesToUserIT {
                 "('Sales', 1), ('Development', 2), ('Finance', 3),  ('Support', 4)");
     }
 
-    @ParameterizedTest
-    @MethodSource("provideValuesForTestAssignRolesToUser")
     // [itest->dsn~assign-roles-to-user-creates-a-table~1]
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]
+    @ParameterizedTest
+    @MethodSource("provideValuesForTestAssignRolesToUser")
     void testAssignRolesToUser(final String rolesToAssign, final int maskValue) throws SQLException {
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("SELECT * FROM " + EXA_RLS_USERS));
@@ -69,8 +69,8 @@ public class AssignRolesToUserIT {
                 Arguments.of("'Sales', 'Development', 'Finance', 'Support'", 15));
     }
 
-    @Test
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]
+    @Test
     void testAssignRolesToUserUpdatesUserRoles() throws SQLException {
         statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Sales', 'Development'))");
         statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Sales'))");
@@ -81,9 +81,9 @@ public class AssignRolesToUserIT {
         sqlTestSetupManager.cleanUpTables(EXA_RLS_USERS_PROJECTION, EXA_RLS_USERS);
     }
 
+    // [itest->dsn~assign-roles-to-user-creates-a-role~1]
     @ParameterizedTest
     @MethodSource("provideValuesForTestAssignUnknownRoleToUserThrowsRoleNotFoundException")
-    // [itest->dsn~assign-roles-to-user-creates-a-role~1]
     void testAssignUnknownRoleToUserThrowsRoleNotFoundException(final String allRoles, final String unknownRoles) {
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY(" + allRoles + "))"));

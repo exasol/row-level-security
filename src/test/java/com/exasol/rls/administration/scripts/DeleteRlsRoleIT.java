@@ -20,9 +20,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 
+// [itest->dsn~delete-a-role~1]
 @Tag("integration")
 @Testcontainers
-// [itest->dsn~delete-a-role~1]
 public class DeleteRlsRoleIT {
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_ROLES_MAPPING_PROJECTION = "EXA_ROLES_MAPPING_PROJECTION";
@@ -46,9 +46,9 @@ public class DeleteRlsRoleIT {
         sqlTestSetupManager.createScript(PATH_TO_DELETE_RLS_ROLE);
     }
 
+    // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
     @ParameterizedTest
     @MethodSource("provideValuesForTestDeleteRlsRoleFromExaRolesMapping")
-    // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
     void testDeleteRlsRoleFromExaRolesMapping(final String roleToDelete, final String expectedTableContent)
             throws SQLException {
         sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
@@ -68,8 +68,8 @@ public class DeleteRlsRoleIT {
                 Arguments.of("'Support'", "('Sales', 1), ('Development', 2), ('Finance', 3)"));
     }
 
-    @Test
     // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
+    @Test
     void testDeleteRlsRoleUnknownRole() throws SQLException {
         sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING, "('Sales', 1), ('Development', 2)");
         final SQLException thrown = assertThrows(SQLException.class,
@@ -78,9 +78,9 @@ public class DeleteRlsRoleIT {
         sqlTestSetupManager.cleanUpTables(EXA_ROLES_MAPPING);
     }
 
+    // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
     @ParameterizedTest
     @MethodSource("provideValuesForTestDeleteRlsRoleFromExaRlsUsers")
-    // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
     void testDeleteRlsRoleFromExaRlsUsers(final String roleToDelete, final String expectedTableContent)
             throws SQLException {
         sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
@@ -101,9 +101,9 @@ public class DeleteRlsRoleIT {
                 Arguments.of("'Support'", "('RLS_USR_1', 7), ('RLS_USR_2', 1)"));
     }
 
+    // [itest->dsn~delete-rls-role-removes-a-role-from-user-tables~1]
     @ParameterizedTest
     @MethodSource("provideValuesForTestDeleteRlsRoleFromPayloadTable")
-    // [itest->dsn~delete-rls-role-removes-a-role-from-user-tables~1]
     void testDeleteRlsRoleFromPayloadTable(final String roleToDelete, final String expectedTableContent)
             throws SQLException {
         sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
