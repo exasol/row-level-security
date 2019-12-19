@@ -1,5 +1,5 @@
---/ [impl->dsn~add-rls-role-creates-a-table~1]
---/ [impl->dsn~add-rls-roles-checks-parameters~1]
+-- [impl->dsn~add-rls-role-creates-a-table~1]
+-- [impl->dsn~add-rls-roles-checks-parameters~1]
 --/ [impl->dsn~assign-roles-to-user-creates-a-table~1]
 CREATE OR REPLACE SCRIPT EXA_RLS_BASE AS
 query([[CREATE TABLE IF NOT EXISTS ::s.EXA_ROLES_MAPPING(ROLE_NAME VARCHAR(128), ROLE_ID DECIMAL(2,0))]],

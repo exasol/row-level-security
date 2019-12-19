@@ -11,6 +11,7 @@ public final class RowLevelSecurityDialectConstants {
     public static final String EXA_ROW_ROLES_COLUMN_NAME = "EXA_ROW_ROLES";
     public static final String EXA_ROW_TENANT_COLUMN_NAME = "EXA_ROW_TENANT";
     public static final String EXA_RLS_USERS_TABLE_NAME = "EXA_RLS_USERS";
+    public static final String EXA_ROLES_MAPPING_TABLE_NAME = "EXA_ROLES_MAPPING";
 
     private RowLevelSecurityDialectConstants() {
         // prevent instantiation

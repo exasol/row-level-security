@@ -1,4 +1,4 @@
---/ [impl->dsn~assign-roles-to-a-user~1]
+-- [impl->dsn~assign-roles-to-a-user~1]
 --/ [impl->dsn~assign-roles-to-user-creates-a-role~1]
 CREATE OR REPLACE SCRIPT ASSIGN_ROLES_TO_USER(user_name, array roles) AS
 import(exa.meta.script_schema..'.EXA_RLS_BASE', 'BASE')

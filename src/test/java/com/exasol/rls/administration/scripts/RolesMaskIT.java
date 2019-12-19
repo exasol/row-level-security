@@ -1,7 +1,7 @@
 package com.exasol.rls.administration.scripts;
 
-import static com.exasol.rls.administration.scripts.IntegrationTestsConstants.PATH_TO_ROLES_MASK;
-import static com.exasol.rls.administration.scripts.IntegrationTestsConstants.RLS_SCHEMA_NAME;
+import static com.exasol.tools.TestsConstants.PATH_TO_ROLES_MASK;
+import static com.exasol.tools.TestsConstants.RLS_SCHEMA_NAME;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.stream.Stream;
 
+import com.exasol.tools.SqlTestSetupManager;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;

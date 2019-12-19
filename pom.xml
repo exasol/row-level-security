@@ -170,6 +170,8 @@
                     <descriptors>
                         <descriptor>src/assembly/all-dependencies.xml</descriptor>
                     </descriptors>
+                    <finalName>row-level-security-dist-${product.version}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
                     <execution>
@@ -213,6 +215,31 @@
                         <goals>
                             <goal>verify</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>Administration SQL Scripts Assembler</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${basedir}/tools/assemble_sql_scripts.sh</executable>
+                            <arguments>
+                                <argument>target/administration-sql-scripts-${product.version}.sql</argument>
+                                <argument>src/main/sql/exa_rls_base.sql</argument>
+                                <argument>src/main/sql/add_rls_role.sql</argument>
+                                <argument>src/main/sql/assign_roles_to_user.sql</argument>
+                                <argument>src/main/sql/delete_rls_role.sql</argument>
+                                <argument>src/main/sql/roles_mask.sql</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

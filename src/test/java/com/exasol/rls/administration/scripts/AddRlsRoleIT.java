@@ -1,7 +1,7 @@
 package com.exasol.rls.administration.scripts;
 
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
-import static com.exasol.rls.administration.scripts.IntegrationTestsConstants.*;
+import static com.exasol.tools.TestsConstants.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.sql.*;
 
+import com.exasol.tools.SqlTestSetupManager;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

@@ -42,40 +42,56 @@ As an example we are going to create a small set of tables and contents in a sch
 
 Role-based security is a way to secure a table by assigning one or more roles to each user and specifying the roles which are allowed to see a row for each row in the table. 
 
+#### Creating administration scripts
+
+RLS provides UDF functions that make administration of RLS more user-friendly.
+
+**Important:** all the scripts must be created in the same schema with tables that are supposed to be protected with rle-base security.
+
+First create all the scripts from the file `administration-sql-scripts-<last-version>.sql`.
+
+#### Creating roles
+
+Create user roles using `ADD_RLS_ROLE(rome_name, role_id)` script. 
+
+`rome_name` is a unique role name. This parameter is **case-insensitive** that means you can't have roles `sales` and `Sales` at the same time.
+`role_id` is a unique role id. It can be in range from 1 to 63.
+
+```sql
+EXECUTE SCRIPT ADD_RLS_ROLE('Sales', 1);
+EXECUTE SCRIPT ADD_RLS_ROLE('Development', 2);
+EXECUTE SCRIPT ADD_RLS_ROLE('Finance', 3);
+```
+
+#### Getting a list of created roles
+
+```sql 
+SELECT * FROM MY_SCHEMA.EXA_ROLES_MAPPING;
+```
+
+The script for this command will be provided in a future release.
+
 #### Assigning Roles to Users
 
-Create the following table for the role assignments as shown below inside the schema you want to protect.
+Assign roles to users using `ASSIGN_ROLES_TO_USER(user_name, array roles)` script.
+
+`user_name` is a name of user created inside Exasol database.
+`roles` is an array of existing roles to assign. This parameter is **case-sensitive**.
 
 ```sql
-CREATE OR REPLACE TABLE <schema name>.EXA_RLS_USERS  
-(  
-    EXA_USER_NAME VARCHAR(200),
-    EXA_ROLE_MASK DECIMAL(20,0)  
-);
+EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Sales', 'Development'));
+EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_2', ARRAY('Development'));
 ```
 
-Since this is a system table RLS relies on, please double-check that you spelled the table and column names correctly and used the right column types.
+**Important:** if you assign roles to the same user several times, the script rewrites user roles each time using a new array. 
 
-Now assign one or more roles to each users. User that are not listed or have no roles assigned to them in this table can only see public datasets.
+#### Getting a list of users with assigned roles
 
-```sql
-INSERT INTO <schema name>.EXA_RLS_USERS VALUES ('<username>', '<bitmask as number>');
+```sql 
+SELECT * FROM MY_SCHEMA.EXA_RLS_USERS;
 ```
 
-Example:
-
-```sql
-INSERT INTO RLS_TEST_SCHEMA.EXA_RLS_USERS VALUES 
-('ALICE', NULL),
-('BOB', 1),
-('CLOE', 3),
-('DAN', 15),
-('SYS', 15);
-```
-
-The first column contains the username of the Exasol user. Make sure to spell it exactly as the original username including the correct case.
-
-The number in the second column is a bit mask representing the role a user has. This mask is 64 bits wide. The most significant bit is reserved and can therefore not be used in role mask. This means users can be assigned to a maximum of 63 different roles or combination of roles.
+The script for this command with a string list of roles output will be provided in a future release.
 
 #### Protecting a Table With Role-based RLS
 
@@ -84,7 +100,7 @@ In case you want to use Role-based security, add a column called `EXA_ROW_ROLES 
 For our example we will create very simple order item list as shown below.
 
 ```sql
-CREATE OR REPLACE TABLE SIMPLE_SALES.ORDER_ITEM 
+CREATE OR REPLACE TABLE MY_SCHEMA.ORDER_ITEM 
 (  
     ORDER_ID DECIMAL(18,0),  
     CUSTOMER VARCHAR(50),  
@@ -94,10 +110,16 @@ CREATE OR REPLACE TABLE SIMPLE_SALES.ORDER_ITEM
 );
 ```
 
-**Hint:** Later versions of RLS will provide UDF functions that make administration of RLS more user-friendly.
+Use `ROLES_MASK` UDF-Function to generate roles mask for tables or for updating the tables with the masks.
 
-Now we need some data to work on.
+An example of generating a role mask which can be later manually inserted into the `EXA_ROW_ROLES` columns:
+```sql 
+SELECT MY_SCHEMA.ROLES_MASK(ROLE_ID) from MY_SCHEMA.EXA_ROLES_MAPPING WHERE ROLE_NAME IN ('Sales', 'Development')
+```
 
+**Important:** Role names are **case-sensitive**.
+
+You can insert generated masks directly to the table:
 ```sql
 INSERT INTO SIMPLE_SALES.ORDER_ITEM VALUES
 (1, 'John Smith', 'Pen', 3, 1),
@@ -106,6 +128,26 @@ INSERT INTO SIMPLE_SALES.ORDER_ITEM VALUES
 (2, 'Jane Doe', 'Pen', 2, 2),
 (2, 'Jane Doe', 'Paper', 200, 1),
 (2, 'Jane Doe', 'Paperclip', 50, POWER(2,63));
+```
+
+An example of updating the table using `ROLES_MASK` UDF-Function:
+```sql 
+UPDATE LOCATIONS
+SET EXA_ROW_ROLES = (SELECT MY_SCHEMA.ROLES_MASK(ROLE_ID) FROM MY_SCHEMA.EXA_ROLES_MAPPING WHERE ROLE_NAME IN ('Sales', 'Development'))
+WHERE customer IN ('John Smith', 'Jane Doe');
+```
+
+#### Deleting Roles
+
+Delete roles using `DELETE_RLS_ROLE(role_name)` script. The script removes the role from all places where is was mentioned:
+1. From the list of existing roles.
+2. From users who have the role in the roles mask.
+3. From all tables which are roles-secured.
+
+`rome_name` is a unique role name. This parameter is **case-insensitive**.
+
+```sql 
+EXECUTE SCRIPT DELETE_RLS_ROLE('Sales');
 ```
 
 ### Tenant-based security
@@ -152,7 +194,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/row-level-security-0.2.0-all-dependencies.jar;
+    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-0.2.0.jar;
 /
 ;
 ```
