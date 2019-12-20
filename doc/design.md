@@ -72,8 +72,7 @@ Covers:
 
 The `RowLevelSecurityDialect` reads the following custom properties:
 
-1. `ROLE_ASSIGNMENT_TABLE`: name of the table that contains the mapping of users to the roles the have
-2. `SCHEMA_NAME`: name of the schema where tables are placed
+1. `SCHEMA_NAME`: name of the schema where tables are placed
 
 Covers:
 
@@ -231,6 +230,130 @@ Covers:
 
 Needs: impl, utest, itest
 
+## Administration Convenience Scripts
+ 
+The RLS project provides scripts which make administration of RLS more user-friendly.
+
+### Add a new role
+`dsn~add-a-new-role~1`
+
+Administrators create new roles using `ADD_RLS_ROLE` with the following parameters:
+
+* Name of the role
+* ID associated with the role (between 1 and 63)
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+#### `ADD_RLS_ROLE` creates a table
+`dsn~add-rls-role-creates-a-table~1`
+
+`ADD_RLS_ROLE` creates a table `EXA_ROLES_MAPPING (EXA_ROLE VARCHAR(128), EXA_ROLE_ID DECIMAL(2, 0)` if it does not exist.
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+#### `ADD_RLS_ROLES` checks parameters
+`dsn~add-rls-roles-checks-parameters~1`
+
+`ADD_RLS_ROLES` checks if all of the following criteria are met, otherwise throws an error:
+
+1. Role ID ranges between 1 and 63
+2. Role ID is unique in the role mapping
+3. Role name is unique independently of its case
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+### Get a role mask
+`dsn~get-a-role-mask~1`
+
+Administrators get role masks using `ROLES_MASK` with the following parameters:
+
+* List of role names
+
+`ROLES_MASK` returns a decimal value.
+
+### Assign roles to a user
+`dsn~assign-roles-to-a-user~1`
+
+Administrators assign roles to users using `ASSIGN_ROLES_TO_USER` with the following parameters:
+
+* Name of the user
+* List of role names
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+#### `ASSIGN_ROLES_TO_USER` creates a table
+`dsn~assign-roles-to-user-creates-a-table~1`
+
+`ASSIGN_ROLES_TO_USER` creates a table `EXA_RLS_USERS (EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK DECIMAL(18,0)` if it does not exist.
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+#### `ASSIGN_ROLES_TO_USER` creates a role
+`dsn~assign-roles-to-user-creates-a-role~1`
+
+`ASSIGN_ROLES_TO_USER` creates a new row with the user name and the role mask if the user name is not in the `EXA_RLS_USERS` table yet. 
+Otherwise it updates `EXA_ROLE_MASK` value. 
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+### Delete a role
+`dsn~delete-a-role~1`
+
+Administrators delete existing roles using `DELETE_RLS_ROLE` with the following parameters:
+
+* Name of the role
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+#### `DELETE_RLS_ROLE` removes a role from administrative tables
+`dsn~delete-rls-role-removes-a-role-from-administrative-tables~1`
+
+`DELETE_RLS_ROLE` removes a role from `EXA_ROLES_MAPPING` and `EXA_RLS_USERS` tables if the role exists.
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+#### `DELETE_RLS_ROLE` removes a role from roles-secured tables
+`dsn~delete-rls-role-removes-a-role-from-roles-secured-tables~1`
+
+`DELETE_RLS_ROLE` removes a deleted role from all tables that contain `EXA_ROW_ROLES` column.
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
 
 # Quality Scenarios
 

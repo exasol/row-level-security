@@ -95,6 +95,8 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
             throws SQLException {
         switch (resultSetTypeExpected) {
         case Types.BIGINT:
+        case Types.SMALLINT:
+        case Types.DECIMAL:
             if (!doesIntMatch(actualRow, column)) {
                 return false;
             }

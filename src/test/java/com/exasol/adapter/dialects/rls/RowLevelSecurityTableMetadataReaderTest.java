@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.adapter.AdapterProperties;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class RowLevelSecurityTableMetadataReaderTest {
     private RowLevelSecurityTableMetadataReader metadataReader;
@@ -22,8 +24,9 @@ class RowLevelSecurityTableMetadataReaderTest {
         assertThat(this.metadataReader.isTableIncludedByMapping("MY_TABLE"), equalTo(true));
     }
 
-    @Test
-    void testIsTableIncludedByMappingFalse() {
-        assertThat(this.metadataReader.isTableIncludedByMapping("EXA_RLS_USERS"), equalTo(false));
+    @ParameterizedTest
+    @ValueSource(strings = { "EXA_RLS_USERS", "EXA_ROLES_MAPPING" })
+    void testIsTableIncludedByMappingFalse(String tableName) {
+        assertThat(this.metadataReader.isTableIncludedByMapping(tableName), equalTo(false));
     }
 }

@@ -1,8 +1,7 @@
 #!/bin/bash
-readonly vs_jar_prefix='row-level-security'
+readonly vs_jar_prefix='row-level-security-dist'
 readonly jar_suffix='jar'
-readonly variant='-all-dependencies'
-readonly vs_jar_pattern="$vs_jar_prefix-.*$variant\.$jar_suffix"
+readonly vs_jar_pattern="$vs_jar_prefix-.*\.$jar_suffix"
 readonly root_dir='row-level-security'
 readonly master_pom='pom.xml'
 readonly file_find_regex='.*\.(md|yaml|sql|java)'
@@ -95,7 +94,7 @@ update_documentation() {
 log "Checking all files matching \"$file_find_regex\""
     find -type f -regextype posix-extended -regex "$file_find_regex" \
       -exec echo "Processing \"{}\"" \; \
-      -exec sed -i s/"$vs_jar_pattern"/"$vs_jar_prefix-$version$variant.$jar_suffix"/g {} \;
+      -exec sed -i s/"$vs_jar_pattern"/"$vs_jar_prefix-$version.$jar_suffix"/g {} \;
 }
 
 main "$@"

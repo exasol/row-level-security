@@ -2,7 +2,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>row-level-security</groupId>
+    <groupId>com.exasol</groupId>
     <artifactId>row-level-security</artifactId>
     <version>${product.version}</version>
     <name>Exasol Row Level Security</name>
@@ -127,8 +127,15 @@
                 <version>0.8.5</version>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>prepare-agend-integration</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
                         </goals>
                     </execution>
                     <execution>
@@ -136,6 +143,13 @@
                         <phase>test</phase>
                         <goals>
                             <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report-integration</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report-integration</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -154,8 +168,10 @@
                 <version>3.1.1</version>
                 <configuration>
                     <descriptors>
-                        <descriptor>src/main/assembly/all-dependencies.xml</descriptor>
+                        <descriptor>src/assembly/all-dependencies.xml</descriptor>
                     </descriptors>
+                    <finalName>row-level-security-dist-${product.version}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
                     <execution>
@@ -199,6 +215,31 @@
                         <goals>
                             <goal>verify</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>Administration SQL Scripts Assembler</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${basedir}/tools/assemble_sql_scripts.sh</executable>
+                            <arguments>
+                                <argument>target/administration-sql-scripts-${product.version}.sql</argument>
+                                <argument>src/main/sql/exa_rls_base.sql</argument>
+                                <argument>src/main/sql/add_rls_role.sql</argument>
+                                <argument>src/main/sql/assign_roles_to_user.sql</argument>
+                                <argument>src/main/sql/delete_rls_role.sql</argument>
+                                <argument>src/main/sql/roles_mask.sql</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
