@@ -42,15 +42,15 @@ As an example we are going to create a small set of tables and contents in a sch
 
 Role-based security is a way to secure a table by assigning one or more roles to each user and specifying the roles which are allowed to see a row for each row in the table. 
 
-#### Creating administration scripts
+#### Installing the Administration Scripts
 
 RLS provides UDF functions that make administration of RLS more user-friendly.
 
-**Important:** all the scripts must be created in the same schema with tables that are supposed to be protected with rle-base security.
+**Important:** all the scripts must be created in the same schema as the tables that you plan to protect with row-level-security.
 
-First create all the scripts from the file `administration-sql-scripts-<last-version>.sql`.
+To install the administration scripts, run the SQL batch file `administration-sql-scripts-<last-version>.sql`.
 
-#### Creating roles
+#### Creating Roles
 
 Create user roles using `ADD_RLS_ROLE(rome_name, role_id)` script. 
 
@@ -63,7 +63,7 @@ EXECUTE SCRIPT ADD_RLS_ROLE('Development', 2);
 EXECUTE SCRIPT ADD_RLS_ROLE('Finance', 3);
 ```
 
-#### Getting a list of created roles
+#### Getting a List of Created Roles
 
 ```sql 
 SELECT * FROM MY_SCHEMA.EXA_ROLES_MAPPING;
@@ -83,15 +83,15 @@ EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Sales', 'Development'));
 EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_2', ARRAY('Development'));
 ```
 
-**Important:** if you assign roles to the same user several times, the script rewrites user roles each time using a new array. 
+**Important:** if you assign roles to the same user several times, the script rewrites user roles each time using a new array. That means that at any time a user has the exact set of roles stated in the _last_ assignment command.
 
-#### Getting a list of users with assigned roles
+#### Getting a List of Users With Assigned Roles
 
 ```sql 
 SELECT * FROM MY_SCHEMA.EXA_RLS_USERS;
 ```
 
-The script for this command with a string list of roles output will be provided in a future release.
+This script will be added in an upcoming release. 
 
 #### Protecting a Table With Role-based RLS
 
