@@ -52,9 +52,9 @@ To install the administration scripts, run the SQL batch file `administration-sq
 
 #### Creating Roles
 
-Create user roles using `ADD_RLS_ROLE(rome_name, role_id)` script. 
+Create user roles using `ADD_RLS_ROLE(role_name, role_id)` script. 
 
-`rome_name` is a unique role name. The check for an existing role is **case-insensitive** that means you can't have roles `sales` and `Sales` at the same time.
+`role_name` is a unique role name. The check for an existing role is **case-insensitive** that means you can't have roles `sales` and `Sales` at the same time.
 `role_id` is a unique role id. It can be in range from 1 to 63.
 
 Examples:
@@ -149,13 +149,13 @@ WHERE customer IN ('John Smith', 'Jane Doe');
 
 #### Deleting Roles
 
-Delete roles using `DELETE_RLS_ROLE(role_name)` script. The script removes the role from all places where is was mentioned:
+Delete roles using `DELETE_RLS_ROLE(role_name)` script. The script removes the role from all places where it is mentioned:
 
 1. From the list of existing roles.
 2. From users who have the role in the roles mask.
 3. From all tables which are roles-secured.
 
-`rome_name` is a unique role name. This parameter is **case-insensitive**.
+`role_name` is a unique role name. This parameter is **case-insensitive**.
 
 Example:
 
