@@ -15,6 +15,7 @@ import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -48,11 +49,10 @@ class RowLevelSecurityDialectIT {
     private static SqlTestSetupManager sqlTestSetupManager;
 
     @BeforeAll
-    static void beforeAll() throws SQLException, BucketAccessException, InterruptedException {
+    static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
         final Bucket bucket = container.getDefaultBucket();
         final Path pathToRls = Path.of("target/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
         bucket.uploadFile(pathToRls, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
-        TimeUnit.SECONDS.sleep(20);
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
         statement = connection.createStatement();
@@ -181,7 +181,6 @@ class RowLevelSecurityDialectIT {
                 + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/bfsdefault/default/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";\n" //
                 + "/");
-        TimeUnit.SECONDS.sleep(20); // FIXME: need to be fixed in the container
     }
 
     private static void createVirtualSchema(final String virtualSchemaName, final Optional<String> additionalParameters)
