@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
@@ -22,6 +21,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -34,6 +36,7 @@ import com.exasol.tools.SqlTestSetupManager;
 @Tag("integration")
 @Testcontainers
 class RowLevelSecurityDialectIT {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RowLevelSecurityDialectIT.class);
     private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-dist-0.2.0.jar";
     private static final String VIRTUAL_SCHEMA_RLS_JDBC_NAME = "VIRTUAL_SCHEMA_RLS_JDBC";
     private static final String VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME = "VIRTUAL_SCHEMA_RLS_JDBC_LOCAL";
@@ -41,7 +44,8 @@ class RowLevelSecurityDialectIT {
     private static final String VIRTUAL_SCHEMA_RLS_EXA_LOCAL_NAME = "VIRTUAL_SCHEMA_RLS_EXA_LOCAL";
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
+            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
+                    .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     public static final String RLS_SALES_UNPROTECTED = "RLS_SALES_UNPROTECTED";
     public static final String RLS_SALES_TENANTS = "RLS_SALES_TENANTS";
     public static final String RLS_SALES_ROLES = "RLS_SALES_ROLES";
@@ -65,11 +69,15 @@ class RowLevelSecurityDialectIT {
         createConnection();
         createAdapterScript();
         createVirtualSchema(VIRTUAL_SCHEMA_RLS_JDBC_NAME, Optional.empty());
+        LOGGER.info("Created " + VIRTUAL_SCHEMA_RLS_JDBC_NAME);
         createVirtualSchema(VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME, Optional.of("IS_LOCAL = 'true'"));
+        LOGGER.info("Created " + VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME);
         createVirtualSchema(VIRTUAL_SCHEMA_RLS_EXA_NAME,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
+        LOGGER.info("Created " + VIRTUAL_SCHEMA_RLS_EXA_NAME);
         createVirtualSchema(VIRTUAL_SCHEMA_RLS_EXA_LOCAL_NAME,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888' IS_LOCAL = 'true'"));
+        LOGGER.info("Created " + VIRTUAL_SCHEMA_RLS_EXA_LOCAL_NAME);
         createUsers(List.of("RLS_USR_1", "RLS_USR_2", "RLS_USR_3", "RLS_USR_4"));
     }
 
