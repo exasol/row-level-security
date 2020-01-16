@@ -18,7 +18,7 @@
         <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
         <vscjava.version>8.0.0</vscjava.version>
         <vscjdbc.version>2.0.0</vscjdbc.version>
-        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco.xml,target/site/jacoco-it/jacoco.xml
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
     <repositories>

@@ -1,7 +1,9 @@
 language: java
+
 matrix:
   include:
     - jdk: openjdk11
+
 addons:
   sonarcloud:
     organization: exasol
