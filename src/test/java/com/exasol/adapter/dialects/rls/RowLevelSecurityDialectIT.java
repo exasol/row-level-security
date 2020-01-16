@@ -69,15 +69,11 @@ class RowLevelSecurityDialectIT {
         createConnection();
         createAdapterScript();
         createVirtualSchema(VIRTUAL_SCHEMA_RLS_JDBC_NAME, Optional.empty());
-        LOGGER.info("Created " + VIRTUAL_SCHEMA_RLS_JDBC_NAME);
         createVirtualSchema(VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME, Optional.of("IS_LOCAL = 'true'"));
-        LOGGER.info("Created " + VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME);
         createVirtualSchema(VIRTUAL_SCHEMA_RLS_EXA_NAME,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888'"));
-        LOGGER.info("Created " + VIRTUAL_SCHEMA_RLS_EXA_NAME);
         createVirtualSchema(VIRTUAL_SCHEMA_RLS_EXA_LOCAL_NAME,
                 Optional.of("IMPORT_FROM_EXA = 'true' EXA_CONNECTION_STRING = 'localhost:8888' IS_LOCAL = 'true'"));
-        LOGGER.info("Created " + VIRTUAL_SCHEMA_RLS_EXA_LOCAL_NAME);
         createUsers(List.of("RLS_USR_1", "RLS_USR_2", "RLS_USR_3", "RLS_USR_4"));
     }
 
