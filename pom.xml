@@ -15,9 +15,11 @@
         <junit.version>5.4.2</junit.version>
         <junit.platform.version>1.4.2</junit.platform.version>
         <maven.surefire.version>2.22.1</maven.surefire.version>
-        <surefire.and.failsafe.plugin.version>2.22.1</surefire.and.failsafe.plugin.version>
+        <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
         <vscjava.version>8.0.0</vscjava.version>
         <vscjdbc.version>2.0.0</vscjdbc.version>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco.xml,target/site/jacoco-it/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
     <repositories>
         <repository>
@@ -77,6 +79,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.exasol</groupId>
+            <artifactId>hamcrest-resultset-matcher</artifactId>
+            <version>0.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
@@ -133,7 +141,7 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>prepare-agend-integration</id>
+                        <id>prepare-agent-integration</id>
                         <goals>
                             <goal>prepare-agent-integration</goal>
                         </goals>
@@ -188,31 +196,14 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${surefire.and.failsafe.plugin.version}</version>
                 <configuration>
-                    <systemProperties>
-                        <property>
-                            <name>java.util.logging.config.file</name>
-                            <value>src/test/resources/logging.properties</value>
-                        </property>
-                    </systemProperties>
-                    <includes>
-                        <include>**/*IT.java</include>
-                    </includes>
+                    <!-- Set the highest log level for coverage testing, so that we have a chance to reach branches
+                      in the logging lambdas too. -->
+                    <argLine>-Djava.util.logging.config.file=src/test/resources/logging.properties ${argLine}</argLine>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>failsafe-integration-tests</id>
-                        <phase>integration-test</phase>
                         <goals>
                             <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                    <!-- verify phase verifies the results. Must be added so that failing integration tests are not
-                        ignored. -->
-                    <execution>
-                        <id>verify</id>
-                        <phase>verify</phase>
-                        <goals>
                             <goal>verify</goal>
                         </goals>
                     </execution>

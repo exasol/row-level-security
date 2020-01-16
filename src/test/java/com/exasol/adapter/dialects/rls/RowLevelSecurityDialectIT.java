@@ -184,7 +184,7 @@ class RowLevelSecurityDialectIT {
                 + "IDENTIFIED BY '" + container.getPassword() + "'");
     }
 
-    private static void createAdapterScript() throws SQLException, InterruptedException {
+    private static void createAdapterScript() throws SQLException {
         statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT " + RLS_SCHEMA_NAME + ".ADAPTER_SCRIPT_EXASOL_RLS AS " //
                 + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/bfsdefault/default/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";\n" //
