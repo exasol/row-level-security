@@ -14,13 +14,16 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -33,14 +36,16 @@ import com.exasol.tools.SqlTestSetupManager;
 @Tag("integration")
 @Testcontainers
 class RowLevelSecurityDialectIT {
-    private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-dist-0.2.0.jar";
+    private static final Logger LOGGER = LoggerFactory.getLogger(RowLevelSecurityDialectIT.class);
+    private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-dist-0.2.1.jar";
     private static final String VIRTUAL_SCHEMA_RLS_JDBC_NAME = "VIRTUAL_SCHEMA_RLS_JDBC";
     private static final String VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME = "VIRTUAL_SCHEMA_RLS_JDBC_LOCAL";
     private static final String VIRTUAL_SCHEMA_RLS_EXA_NAME = "VIRTUAL_SCHEMA_RLS_EXA";
     private static final String VIRTUAL_SCHEMA_RLS_EXA_LOCAL_NAME = "VIRTUAL_SCHEMA_RLS_EXA_LOCAL";
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
+            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
+                    .withLogConsumer(new Slf4jLogConsumer(LOGGER));
     public static final String RLS_SALES_UNPROTECTED = "RLS_SALES_UNPROTECTED";
     public static final String RLS_SALES_TENANTS = "RLS_SALES_TENANTS";
     public static final String RLS_SALES_ROLES = "RLS_SALES_ROLES";
@@ -48,11 +53,10 @@ class RowLevelSecurityDialectIT {
     private static SqlTestSetupManager sqlTestSetupManager;
 
     @BeforeAll
-    static void beforeAll() throws SQLException, BucketAccessException, InterruptedException {
+    static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
         final Bucket bucket = container.getDefaultBucket();
         final Path pathToRls = Path.of("target/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
         bucket.uploadFile(pathToRls, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
-        TimeUnit.SECONDS.sleep(20);
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
         statement = connection.createStatement();
@@ -176,12 +180,11 @@ class RowLevelSecurityDialectIT {
                 + "IDENTIFIED BY '" + container.getPassword() + "'");
     }
 
-    private static void createAdapterScript() throws SQLException, InterruptedException {
+    private static void createAdapterScript() throws SQLException {
         statement.execute("CREATE OR REPLACE JAVA ADAPTER SCRIPT " + RLS_SCHEMA_NAME + ".ADAPTER_SCRIPT_EXASOL_RLS AS " //
                 + "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/bfsdefault/default/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";\n" //
                 + "/");
-        TimeUnit.SECONDS.sleep(20); // FIXME: need to be fixed in the container
     }
 
     private static void createVirtualSchema(final String virtualSchemaName, final Optional<String> additionalParameters)
