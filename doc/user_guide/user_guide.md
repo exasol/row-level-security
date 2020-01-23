@@ -329,7 +329,7 @@ That means whenever you are protecting data on the same instance or cluster, you
 
 #### Data Source is an Exasol Instance or Cluster Only Reachable via JDBC
 
-Why this connection type works, it is also the slowest option and exists mainly to support integration tests on the ExaLoader. We recommend that you use `IMPORT FROM EXA` instead.
+While this connection type works, it is also the slowest option and exists mainly to support integration tests on the ExaLoader. We recommend that you use `IMPORT FROM EXA` instead.
 
 ## Limitations
 
