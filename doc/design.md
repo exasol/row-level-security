@@ -65,6 +65,16 @@ Covers:
 
 * `req~user-roles~1`
 
+
+## `TableProtectionStatus`
+
+The `TableProtectionStatus` provides information about which tables are protected by which RLS variant.
+
+Covers:
+
+* `req~tables-with-row-restrictions~1`
+* `req~tables-with-tenants-restrictions~1`
+
 # Runtime
 
 ## `RowLevelSecurityDialect` Reads Custom Properties
@@ -153,6 +163,22 @@ Covers:
 * `req~rows-users-are-allowed-to-read~1`
 
 Needs: impl, utest, itest
+
+## `TableProtectionStatus` Cache
+`dsn~table-protection-status-cache`
+
+The `TableProectionStatus` holds a cache of protected tables with the following attributes
+
+1. Table identifier
+1. Protection type: role / tenant / both
+
+Covers:
+
+* `qr~rls-protected-query-execution-time~1`
+* `req~tables-with-row-restrictions~1`
+* `req~tables-with-tenants-restrictions~1`
+
+Needs: impl, itest
 
 # Cross-cutting Concerns
 
