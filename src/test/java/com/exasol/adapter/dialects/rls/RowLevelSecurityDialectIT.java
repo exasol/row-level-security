@@ -37,7 +37,7 @@ import com.exasol.tools.SqlTestSetupManager;
 @Testcontainers
 class RowLevelSecurityDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(RowLevelSecurityDialectIT.class);
-    private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-dist-0.2.1.jar";
+    private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-dist-0.2.2.jar";
     private static final String VIRTUAL_SCHEMA_RLS_JDBC_NAME = "VIRTUAL_SCHEMA_RLS_JDBC";
     private static final String VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME = "VIRTUAL_SCHEMA_RLS_JDBC_LOCAL";
     private static final String VIRTUAL_SCHEMA_RLS_EXA_NAME = "VIRTUAL_SCHEMA_RLS_EXA";
