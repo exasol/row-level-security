@@ -1,7 +1,8 @@
 package com.exasol.adapter.dialects.rls;
 
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.*;
+
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -9,34 +10,36 @@ import java.util.logging.Logger;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlGenerationHelper;
-import com.exasol.adapter.dialects.exasol.ExasolQueryRewriter;
+import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
 
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.*;
-
 /**
  * RLS-specific query rewriter.
  */
-public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
+public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(RowLevelSecurityQueryRewriter.class.getName());
     private final TableProtectionStatus tableProtectionStatus;
+    private final QueryRewriter delegate;
+    private final ConnectionFactory connectionFactory;
 
     /**
      * Create a new instance of a {@link RowLevelSecurityQueryRewriter}.
      *
      * @param dialect               dialect
      * @param remoteMetadataReader  remote metadata reader
-     * @param connection            JDBC connection to remote data source
+     * @param connectionFactory     factory for JDBC connection to remote data source
      * @param tableProtectionStatus table protection information
+     * @param delegate              rewriter handling the dialect specific parts
      */
     public RowLevelSecurityQueryRewriter(final SqlDialect dialect, final RemoteMetadataReader remoteMetadataReader,
-            final Connection connection, final TableProtectionStatus tableProtectionStatus) {
-        super(dialect, remoteMetadataReader, connection);
+            final ConnectionFactory connectionFactory, final TableProtectionStatus tableProtectionStatus,
+            final QueryRewriter delegate) {
+        this.connectionFactory = connectionFactory;
         this.tableProtectionStatus = tableProtectionStatus;
+        this.delegate = delegate;
     }
 
     @Override
@@ -57,18 +60,15 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
         final UserInformation userInformation = new UserInformation(exaMetadata.getCurrentUser(), schemaName,
                 EXA_RLS_USERS_TABLE_NAME);
         final String tableName = ((SqlTable) select.getFromClause()).getName();
-        final String catalogName = properties.getCatalogName();
-        final boolean protectedWithExaRowRoles = this.tableProtectionStatus.isTableProtectedWithExaRowRoles(catalogName,
-                schemaName, tableName);
-        final boolean protectedWithExaRowTenants = this.tableProtectionStatus
-                .isTableProtectedWithRowTenants(catalogName, schemaName, tableName);
+        final boolean protectedWithExaRowRoles = this.tableProtectionStatus.isTableRoleProtected(tableName);
+        final boolean protectedWithExaRowTenants = this.tableProtectionStatus.isTableTenantProtected(tableName);
         logTableProtectionInfo(protectedWithExaRowRoles, protectedWithExaRowTenants);
         if (protectedWithExaRowRoles || protectedWithExaRowTenants) {
             final SqlStatementSelect protectedSelectStatement = getProtectedSqlStatementSelect(select, userInformation,
                     protectedWithExaRowRoles, protectedWithExaRowTenants);
-            return super.rewrite(protectedSelectStatement, exaMetadata, properties);
+            return this.delegate.rewrite(protectedSelectStatement, exaMetadata, properties);
         } else {
-            return super.rewrite(statement, exaMetadata, properties);
+            return this.delegate.rewrite(statement, exaMetadata, properties);
         }
     }
 
@@ -87,7 +87,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
 
     private SqlStatementSelect getProtectedSqlStatementSelect(final SqlStatementSelect select,
             final UserInformation userInformation, final boolean protectedWithExaRowRoles,
-            final boolean protectedWithExaRowTenants) {
+            final boolean protectedWithExaRowTenants) throws SQLException {
         final SqlSelectList sqlSelectList = getSqlSelectList(select);
         final SqlStatementSelect.Builder rlsStatementBuilder = copyOriginalClauses(select, sqlSelectList);
         final SqlNode whereClause = createWhereClause(select, userInformation, protectedWithExaRowRoles,
@@ -143,7 +143,7 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
     }
 
     private SqlNode createWhereClause(final SqlStatementSelect select, final UserInformation userInformation,
-            final boolean protectedWithExaRowRoles, final boolean protectedWithExaRowTenants) {
+            final boolean protectedWithExaRowRoles, final boolean protectedWithExaRowTenants) throws SQLException {
         final Optional<SqlNode> whereClauseForRoles = setWhereClauseForRoles(protectedWithExaRowRoles, userInformation);
         final Optional<SqlNode> whereClauseForTenants = setWhereClauseForTenants(protectedWithExaRowTenants,
                 userInformation);
@@ -179,12 +179,14 @@ public class RowLevelSecurityQueryRewriter extends ExasolQueryRewriter {
     }
 
     private Optional<SqlNode> setWhereClauseForRoles(final boolean protectedWithExaRowRoles,
-            final UserInformation userInformation) {
+            final UserInformation userInformation) throws SQLException {
         if (protectedWithExaRowRoles) {
-            final String exaRoleMask = userInformation.getRoleMask(this.connection);
+            String exaRoleMask;
+            exaRoleMask = userInformation.getRoleMask(this.connectionFactory.getConnection());
             final SqlPredicateNotEqual whereClauseForRoles = new SqlPredicateNotEqual(
                     createRoleCheckPredicate(exaRoleMask), new SqlLiteralExactnumeric(BigDecimal.valueOf(0)));
             return Optional.of(whereClauseForRoles);
+
         } else {
             return Optional.empty();
         }

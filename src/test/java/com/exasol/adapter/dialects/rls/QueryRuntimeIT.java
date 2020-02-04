@@ -8,8 +8,7 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
@@ -22,9 +21,10 @@ import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 
+@Tag("integration")
 @Testcontainers
 class QueryRuntimeIT {
-    private static final String ADAPTER_FILENAME = "row-level-security-dist-0.2.2.jar";
+    private static final String ADAPTER_FILENAME = "row-level-security-dist-1.0.0.jar";
     private static final Logger LOGGER = LoggerFactory.getLogger(RowLevelSecurityDialectIT.class);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(

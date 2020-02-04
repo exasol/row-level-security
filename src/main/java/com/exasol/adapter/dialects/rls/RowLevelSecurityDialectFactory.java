@@ -1,10 +1,9 @@
 package com.exasol.adapter.dialects.rls;
 
-import java.sql.Connection;
-
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.logging.VersionCollector;
 
 /**
@@ -24,7 +23,7 @@ public class RowLevelSecurityDialectFactory implements SqlDialectFactory {
     }
 
     @Override
-    public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
-        return new RowLevelSecurityDialect(connection, properties);
+    public SqlDialect createSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        return new RowLevelSecurityDialect(connectionFactory, properties);
     }
 }

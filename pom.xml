@@ -8,7 +8,7 @@
     <name>Exasol Row Level Security</name>
     <description>This projects provides a plug-in to the Exasol database that adds per-row access control.</description>
     <properties>
-        <product.version>0.2.2</product.version>
+        <product.version>1.0.0</product.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
@@ -17,7 +17,7 @@
         <maven.surefire.version>2.22.1</maven.surefire.version>
         <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
         <vscjava.version>8.0.0</vscjava.version>
-        <vscjdbc.version>2.0.0</vscjdbc.version>
+        <vscjdbc.version>3.0.0</vscjdbc.version>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
@@ -169,18 +169,6 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                    </archive>
                 </configuration>
             </plugin>
             <plugin>

@@ -11,6 +11,14 @@
         <listEntry value="org.eclipse.eclemma.ui.launchGroup.coverage"/>
         <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
     </listAttribute>
+    <listAttribute key="org.eclipse.eclemma.core.SCOPE_IDS">
+        <listEntry value="=row-level-security/src\/main\/resources"/>
+        <listEntry value="=row-level-security/src\/main\/java"/>
+        <listEntry value="=virtual-schema-common-jdbc/src\/main\/resources"/>
+        <listEntry value="=virtual-schema-common-jdbc/src\/test\/java"/>
+        <listEntry value="=virtual-schema-common-jdbc/src\/main\/java"/>
+        <listEntry value="=virtual-schema-common-jdbc/src\/test\/resources"/>
+    </listAttribute>
     <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value="=row-level-security"/>
     <stringAttribute key="org.eclipse.jdt.junit.EXCLUDE_TAGS" value="integration"/>
     <booleanAttribute key="org.eclipse.jdt.junit.HAS_EXCLUDE_TAGS" value="true"/>

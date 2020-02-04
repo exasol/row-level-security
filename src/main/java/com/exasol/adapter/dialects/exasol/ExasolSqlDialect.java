@@ -6,14 +6,14 @@ import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_CONNECT
 import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_IMPORT_PROPERTY;
 import static com.exasol.adapter.sql.ScalarFunction.*;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
 import com.exasol.adapter.dialects.*;
-import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.*;
 
 /**
  * Exasol SQL dialect.
@@ -30,11 +30,11 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     /**
      * Create a new instance of the {@link ExasolSqlDialect}.
      *
-     * @param connection SQL connection
-     * @param properties adapter properties
+     * @param connectionFactory factory for the JDBC connection to the remote data source
+     * @param properties        adapter properties
      */
-    public ExasolSqlDialect(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public ExasolSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        super(connectionFactory, properties);
         this.omitParenthesesMap.add(SYSDATE);
         this.omitParenthesesMap.add(SYSTIMESTAMP);
         this.omitParenthesesMap.add(CURRENT_SCHEMA);
@@ -64,12 +64,41 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
-        return new ExasolMetadataReader(this.connection, this.properties);
+        try {
+            return new ExasolMetadataReader(this.connectionFactory.getConnection(), this.properties);
+        } catch (final SQLException exception) {
+            throw new RemoteMetadataReaderException("Unable to create Exasol remote metadata reader.", exception);
+        }
     }
 
+    /**
+     * Create a query rewriter.
+     * <p>
+     * Virtual Schema for Exasol supports the following import variants which are represented by dedicated query
+     * re-writers:
+     * <dl>
+     * <dt>local</dt>
+     * <dd>Create a {@code SELECT} statement that is directly executed on the local Exasol database.
+     * <dt>{@code IMPORT FROM EXA}</dt>
+     * <dd>Create dedicated import statement for a remote Exasol database that is more efficient than a regular JDBC
+     * import.</dd>
+     * <dt>JDBC import</dt>
+     * <dd>Create a regular JDBC import</dd>
+     * </dl>
+     */
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new ExasolQueryRewriter(this, this.remoteMetadataReader, this.connection);
+        if (this.properties.isLocalSource()) {
+            return new ExasolLocalQueryRewriter(this);
+        } else if (isImportFromExa(this.properties)) {
+            return new ExasolFromExaQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
+        } else {
+            return new ExasolJdbcQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
+        }
+    }
+
+    private boolean isImportFromExa(final AdapterProperties properties) {
+        return properties.isEnabled(EXASOL_IMPORT_PROPERTY);
     }
 
     @Override
@@ -105,21 +134,6 @@ public class ExasolSqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_HIGH;
-    }
-
-    /**
-     * Return the type of import the Exasol dialect uses.
-     *
-     * @return import type
-     */
-    public ImportType getImportType() {
-        if (this.properties.isEnabled(IS_LOCAL_PROPERTY)) {
-            return ImportType.LOCAL;
-        } else if (this.properties.isEnabled(EXASOL_IMPORT_PROPERTY)) {
-            return ImportType.EXA;
-        } else {
-            return ImportType.JDBC;
-        }
     }
 
     @Override
