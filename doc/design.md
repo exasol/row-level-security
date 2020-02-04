@@ -164,22 +164,6 @@ Covers:
 
 Needs: impl, utest, itest
 
-## `TableProtectionStatus` Cache
-`dsn~table-protection-status-cache`
-
-The `TableProectionStatus` holds a cache of protected tables with the following attributes
-
-1. Table identifier
-1. Protection type: role / tenant / both
-
-Covers:
-
-* `qr~rls-protected-query-execution-time~1`
-* `req~tables-with-row-restrictions~1`
-* `req~tables-with-tenants-restrictions~1`
-
-Needs: impl, itest
-
 # Cross-cutting Concerns
 
 # Design Decisions
@@ -382,5 +366,29 @@ Covers:
 Needs: impl, itest
 
 # Quality Scenarios
+
+## Total Runtime of Secured Simple Query
+`qs~total-runtime-of-secured-simple-query~1`
+
+Given
+
+* a database table with 5 datasets
+* s<sub>o</sub> as an SQL statement where columns are select from a single table without filter or expressions
+* s<sub>s</sub> as the same statement protected by RLS with a role filter
+
+When
+
+* s<sub>o</sub> is executed in a total runtime of t<sub>o</sub> and
+* s<sub>s</sub> is executed in a total runtime of t<sub>s</sub>
+
+Then
+
+* t<sub>s</sub> is smaller than either t<sub>o</sub> times 1.1 or t<sub>o</sub> plus one second.
+
+Covers:
+
+* `qr~rls-protected-query-execution-time~1`
+
+Needs: itest
 
 # Risks

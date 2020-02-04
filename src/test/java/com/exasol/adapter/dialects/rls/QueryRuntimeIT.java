@@ -93,13 +93,14 @@ class QueryRuntimeIT {
         }
     }
 
+    // [itest->qs~total-runtime-of-secured-simple-query~1]
     @Test
     void testSimpleQueryRuntime() throws NoDriverFoundException, SQLException {
         final Connection connection = container.createConnection("");
         final long originalRuntime = executeTimedQuery(connection, "SELECT * FROM SIMPLE_SALES.ORDER_ITEM");
         final long rlsRuntime = executeTimedQuery(connection, "SELECT * FROM RLS_VS.ORDER_ITEM");
         final long maxRelativeMillis = Math.round(originalRuntime * 1.1);
-        final long maxAbsoluteMillis = originalRuntime + 500;
+        final long maxAbsoluteMillis = originalRuntime + 1000;
         assertThat(rlsRuntime, either(lessThanOrEqualTo(maxRelativeMillis)).or(lessThanOrEqualTo(maxAbsoluteMillis)));
     }
 

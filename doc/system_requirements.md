@@ -201,10 +201,14 @@ Covers:
 
 The Performance degradation caused by and RLS-protected query compared to the same query without RLS is below the greater of
 
-* half a second or
+* one second or
 * 10%
 
 on top of the original execution time.
+
+Comment:
+
+This is the complete runtime as the database client experiences it including the involved upstart times for the UDF language container and the contained runtime environment.
 
 Covers:
 
