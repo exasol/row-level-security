@@ -1,10 +1,9 @@
 package com.exasol.adapter.dialects.exasol;
 
-import java.sql.Connection;
-
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
 /**
  * Factory for the Exasol SQL dialect.
@@ -21,7 +20,7 @@ public class ExasolSqlDialectFactory implements SqlDialectFactory {
     }
 
     @Override
-    public SqlDialect createSqlDialect(final Connection connection, final AdapterProperties properties) {
-        return new ExasolSqlDialect(connection, properties);
+    public SqlDialect createSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
+        return new ExasolSqlDialect(connectionFactory, properties);
     }
 }

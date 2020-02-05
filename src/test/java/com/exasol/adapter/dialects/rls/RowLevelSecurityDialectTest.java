@@ -8,10 +8,10 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,16 +21,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.*;
+import com.exasol.adapter.jdbc.ConnectionFactory;
 
 @ExtendWith(MockitoExtension.class)
 class RowLevelSecurityDialectTest {
     @Mock
-    Connection connectionMock;
+    ConnectionFactory connectionFactoryMock;
     private RowLevelSecurityDialect dialect;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new RowLevelSecurityDialect(this.connectionMock, AdapterProperties.emptyProperties());
+        this.dialect = new RowLevelSecurityDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
     }
 
     @Test
@@ -39,14 +40,19 @@ class RowLevelSecurityDialectTest {
     }
 
     @Test
-    void testCreateQueryRewriter() {
+    void testCreateQueryRewriter(@Mock final Connection connectionMock, @Mock final DatabaseMetaData metadataMock,
+            @Mock final ResultSet resultSetMock) throws SQLException {
+        when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
+        when(connectionMock.getMetaData()).thenReturn(metadataMock);
+        when(metadataMock.getColumns(any(), any(), any(), any())).thenReturn(resultSetMock);
         assertThat(getMethodReturnViaReflection(this.dialect, "createQueryRewriter"),
                 instanceOf(RowLevelSecurityQueryRewriter.class));
     }
 
     @Test
-    void testCreateQueryRewriterThrowsException() throws SQLException {
-        when(this.connectionMock.getMetaData()).thenThrow(SQLException.class);
+    void testCreateQueryRewriterThrowsException(@Mock final Connection connectionMock) throws SQLException {
+        when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
+        when(connectionMock.getMetaData()).thenThrow(SQLException.class);
         assertThrows(IllegalArgumentException.class, () -> this.dialect.createQueryRewriter());
     }
 

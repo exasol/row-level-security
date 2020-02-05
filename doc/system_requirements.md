@@ -20,8 +20,19 @@ The RLS main goal is to provide fine-grained access control below the level of t
 
 RLS's main quality goals are in descending order of importance:
 
-1. Provide reliable security
-1. Work with an affordable performance hit compared to accessing the data without RLS
+#### Reliable Security
+`qg~reliable-security~1`
+
+RLS reliably secures the access to protected data.
+
+<!-- Needs: qr -->
+
+#### Affordable Performance Hit
+`qg~affordable-performance-hit~1`
+
+The Performance degradation caused by and RLS-protected query compared to the same query without RLS is small.
+
+Needs: qr
 
 ## Stakeholders
 
@@ -170,3 +181,37 @@ Data Owners can leave a table unprotected. In this case all users can access all
 Covers:
 
 * [feat~row-level-security~1](#row-level-security)
+
+## Quality Requirements
+
+### Quality Tree
+
+    Utility
+      |
+      |-- Performance
+      |-- Modifiability
+      '-- Security
+
+### Quality Scenarios
+
+#### Performance
+
+##### RLS-protected Query Execution Time
+`qr~rls-protected-query-execution-time~1`
+
+The Performance degradation caused by and RLS-protected query compared to the same query without RLS is below the greater of
+
+* two seconds or
+* 10%
+
+on top of the original execution time.
+
+Comment:
+
+This is the complete runtime as the database client experiences it including the involved upstart times for the UDF language container and the contained runtime environment.
+
+Covers:
+
+* [qg~affordable-performance-hit~1](#affordable-performance-hit)
+
+Needs: dsn
