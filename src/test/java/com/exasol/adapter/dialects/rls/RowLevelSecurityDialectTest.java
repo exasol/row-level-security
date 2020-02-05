@@ -30,7 +30,7 @@ class RowLevelSecurityDialectTest {
     private RowLevelSecurityDialect dialect;
 
     @BeforeEach
-    void beforeEach() throws SQLException {
+    void beforeEach() {
         this.dialect = new RowLevelSecurityDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
     }
 

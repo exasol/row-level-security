@@ -149,7 +149,7 @@ class ExasolSqlDialectTest {
     }
 
     @Test
-    void testCreateLocalQueryRewriter(@Mock final Connection connectionMock) throws SQLException {
+    void testCreateLocalQueryRewriter() {
         this.rawProperties.put(IS_LOCAL_PROPERTY, "true");
         final AdapterProperties properties = new AdapterProperties(this.rawProperties);
         final SqlDialect dialect = new ExasolSqlDialect(this.connectionFactoryMock, properties);

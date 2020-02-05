@@ -22,7 +22,7 @@ import com.exasol.adapter.sql.*;
 public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(RowLevelSecurityQueryRewriter.class.getName());
     private final TableProtectionStatus tableProtectionStatus;
-    private final QueryRewriter delegate;
+    private final QueryRewriter delegateRewriter;
     private final ConnectionFactory connectionFactory;
 
     /**
@@ -32,14 +32,14 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
      * @param remoteMetadataReader  remote metadata reader
      * @param connectionFactory     factory for JDBC connection to remote data source
      * @param tableProtectionStatus table protection information
-     * @param delegate              rewriter handling the dialect specific parts
+     * @param delegateRewriter      rewriter handling the dialect specific parts
      */
     public RowLevelSecurityQueryRewriter(final SqlDialect dialect, final RemoteMetadataReader remoteMetadataReader,
             final ConnectionFactory connectionFactory, final TableProtectionStatus tableProtectionStatus,
-            final QueryRewriter delegate) {
+            final QueryRewriter delegateRewriter) {
         this.connectionFactory = connectionFactory;
         this.tableProtectionStatus = tableProtectionStatus;
-        this.delegate = delegate;
+        this.delegateRewriter = delegateRewriter;
     }
 
     @Override
@@ -66,9 +66,9 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         if (protectedWithExaRowRoles || protectedWithExaRowTenants) {
             final SqlStatementSelect protectedSelectStatement = getProtectedSqlStatementSelect(select, userInformation,
                     protectedWithExaRowRoles, protectedWithExaRowTenants);
-            return this.delegate.rewrite(protectedSelectStatement, exaMetadata, properties);
+            return this.delegateRewriter.rewrite(protectedSelectStatement, exaMetadata, properties);
         } else {
-            return this.delegate.rewrite(statement, exaMetadata, properties);
+            return this.delegateRewriter.rewrite(statement, exaMetadata, properties);
         }
     }
 
@@ -181,8 +181,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     private Optional<SqlNode> setWhereClauseForRoles(final boolean protectedWithExaRowRoles,
             final UserInformation userInformation) throws SQLException {
         if (protectedWithExaRowRoles) {
-            String exaRoleMask;
-            exaRoleMask = userInformation.getRoleMask(this.connectionFactory.getConnection());
+            final String exaRoleMask = userInformation.getRoleMask(this.connectionFactory.getConnection());
             final SqlPredicateNotEqual whereClauseForRoles = new SqlPredicateNotEqual(
                     createRoleCheckPredicate(exaRoleMask), new SqlLiteralExactnumeric(BigDecimal.valueOf(0)));
             return Optional.of(whereClauseForRoles);

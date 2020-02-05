@@ -78,7 +78,7 @@ public class TableProtectionStatus {
         }
 
         /**
-         * Add a table that is role-protected
+         * Add a table that is role-protected.
          *
          * @param tableName name of the protected table
          * @return builder instance for fluent programming
@@ -91,7 +91,7 @@ public class TableProtectionStatus {
         }
 
         /**
-         * Add a table that is tenant-protected
+         * Add a table that is tenant-protected.
          *
          * @param tableName name of the protected table
          * @return builder instance for fluent programming
@@ -104,7 +104,7 @@ public class TableProtectionStatus {
         }
 
         /**
-         * Build a new instance of a {@link TableProtectionStatus}
+         * Build a new instance of a {@link TableProtectionStatus}.
          *
          * @return new instance
          */

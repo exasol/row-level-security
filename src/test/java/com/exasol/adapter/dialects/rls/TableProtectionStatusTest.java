@@ -31,7 +31,7 @@ class TableProtectionStatusTest {
         assertAll(
                 () -> assertThat("role-protected", tableProtectionStatus.isTableRoleProtected(table),
                         equalTo(roleProtected)),
-                () -> assertThat("tenant-proteced", tableProtectionStatus.isTableTenantProtected(table),
+                () -> assertThat("tenant-protected", tableProtectionStatus.isTableTenantProtected(table),
                         equalTo(tenantProtected)));
     }
 
@@ -48,5 +48,4 @@ class TableProtectionStatusTest {
         this.builder.addRoleProtectedTable(table).addTenantProtectedTable(table);
         assertTableProtectionStatus(table, true, true);
     }
-
 }

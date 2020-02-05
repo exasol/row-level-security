@@ -50,7 +50,7 @@ class ExasolFromExaQueryRewriterTest extends AbstractQueryRewriterTestBase {
     }
 
     @Test
-    void testRewriteLocal() throws AdapterException, SQLException, ExaConnectionAccessException {
+    void testRewriteLocal() throws AdapterException, SQLException {
         setIsLocalProperty();
         final AdapterProperties properties = new AdapterProperties(this.rawProperties);
         final SqlDialect dialect = new ExasolSqlDialect(null, properties);

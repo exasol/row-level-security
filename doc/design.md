@@ -383,7 +383,7 @@ When
 
 Then
 
-* t<sub>s</sub> is smaller than either t<sub>o</sub> times 1.1 or t<sub>o</sub> plus one second.
+* t<sub>s</sub> is smaller than either t<sub>o</sub> times 1.1 or t<sub>o</sub> plus two seconds.
 
 Covers:
 

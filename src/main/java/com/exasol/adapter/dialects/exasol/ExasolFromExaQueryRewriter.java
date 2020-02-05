@@ -1,7 +1,5 @@
 package com.exasol.adapter.dialects.exasol;
 
-import java.sql.SQLException;
-
 import com.exasol.ExaConnectionInformation;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
@@ -34,7 +32,7 @@ public class ExasolFromExaQueryRewriter extends BaseQueryRewriter {
 
     @Override
     public String rewrite(final SqlStatement statement, final ExaMetadata exaMetadata,
-            final AdapterProperties properties) throws AdapterException, SQLException {
+            final AdapterProperties properties) throws AdapterException {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
         final SqlNodeVisitor<String> sqlGeneratorVisitor = this.dialect.getSqlGenerationVisitor(context);

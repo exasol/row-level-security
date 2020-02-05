@@ -57,9 +57,9 @@ public class RowLevelSecurityDialect extends ExasolSqlDialect {
             final DatabaseMetaData metadata = this.connectionFactory.getConnection().getMetaData();
             final TableProtectionStatus tableProtectionStatus = new TableProtectionStatusReader(metadata)
                     .read(catalogName, schemaName);
-            final QueryRewriter delegate = super.createQueryRewriter();
+            final QueryRewriter delegateRewriter = super.createQueryRewriter();
             return new RowLevelSecurityQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory,
-                    tableProtectionStatus, delegate);
+                    tableProtectionStatus, delegateRewriter);
         } catch (final SQLException exception) {
             throw new IllegalArgumentException("Unable to read metadata for instantiating TableProtectionStatus.");
         }

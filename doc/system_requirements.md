@@ -201,7 +201,7 @@ Covers:
 
 The Performance degradation caused by and RLS-protected query compared to the same query without RLS is below the greater of
 
-* one second or
+* two seconds or
 * 10%
 
 on top of the original execution time.
