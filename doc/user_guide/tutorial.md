@@ -54,6 +54,16 @@ Assumptions:
 
 Over the course of you IT project you will want to verify you assumptions. For the sake of this tutorial let's assume they are true.
 
+### Actors
+
+We can idendify three different actor types in our scenario:
+
+1. Database administrator (`SYS`) user who creates the initial users and schemas
+1. Department of Business Affairs & Consumer Protection (`BACP`)
+1. Taxi companies
+
+Each will be represented by a separate database user.
+
 ## RLS Design Considerations
 
 Before you start to dive into setting up the database, let's first discuss a few design considerations.
@@ -66,15 +76,9 @@ Separating the import from production is a best practice for data ingestion, so 
 
 We are going to implement [tenant-based security](user_guide.md#tenant-based-security) in this tutorial and therefore need to add the column `EXA_ROW_TENANT` to the fact table (i.e. the taxi rides).
 
-Now, the dataset already contains a column for the company, but that one is free format. You can list the companies as follows.
+Now, the dataset already contains a column for the company, but that one is free format.
 
-```sql
-SELECT DISTINCT(COMPANY)
-FROM CHICAGO_TAXI_STAGE.TRIPS
-ORDER BY COMPANY;
-```
-
-If you execute this query, you get something that looks like this:
+Here is are a few samples:
 
     0118 - 42111 Godfrey S.Awir
     0694 - 59280 Chinesco Trans Inc
@@ -120,7 +124,19 @@ In our example you are the BACP and you own the two schemas, so let's create tha
 
 ```sql
 CREATE USER BACP IDENTIFIED BY "<password>";
-GRANT CREATE SESSION TO BACP;
+```
+
+Next you transfer ownership of the two schemas to `BACP`.
+
+```sql
+ALTER SCHEMA CHICAGO_TAXI_STAGE CHANGE OWNER BACP;
+ALTER SCHEMA CHICAGO_TAXI CHANGE OWNER BACP;
+```
+
+And finally you assign the global rights to login, create tables and views as well as run imports to that user. Additionally all privileges on the two schemas.
+
+```sql
+GRANT CREATE SESSION, CREATE TABLE, CREATE VIEW, IMPORT TO BACP;
 GRANT ALL ON CHICAGO_TAXI_STAGE TO BACP;
 GRANT ALL ON CHICAGO_TAXI TO BACP;
 ```
@@ -129,14 +145,14 @@ Now log into Exasol as user `BACP` for the next steps.
 
 ### Creating a Staging Area
 
-First please create the staging table for the taxi trips. This will hold the import from the large fact table.
+First create the staging table for the taxi trips. This will hold the import from the large fact table.
 
 ```sql
 CREATE OR REPLACE TABLE CHICAGO_TAXI_STAGE.TRIPS (
     TRIP_ID VARCHAR(40),
     TAXI_ID VARCHAR(255),
-    TRIP_START_TIMESTAMP TIMESTAMP WITHOUT TIME ZONE,
-    TRIP_END_TIMESTAMP TIMESTAMP WITHOUT TIME ZONE,
+    TRIP_START_TIMESTAMP VARCHAR(24),
+    TRIP_END_TIMESTAMP VARCHAR(24),
     TRIP_SECONDS DECIMAL(9),
     TRIP_MILES DECIMAL(18,4),
     PICKUP_CENSUS_TRACT VARCHAR(100),
@@ -159,7 +175,26 @@ CREATE OR REPLACE TABLE CHICAGO_TAXI_STAGE.TRIPS (
 );
 ```
 
-Now do the same for the two accompanying dimension tables.
+Unfortunately we have to define the timestamps as `VARCHAR` for this particular table. The table is large and the only current way to limit the number of records during download is to use an API that produces a timestamp format that Exasol's importer up to 6.2.x does not recognize.
+
+The following view gives us proper timestamps.
+
+``` sql
+CREATE OR REPLACE VIEW CHICAGO_TAXI_STAGE.V_TRIPS
+AS SELECT 
+    TRIP_ID, TAXI_ID,
+    TO_TIMESTAMP(REPLACE(TRIP_START_TIMESTAMP, 'T', ' ')) AS TRIP_START_TIMESTAMP,
+    TO_TIMESTAMP(REPLACE(TRIP_END_TIMESTAMP, 'T', ' ')) AS TRIP_END_TIMESTAMP,
+    TRIP_SECONDS, TRIP_MILES, PICKUP_CENSUS_TRACT, DROPOFF_CENSUS_TRACT,
+    PICKUP_COMMUNITY_AREA, DROPOFF_COMMUNITY_AREA, FARE, TIPS, TOLLS, EXTRAS,
+    TRIP_TOTAL, PAYMENT_TYPE, COMPANY,
+    PICKUP_CENTROID_LATITUDE, PICKUP_CENTROID_LONGITUDE,
+    PICKUP_CENTROID_LOCATION, DROPOFF_CENTROID_LATITUDE,
+    DROPOFF_CENTROID_LONGITUDE, DROPOFF_CENTROID_LOCATION
+FROM CHICAGO_TAXI_STAGE.TRIPS;
+```
+
+The two accompanying dimension tables are rather small, so we can later afford to use an API that does not support limiting the number of rows but gives us a recognized timestamp format directly. No view magic needed.
 
 ```sql
 CREATE OR REPLACE TABLE CHICAGO_TAXI_STAGE.CENSUS_TRACTS(
@@ -173,7 +208,7 @@ CREATE OR REPLACE TABLE CHICAGO_TAXI_STAGE.CENSUS_TRACTS(
     COMMAREA DECIMAL(9),
     COMMAREA_N DECIMAL(9),
     NOTES VARCHAR(1000)
-    );
+);
 
 CREATE OR REPLACE TABLE CHICAGO_TAXI_STAGE.COMMUNITY_AREAS(
     THE_GEOM VARCHAR(2000000),
@@ -186,26 +221,26 @@ CREATE OR REPLACE TABLE CHICAGO_TAXI_STAGE.COMMUNITY_AREAS(
     AREA_NUM_1 DECIMAL(9),
     SHAPE_AREA DOUBLE,
     SHAPE_LEN DOUBLE
-    );
+);
 ```
 
 ### Creating a Production Area
 
-First you create the table with the taxi trips, using the one from the staging area as template and adding the `EXA_ROW_TENANT`.
+First you create the table with the taxi trips, using the `V_TRIPS` view from the staging area as template and adding the `EXA_ROW_TENANT`.
 
 ```sql
 CREATE OR REPLACE TABLE CHICAGO_TAXI.TRIPS
-(LIKE CHICAGO_TAXI_STAGE.TRIPS_RAW, EXA_ROW_TENANT VARCHAR(128));
+(LIKE CHICAGO_TAXI_STAGE.V_TRIPS, EXA_ROW_TENANT VARCHAR(128));
 ```
 
 In case of the dimension tables you simply make a 1:1 copy.
 
 ```sql
-CREATE OR REPLACE TABLE CHICAGO_TAXI.CENSUS_TRACTS AS
+CREATE OR REPLACE TABLE CHICAGO_TAXI.CENSUS_TRACTS
 (LIKE CHICAGO_TAXI_STAGE.CENSUS_TRACTS);
 
-CREATE OR REPLACE TABLE CHICAGO_TAXI.COMMUNITY_AREAS AS
-(LIC CHICAGO_TAXI_STAGE.COMMUNITY_AREAS);
+CREATE OR REPLACE TABLE CHICAGO_TAXI.COMMUNITY_AREAS
+(LIKE CHICAGO_TAXI_STAGE.COMMUNITY_AREAS);
 ```
 
 ## Importing the Data Into the Staging Area
@@ -225,6 +260,15 @@ SKIP=1;
 
 Both commands tell the EXALoader to directly [import](https://docs.exasol.com/sql/import.htm) the data from a download URL in [CSV](https://tools.ietf.org/html/rfc4180) format.
 
+Skipping the first line removes the header fields from the dataset.
+
+```sql
+IMPORT INTO CHICAGO_TAXI_STAGE.TRIPS
+FROM CSV AT 'https://data.cityofchicago.org/resource' FILE 'wrvz-psew.csv?$limit=1000000'
+SKIP=1;
+```
+
+As mentioned earlier we use a slightly different API here, one that allows us to limit the number of datasets to 1 million. This way the import does not take forever.
 
 ## Importing the Data Into Production
 
@@ -242,19 +286,20 @@ Use the following command to copy the trips data from the stage to production. N
 
 ```sql
 INSERT INTO CHICAGO_TAXI.TRIPS
-    SELECT TR.*,
-    UPPER(
+SELECT TR.*,
+UPPER(
+    REGEXP_REPLACE(
         REGEXP_REPLACE(
-            REGEXP_REPLACE(
-                REGEXP_REPLACE(TR.COMPANY, '^[-0-9 ]*'),
-            '\W+', '_'
-            ),
-            '_*$', ''
-        )
+            REGEXP_REPLACE(TR.COMPANY, '^[-0-9 ]*'),
+        '\W+', '_'
+        ),
+        '_*$', ''
     )
-    FROM CHICAGO_TAXI_STAGE.TRIPS TR
-;
+)
+FROM CHICAGO_TAXI_STAGE.V_TRIPS TR;
 ```
+
+Note that this time we are copying the data from a view.
 
 The ID is an upper-case, underscore-connected version of the company name. Leading numbers and trailing underscores are removed.
 
@@ -320,14 +365,14 @@ Note that `IS_LOCAL` is important.
 
 Next step is to create a user account that you will need in order to see the effect RLS has.
 
-One of the taxi companies is called "Yellow Cab" and the corresponding entry in the `EXA_ROW_TENANT` column is `YELLOW_CAB`.
+One of the taxi companies is called "Zip Cab" and the corresponding entry in the `EXA_ROW_TENANT` column is `ZIP_CAB`.
 
 So please create a user account with that name, allow it to log in and grant the `SELECT` privilege on the RLS Virtual Schema.
 
 ```sql
-CREATE USER YELLOW_CAB IDENTIFIED BY "secret";
-GRANT CREATE SESSION TO YELLOW_CAB;
-GRANT SELECT ON RLS_CHICAGO_TAXI_VS TO YELLOW_CAB;
+CREATE USER ZIP_CAB IDENTIFIED BY "<password>";
+GRANT CREATE SESSION TO ZIP_CAB;
+GRANT SELECT ON RLS_CHICAGO_TAXI_VS TO ZIP_CAB;
 ```
 
 ### Querying the Data as Non-privileged User
@@ -352,15 +397,17 @@ GROUP BY COMPANY
 ORDER BY COMPANY;
 ```
 
-In the second case you only see the number of trips that Yellow Cab made &mdash; and there are no other companies listed.
+In the second case you only see the number of trips that Zip Cab made &mdash; and there are no other companies listed.
 
 ## Profiling
 
 If you are curious about how queries using RLS perform, you can use [Exasol's profiling feature](https://docs.exasol.com/administration/on-premise/support/profiling_information.htm).
 
-Run the following example as user `YELLOW_CAB`. It demonstrates how Exasol executes a query that joins the large fact table and a dimension table. There is a narrow filter on the fact table and we want to see that this filter is applied _before_ the join.
+Run the following example as user `ZIP_CAB`. It demonstrates how Exasol executes a query that joins the large fact table and a dimension table. There is a narrow filter on the fact table and we want to see that this filter is applied _before_ the join.
 
 Otherwise an unnecessarily large amount of data would go into the join.
+
+First, switch profiling on, then run the query. Immediately afterwards, deactivate profiling to avoid flooding the log.
 
 ```sql
 ALTER SESSION SET PROFILE = 'on';
@@ -373,7 +420,11 @@ WHERE RLS_CHICAGO_TAXI_VS.TRIPS.TRIP_SECONDS < 400;
 ALTER SESSION SET PROFILE = 'off';
 
 FLUSH STATISTICS;
+```
 
+Now let's take a look at the profiling data we collected
+
+```sql
 SELECT STMT_ID, COMMAND_NAME AS COMMAND, PART_NAME, PART_INFO,
     OBJECT_SCHEMA, OBJECT_NAME, OBJECT_ROWS AS OBJ_ROWS, OUT_ROWS, DURATION 
 FROM EXA_STATISTICS.EXA_USER_PROFILE_LAST_DAY
@@ -381,25 +432,30 @@ WHERE SESSION_ID = CURRENT_SESSION
 ORDER BY STMT_ID, PART_ID;
 ```
 
-Let's unravel this bit by bit. First you switch on profiling. Then you run the query under test. To avoid having to read more profiling messages than necessary you then immediately turn profiling off again.
-
-Last but not least you query the profiling log table.
-
 Your result should look similar to this:
 
 |STMT_ID|COMMAND|PART_NAME|PART_INFO|OBJECT_SCHEMA|OBJECT_NAME|OBJ_ROWS|OUT_ROWS|DURATION|
 |-------|-------|---------|---------|-------------|-----------|--------|--------|--------|
-|151|SELECT|COMPILE / EXECUTE||||||1.729|
-|151|SELECT|PUSHDOWN||||||0.440|
-|151|SELECT|PUSHDOWN||||||0.082|
-|151|SELECT|SCAN||CHICAGO_TAXI|TRIPS|99999|119|0.013|
-|151|SELECT|OUTER JOIN|on REPLICATED table|CHICAGO_TAXI|COMMUNITY_AREAS|77|119|0.001|
-|151|SELECT|INSERT|on TEMPORARY table||tmp_subselect0|0|119|0.033|
-|152|COMMIT|COMMIT||||||0.041|
-|153|SELECT|COMPILE / EXECUTE||||||0.007|
-|154|SELECT|COMPILE / EXECUTE||||||0.004|
-|154|SELECT|SYSTEM TABLE SNAPSHOT||||||0.000|
-|154|SELECT|SCAN||SYS|DUAL|1|1|0.003|
-|154|SELECT|INSERT|on TEMPORARY table||tmp_subselect0|0|1|0.002|
+|54|SELECT|COMPILE / EXECUTE||||||0.758|
+|54|SELECT|PUSHDOWN||||||0.220|
+|54|SELECT|PUSHDOWN||||||0.090|
+|54|SELECT|SCAN||CHICAGO_TAXI|TRIPS|1000000|96|0.024|
+|54|SELECT|OUTER JOIN|on REPLICATED table|CHICAGO_TAXI|COMMUNITY_AREAS|77|96|0.000|
+|54|SELECT|INSERT|on TEMPORARY table||tmp_subselect0|0|96|0.009|
+|55|COMMIT|COMMIT||||||0.029|
 
 The important part to realize here is that the `SCAN` happens _before_ the `OUTER JOIN`. And you should also notice that the number of rows going into the scan are a lot more than the result rows of the scan.
+
+If you look at the time spent for each part of the execution, you will notice that the vast majority of time is used up in the `COMPILE \ EXECUTE` phase. This is the UDF container starting and running the RLS Virtual Schema that rewrites your query.
+
+Executing the resulting query is lightning fast.
+
+## Conclusion
+
+In this tutorial we went trough a real world example where you learned how to securely setup an RLS-protected Virtual Schema in order to restrict what users are allowed to see.
+
+You created a staging area and populated that with publicly available data by pointing the EXALoader to a public API and running an import.
+
+You created a view in the staging area to fix a timestamp format and then imported the data into a production area. There you experienced the effect of RLS and profiled a query using built-in capabilities of the Exasol analytical platform.
+
+Congratulations, you are now ready and able to protect your own data with RLS.
