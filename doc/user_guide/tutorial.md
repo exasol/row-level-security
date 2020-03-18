@@ -340,7 +340,7 @@ Please refer to the [user guide](user_guide.md) for detailed instructions on how
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_VSADAPTER_SCHEMA.RLS_VSADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/jars/row-level-security-dist-1.0.0.jar;
+    %jar /buckets/bfsdefault/jars/row-level-security-dist-1.0.1.jar;
 /
 ;
 

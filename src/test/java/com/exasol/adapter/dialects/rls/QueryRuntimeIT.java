@@ -24,7 +24,7 @@ import com.exasol.containers.ExasolContainerConstants;
 @Tag("integration")
 @Testcontainers
 class QueryRuntimeIT {
-    private static final String ADAPTER_FILENAME = "row-level-security-dist-1.0.0.jar";
+    private static final String ADAPTER_FILENAME = "row-level-security-dist-1.0.1.jar";
     private static final Logger LOGGER = LoggerFactory.getLogger(RowLevelSecurityDialectIT.class);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
