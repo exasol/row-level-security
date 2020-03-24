@@ -29,6 +29,8 @@ We assume our readers have firm knowledge of database principles in general and 
 
 We are using a dataset provided to the public by the City of Chicago. This dataset contains a [collection of taxi trips](https://digital.cityofchicago.org/index.php/chicago-taxi-data-released/). The collection started 2013 and still keeps going. So the dataset grows all the time.
 
+![Chicago Taxi dataset](../images/chicago_taxi_dataset.png)
+
 The dataset consists of one large fact table containing the actual taxi rides with details like start and end time, pickup and drop-off area.
 
 Additionally, two dimension tables provide more information about the community areas where trips start end end and the [census tracts](https://en.wikipedia.org/wiki/Census_tract#United_States).
@@ -225,7 +227,7 @@ CREATE OR REPLACE TABLE CHICAGO_TAXI_STAGE.COMMUNITY_AREAS(
     THE_GEOM VARCHAR(2000000),
     PERIMETER DECIMAL(9),
     AREA DECIMAL(9),
-    COMAREA_ DECIMAL(9),
+    COMAREA DECIMAL(9),
     COMAREA_ID DECIMAL(9),
     AREA_NUMBER DECIMAL(9),
     COMMUNITY VARCHAR(100),
