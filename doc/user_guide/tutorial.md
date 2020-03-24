@@ -11,16 +11,27 @@ Working through this tutorial you will learn you the following things:
 1. Import a publicly available dataset into Exasol
 1. Create a view that establishes row-ownership based on business data
 1. Create an RLS Virtual Schema
-1. Access and access restrictions with RLS
+1. Access restrictions with RLS
 
 ### Target Audience
 
 This tutorial is targeted at database users and administrators wanting to learn more about Exaso's row-level security.
 We assume our readers have firm knowledge of database principles in general and the SQL language in particular. Also readers should be able to setup an Exasol database or at least have administrator access to an existing one.
 
+### Terms and Abbreviations
+
+<dl>
+<dt>RLS</dt><dd>See "Row Level Security"</dd>
+<dt>Row Level Security</dt><dd>Data access restrictions in a database on the level of an individual dataset (aka. "row").</dt>
+<dl>
+
 ### About the Dataset
 
-We are using a dataset provided to the public by the City of Chicago. This dataset contains a collection of taxi trips. The collection started 2013 and still keeps going. So the dataset grows all the time.
+We are using a dataset provided to the public by the City of Chicago. This dataset contains a [collection of taxi trips](https://digital.cityofchicago.org/index.php/chicago-taxi-data-released/). The collection started 2013 and still keeps going. So the dataset grows all the time.
+
+The dataset consists of one large fact table containing the actual taxi rides with details like start and end time, pickup and drop-off area.
+
+Additionally, two dimension tables provide more information about the community areas where trips start end end and the [census tracts](https://en.wikipedia.org/wiki/Census_tract#United_States).
 
 ### Data Privacy and Masking
 
@@ -335,7 +346,7 @@ Exasol's row-level security implementation is a [Virtual Schema](https://github.
 
 A Virtual Schema is a projection of an underlying concrete schema. In the case of RLS it add a filter layer that makes sure that users only see what they are supposed to.
 
-Please refer to the [user guide](user_guide.md) for detailed instructions on how to install the RLS package.
+Please refer to the [user guide](user_guide.md#creating-the-virtual-schema) for detailed instructions on how to install the RLS package.
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_VSADAPTER_SCHEMA.RLS_VSADAPTER AS
