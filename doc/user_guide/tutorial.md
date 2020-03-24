@@ -6,7 +6,7 @@ This tutorial demonstrates row-level security based on a concrete example. We ar
 
 ### What you Will Learn
 
-Working through this tutorial you will learn you the following things:
+Working through this tutorial you will learn the following things:
 
 1. Import a publicly available dataset into Exasol
 1. Create a view that establishes row-ownership based on business data
@@ -15,8 +15,8 @@ Working through this tutorial you will learn you the following things:
 
 ### Target Audience
 
-This tutorial is targeted at database users and administrators wanting to learn more about Exaso's row-level security.
-We assume our readers have firm knowledge of database principles in general and the SQL language in particular. Also readers should be able to setup an Exasol database or at least have administrator access to an existing one.
+This tutorial is targeted at database users and administrators wanting to learn more about Exasol's row-level security.
+We assume our readers have firm knowledge of database principles in general and the SQL language in particular. Also readers should be able to setup an Exasol database or at least have administrator access to an existing one with internet access and configured name servers.
 
 ### Terms and Abbreviations
 
@@ -79,7 +79,7 @@ Each will be represented by a separate database user.
 
 Before you start to dive into setting up the database, let's first discuss a few design considerations.
 
-### Staging Area an Production
+### Staging Area and Production
 
 Separating the import from production is a best practice for data ingestion, so we are going to have a stating area dedicated to importing the data from the servers of the City of Chicago. And a production area, where the actual work is done.
 
@@ -114,7 +114,7 @@ Using views follows the Single-responsibility principle (SRP). The view is respo
 
 If you put the view on the production table, you can change the mapping without re-importing the data. On the other hand this comes at the expense of performance.
 
-In our assumption list we earlier defined that reading speed is key, so we are definitely pre-calculating the column contents. That leaves us with the choice between view on the stage and building the mapping into the load from stage to production.
+In our assumption list we earlier defined that reading speed is key, so we are definitely pre-calculating the column contents. That leaves us with the choice between view on the staging area and building the mapping into the load from staging area to production.
 
 For the sake of simplicity, we pick the later option.
 
@@ -336,15 +336,15 @@ ORDER BY EXA_ROW_TENANT;
 
 As you can see, the mapping is not perfect. There are two rows that produce the same ID (`ZIP_CAB`) and one that produces a `NULL`.
 
-I a real-world scenario you would spend more effort to disambiguate the ID generation and make sure that `NULL`s don't happen. For the sake of this tutorial though the naive approach will have to suffice.
+In a real-world scenario you would spend more effort to disambiguate the ID generation and make sure that `NULL`s don't happen. For the sake of this tutorial though the naive approach will have to suffice.
 
 ## Protecting the Data with RLS
 
 ### Creating the RLS Virtual Schema
 
-Exasol's row-level security implementation is a [Virtual Schema](https://github.com/exasol/virtual-schemas). If know how views work, then consider Virtual Schemas a closely related concept.
+Exasol's row-level security implementation is a [Virtual Schema](https://github.com/exasol/virtual-schemas). If you know how views work, then consider Virtual Schemas a closely related concept.
 
-A Virtual Schema is a projection of an underlying concrete schema. In the case of RLS it add a filter layer that makes sure that users only see what they are supposed to.
+A Virtual Schema is a projection of an underlying concrete schema. In the case of RLS it adds a filter layer that makes sure that users only see what they are supposed to.
 
 Please refer to the [user guide](user_guide.md#creating-the-virtual-schema) for detailed instructions on how to install the RLS package.
 
@@ -388,7 +388,7 @@ GRANT SELECT ON RLS_CHICAGO_TAXI_VS TO ZIP_CAB;
 
 ### Querying the Data as Non-privileged User
 
-Now's the moment of truth. You are going to impersonate a taxi company an verify that we only see entries that this company should be able to see.
+Now is the moment of truth. You are going to impersonate a taxi company and verify that we only see entries that this company should be able to see.
 
 Log in first with the owner account `BACP` and run this query:
 
