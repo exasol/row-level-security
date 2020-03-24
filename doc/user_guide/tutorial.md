@@ -11,16 +11,19 @@ Working through this tutorial you will learn the following things:
 1. Import a publicly available dataset into Exasol
 1. Create a view that establishes row-ownership based on business data
 1. Create an RLS Virtual Schema
-1. Access restrictions with RLS
+1. Access restrictions with row-level security
 
 ### Target Audience
 
 This tutorial is targeted at database users and administrators wanting to learn more about Exasol's row-level security.
-We assume our readers have firm knowledge of database principles in general and the SQL language in particular. Also readers should be able to setup an Exasol database or at least have administrator access to an existing one with internet access and configured name servers.
+We assume our readers have firm knowledge of database principles in general and the SQL language in particular. Also readers should be able to setup an Exasol database or at least have administrator access to an existing one with Internet access and configured name servers.
 
 ### Terms and Abbreviations
 
 <dl>
+<dt>BACP</dt><dd>Department of Business Affairs & Consumer Protection</dd>
+<dt>Dimension table</dt><dd>Table type in an analytical database that holds descriptions for objects of the business case like for example a product description in a sales database.</dd>
+<dt>Fact table</dt><dd>Table type in an analytical database that holds business process data like the individual sales in a sales database. Fact tables hold references to keys in dimension tables and concrete values.</dd>
 <dt>RLS</dt><dd>See "Row Level Security"</dd>
 <dt>Row Level Security</dt><dd>Data access restrictions in a database on the level of an individual dataset (aka. "row").</dt>
 <dl>
@@ -33,7 +36,7 @@ We are using a dataset provided to the public by the City of Chicago. This datas
 
 The dataset consists of one large fact table containing the actual taxi rides with details like start and end time, pickup and drop-off area.
 
-Additionally, two dimension tables provide more information about the community areas where trips start end end and the [census tracts](https://en.wikipedia.org/wiki/Census_tract#United_States).
+Additionally, two dimension tables provide more information about the community areas where trips start and end as well as the [census tracts](https://en.wikipedia.org/wiki/Census_tract#United_States).
 
 ### Data Privacy and Masking
 
@@ -41,7 +44,7 @@ For privacy reasons the datasets use masking techniques that prevent tracking th
 
 ### The RLS Scenario
 
-For the sake of the tutorial we are imagining that we are the Department of Business Affairs & Consumer Protection (BACP). We are collecting the data and are allowed to see every dataset. The taxi companies on the other hand are only allowed to see the datasets that they themselves provide. This is a archetypal row-level security scenario.
+For the sake of the tutorial we are imagining that we are the Department of Business Affairs & Consumer Protection (BACP). We are collecting the data and are allowed to see every dataset. The taxi companies on the other hand, are only allowed to see the datasets that they themselves provide. This is a archetypal row-level security scenario.
 
 Quite possibly that might be the deal the City of Chicago has with the taxi companies when it comes to handling the raw data &mdash; i.e. the data before [masking](#data-privacy-and-masking) is applied.
 
@@ -65,7 +68,7 @@ Assumptions:
 1. The same dataset will be read a lot of times
 1. Reading speed is far more important than writing speed
 
-Over the course of you IT project you will want to verify you assumptions. For the sake of this tutorial let's assume they are true.
+Over the course of your IT project you will want to verify your assumptions. For the sake of this tutorial let's assume they are true.
 
 ### Actors
 
@@ -89,7 +92,7 @@ Separating the import from production is a best practice for data ingestion, so 
 
 We are going to implement [tenant-based security](user_guide.md#tenant-based-security) in this tutorial and therefore need to add the column `EXA_ROW_TENANT` to the fact table (i.e. the taxi rides).
 
-Now, the dataset already contains a column for the company, but that one is free format.
+Now, the dataset already contains a column for the company, but that one does not have a strict format.
 
 Here is are a few samples:
 
@@ -116,9 +119,9 @@ Using views follows the Single-responsibility principle (SRP). The view is respo
 
 If you put the view on the production table, you can change the mapping without re-importing the data. On the other hand this comes at the expense of performance.
 
-In our assumption list we earlier defined that reading speed is key, so we are definitely pre-calculating the column contents. That leaves us with the choice between view on the staging area and building the mapping into the load from staging area to production.
+In our assumption list we earlier defined that reading speed is key, so we are definitely pre-calculating the column contents. That leaves us with the choice between the view on the staging area and building the mapping into the load from staging area to production.
 
-For the sake of simplicity, we pick the later option.
+For the sake of simplicity, we pick the last option.
 
 ## Structuring the Database
 
@@ -146,7 +149,7 @@ ALTER SCHEMA CHICAGO_TAXI_STAGE CHANGE OWNER BACP;
 ALTER SCHEMA CHICAGO_TAXI CHANGE OWNER BACP;
 ```
 
-And finally you assign the global rights to login, create tables and views as well as run imports to that user. Additionally all privileges on the two schemas.
+And finally you assign the global rights to log in, create tables and views as well as run imports to that user. Additionally all privileges on the two schemas.
 
 ```sql
 GRANT CREATE SESSION, CREATE TABLE, CREATE VIEW, IMPORT TO BACP;
@@ -273,7 +276,7 @@ SKIP=1;
 
 Both commands tell the EXALoader to directly [import](https://docs.exasol.com/sql/import.htm) the data from a download URL in [CSV](https://tools.ietf.org/html/rfc4180) format.
 
-Skipping the first line removes the header fields from the dataset.
+The `SKIP=1` option removes the header fields from the dataset.
 
 ```sql
 IMPORT INTO CHICAGO_TAXI_STAGE.TRIPS
@@ -350,7 +353,11 @@ A Virtual Schema is a projection of an underlying concrete schema. In the case o
 
 Please refer to the [user guide](user_guide.md#creating-the-virtual-schema) for detailed instructions on how to install the RLS package.
 
+Execute the following SQL statements as user `SYS`.
+
 ```sql
+CREATE SCHEMA RLS_VSADAPTER_SCHEMA;
+
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_VSADAPTER_SCHEMA.RLS_VSADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
     %jar /buckets/bfsdefault/jars/row-level-security-dist-1.0.1.jar;
@@ -401,7 +408,7 @@ GROUP BY COMPANY
 ORDER BY COMPANY;
 ```
 
-Now login as `YELLOW CAB` and run this query for comparison:
+Now login as `ZIP_CAB` and run this query for comparison:
 
 ```sql
 SELECT COMPANY, COUNT(1)
