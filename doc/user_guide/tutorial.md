@@ -16,7 +16,7 @@ Working through this tutorial you will learn the following things:
 ### Target Audience
 
 This tutorial is targeted at database users and administrators wanting to learn more about Exasol's row-level security.
-We assume our readers have firm knowledge of database principles in general and the SQL language in particular. Also readers should be able to setup an Exasol database or at least have administrator access to an existing one with internet access and configured name servers.
+We assume our readers have a firm knowledge of database principles in general and the SQL language in particular. Also readers should be able to set up an Exasol database or at least have administrator access to an existing one with internet access and configured name servers.
 
 ### Terms and Abbreviations
 
@@ -27,7 +27,7 @@ We assume our readers have firm knowledge of database principles in general and 
 
 ### About the Dataset
 
-We are using a dataset provided to the public by the City of Chicago. This dataset contains a [collection of taxi trips](https://digital.cityofchicago.org/index.php/chicago-taxi-data-released/). The collection started 2013 and still keeps going. So the dataset grows all the time.
+We are using a dataset provided to the public by the City of Chicago. This dataset contains a [collection of taxi trips](https://digital.cityofchicago.org/index.php/chicago-taxi-data-released/). The collection started in 2013 and still keeps going. So the dataset grows all the time.
 
 ![Chicago Taxi dataset](../images/chicago_taxi_dataset.png)
 
@@ -83,7 +83,7 @@ Before you start to dive into setting up the database, let's first discuss a few
 
 ### Staging Area and Production
 
-Separating the import from production is a best practice for data ingestion, so we are going to have a stating area dedicated to importing the data from the servers of the City of Chicago. And a production area, where the actual work is done.
+Separating the import from production is the best practice for data ingestion, so we are going to have a stating area dedicated to importing the data from the servers of the City of Chicago. And a production area, where the actual work is done.
 
 ### The `EXA_ROW_TENANT` Column
 
@@ -158,7 +158,7 @@ Now log into Exasol as user `BACP` for the next steps.
 
 ### Creating a Staging Area
 
-First create the staging table for the taxi trips. This will hold the import from the large fact table.
+First, create the staging table for the taxi trips. This will hold the import from the large fact table.
 
 ```sql
 CREATE OR REPLACE TABLE CHICAGO_TAXI_STAGE.TRIPS (
@@ -188,7 +188,7 @@ CREATE OR REPLACE TABLE CHICAGO_TAXI_STAGE.TRIPS (
 );
 ```
 
-Unfortunately we have to define the timestamps as `VARCHAR` for this particular table. The table is large and the only current way to limit the number of records during download is to use an API that produces a timestamp format that Exasol's importer up to 6.2.x does not recognize.
+Unfortunately, we have to define the timestamps as `VARCHAR` for this particular table. The table is large and the only current way to limit the number of records during download is to use an API that produces a timestamp format that Exasol's importer up to 6.2.x does not recognize.
 
 The following view gives us proper timestamps.
 
@@ -239,7 +239,7 @@ CREATE OR REPLACE TABLE CHICAGO_TAXI_STAGE.COMMUNITY_AREAS(
 
 ### Creating a Production Area
 
-First you create the table with the taxi trips, using the `V_TRIPS` view from the staging area as template and adding the `EXA_ROW_TENANT`.
+First, you create the table with the taxi trips, using the `V_TRIPS` view from the staging area as a template and adding the `EXA_ROW_TENANT`.
 
 ```sql
 CREATE OR REPLACE TABLE CHICAGO_TAXI.TRIPS
@@ -258,7 +258,7 @@ CREATE OR REPLACE TABLE CHICAGO_TAXI.COMMUNITY_AREAS
 
 ## Importing the Data Into the Staging Area
 
-Let's first import the two smaller tables for practice, this this is quite fast.
+Let's first import the two smaller tables for practice, this is quite fast.
 
 ```sql
 IMPORT INTO CHICAGO_TAXI_STAGE.CENSUS_TRACTS
@@ -346,7 +346,7 @@ In a real-world scenario you would spend more effort to disambiguate the ID gene
 
 Exasol's row-level security implementation is a [Virtual Schema](https://github.com/exasol/virtual-schemas). If you know how views work, then consider Virtual Schemas a closely related concept.
 
-A Virtual Schema is a projection of an underlying concrete schema. In the case of RLS it adds a filter layer that makes sure that users only see what they are supposed to.
+A Virtual Schema is a projection of an underlying concrete schema. In the case of RLS, it adds a filter layer that makes sure that users only see what they are supposed to.
 
 Please refer to the [user guide](user_guide.md#creating-the-virtual-schema) for detailed instructions on how to install the RLS package.
 
@@ -376,7 +376,7 @@ Note that `IS_LOCAL` is important.
 
 ### Creating a User Account
 
-Next step is to create a user account that you will need in order to see the effect RLS has.
+The next step is to create a user account that you will need in order to see the effect RLS has.
 
 One of the taxi companies is called "Zip Cab" and the corresponding entry in the `EXA_ROW_TENANT` column is `ZIP_CAB`.
 
@@ -418,7 +418,7 @@ If you are curious about how queries using RLS perform, you can use [Exasol's pr
 
 Run the following example as user `ZIP_CAB`. It demonstrates how Exasol executes a query that joins the large fact table and a dimension table. There is a narrow filter on the fact table and we want to see that this filter is applied _before_ the join.
 
-Otherwise an unnecessarily large amount of data would go into the join.
+Otherwise, an unnecessarily large amount of data would go into the join.
 
 First, switch profiling on, then run the query. Immediately afterwards, deactivate profiling to avoid flooding the log.
 
@@ -457,7 +457,7 @@ Your result should look similar to this:
 |54|SELECT|INSERT|on TEMPORARY table||tmp_subselect0|0|96|0.009|
 |55|COMMIT|COMMIT||||||0.029|
 
-The important part to realize here is that the `SCAN` happens _before_ the `OUTER JOIN`. And you should also notice that the number of rows going into the scan are a lot more than the result rows of the scan.
+The important part to realize here is that the `SCAN` happens _before_ the `OUTER JOIN`. And you should also notice that the number of rows going into the scan is a lot more than the result rows of the scan.
 
 If you look at the time spent for each part of the execution, you will notice that the vast majority of time is used up in the `COMPILE \ EXECUTE` phase. This is the UDF container starting and running the RLS Virtual Schema that rewrites your query.
 
@@ -465,7 +465,7 @@ Executing the resulting query is lightning fast.
 
 ## Conclusion
 
-In this tutorial we went trough a real world example where you learned how to securely setup an RLS-protected Virtual Schema in order to restrict what users are allowed to see.
+In this tutorial we went through a real-world example where you learned how to securely set up an RLS-protected Virtual Schema in order to restrict what users are allowed to see.
 
 You created a staging area and populated that with publicly available data by pointing the EXALoader to a public API and running an import.
 
