@@ -30,6 +30,7 @@ Protect access to database tables on a per-row level based on roles and / or ten
 ### Information for Users
 
 * [User Guide](doc/user_guide/user_guide.md)
+* [Tutorial](doc/user_guide/tutorial.md)
 
 ### Information for Contributors
 
