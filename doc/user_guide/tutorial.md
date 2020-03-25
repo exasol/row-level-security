@@ -143,19 +143,17 @@ In our example you are the BACP and you own the two schemas, so let's create tha
 CREATE USER BACP IDENTIFIED BY "<password>";
 ```
 
-Next you transfer ownership of the two schemas to `BACP`.
+Next you transfer ownership of the two schemas to `BACP`. With ownership `BACP` also automatically gets all privileges on the schemas.
 
 ```sql
 ALTER SCHEMA CHICAGO_TAXI_STAGE CHANGE OWNER BACP;
 ALTER SCHEMA CHICAGO_TAXI CHANGE OWNER BACP;
 ```
 
-And finally you assign the global rights to log in, create tables and views as well as run imports to that user. Additionally all privileges on the two schemas.
+And finally you assign the global rights to log in, create tables and views as well as run imports to that user.
 
 ```sql
 GRANT CREATE SESSION, CREATE TABLE, CREATE VIEW, IMPORT TO BACP;
-GRANT ALL ON CHICAGO_TAXI_STAGE TO BACP;
-GRANT ALL ON CHICAGO_TAXI TO BACP;
 ```
 
 Now log into Exasol as user `BACP` for the next steps.
