@@ -279,7 +279,7 @@ The `SKIP=1` option removes the header fields from the dataset.
 
 ```sql
 IMPORT INTO CHICAGO_TAXI_STAGE.TRIPS
-FROM CSV AT 'https://data.cityofchicago.org/resource' FILE 'wrvz-psew.csv?$limit=1000000'
+FROM CSV AT 'https://data.cityofchicago.org/resource' FILE 'wrvz-psew.csv?$limit=1000000&$order=trip_start_timestamp'
 SKIP=1;
 ```
 
