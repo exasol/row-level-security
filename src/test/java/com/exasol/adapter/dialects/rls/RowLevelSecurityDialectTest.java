@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
 import static com.exasol.adapter.capabilities.MainCapability.*;
-import static com.exasol.reflect.ReflectionUtils.getMethodReturnViaReflection;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -11,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -41,12 +42,20 @@ class RowLevelSecurityDialectTest {
 
     @Test
     void testCreateQueryRewriter(@Mock final Connection connectionMock, @Mock final DatabaseMetaData metadataMock,
-            @Mock final ResultSet resultSetMock) throws SQLException {
+            @Mock final ResultSet resultSetMock)
+            throws SQLException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
         when(connectionMock.getMetaData()).thenReturn(metadataMock);
         when(metadataMock.getColumns(any(), any(), any(), any())).thenReturn(resultSetMock);
         assertThat(getMethodReturnViaReflection(this.dialect, "createQueryRewriter"),
                 instanceOf(RowLevelSecurityQueryRewriter.class));
+    }
+
+    private static Object getMethodReturnViaReflection(final Object object, final String methodName)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final Method method = object.getClass().getDeclaredMethod(methodName);
+        method.setAccessible(true);
+        return method.invoke(object);
     }
 
     @Test

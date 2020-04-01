@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
+import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
@@ -24,7 +25,6 @@ import com.exasol.containers.ExasolContainerConstants;
 @Tag("integration")
 @Testcontainers
 class QueryRuntimeIT {
-    private static final String ADAPTER_FILENAME = "row-level-security-dist-1.0.1.jar";
     private static final Logger LOGGER = LoggerFactory.getLogger(RowLevelSecurityDialectIT.class);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
@@ -58,8 +58,8 @@ class QueryRuntimeIT {
     }
 
     private static void uploadRlsAdapter() throws InterruptedException, BucketAccessException, TimeoutException {
-        final Path localAdapterPath = Path.of("target", ADAPTER_FILENAME).toAbsolutePath();
-        container.getDefaultBucket().uploadFile(localAdapterPath, ADAPTER_FILENAME);
+        final Path localAdapterPath = Path.of("target", ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION).toAbsolutePath();
+        container.getDefaultBucket().uploadFile(localAdapterPath, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
     }
 
     private static void createRowLevelSecuritySchema() throws SQLException {
@@ -70,7 +70,7 @@ class QueryRuntimeIT {
                 "CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS\n" //
                         + "    %scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                         + "    %jar /buckets/" + bucket.getBucketFsName() + "/" + bucket.getBucketName() //
-                        + "/" + ADAPTER_FILENAME + ";\n" //
+                        + "/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";\n" //
                         + "/", //
                 "CREATE CONNECTION EXASOL_JDBC_CONNECTION TO 'jdbc:exa:localhost:" //
                         + container.getExposedPorts().get(0) + "' USER '" + container.getUsername()
