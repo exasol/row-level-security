@@ -9,6 +9,7 @@ public final class TestsConstants {
     public static final Path PATH_TO_ROLES_MASK = Path.of("src/main/sql/roles_mask.sql");
     public static final Path PATH_TO_ASSIGN_ROLES_TO_USER = Path.of("src/main/sql/assign_roles_to_user.sql");
     public static final String RLS_SCHEMA_NAME = "RLS_SCHEMA";
+    public static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-dist-1.0.2.jar";
 
     private TestsConstants() {
         // intentionally left blank

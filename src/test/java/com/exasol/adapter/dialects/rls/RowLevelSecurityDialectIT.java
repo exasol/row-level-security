@@ -4,6 +4,7 @@ import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.E
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROLES_MAPPING_TABLE_NAME;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static com.exasol.tools.TestsConstants.RLS_SCHEMA_NAME;
+import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,7 +38,6 @@ import com.exasol.tools.SqlTestSetupManager;
 @Testcontainers
 class RowLevelSecurityDialectIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(RowLevelSecurityDialectIT.class);
-    private static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-dist-1.0.1.jar";
     private static final String VIRTUAL_SCHEMA_RLS_JDBC_NAME = "VIRTUAL_SCHEMA_RLS_JDBC";
     private static final String VIRTUAL_SCHEMA_RLS_JDBC_LOCAL_NAME = "VIRTUAL_SCHEMA_RLS_JDBC_LOCAL";
     private static final String VIRTUAL_SCHEMA_RLS_EXA_NAME = "VIRTUAL_SCHEMA_RLS_EXA";
