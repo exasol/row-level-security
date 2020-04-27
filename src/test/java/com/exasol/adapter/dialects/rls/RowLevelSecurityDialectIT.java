@@ -1,9 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
 import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.nio.file.Path;
 import java.sql.*;
@@ -50,13 +47,8 @@ class RowLevelSecurityDialectIT {
         final VirtualSchema virtualSchema = installVirtualSchema(sourceSchema);
         final User rlsUser = factory.createLoginUser("FRED").grant(virtualSchema, ObjectPrivilege.SELECT);
         final Connection rlsConnection = container.createConnectionForUser(rlsUser.getName(), rlsUser.getPassword());
-        final Statement statement = rlsConnection.createStatement();
-        final ResultSet result = statement
-                .executeQuery("SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE");
-        assertAll(() -> assertThat("Result has row 1", result.next(), equalTo(true)),
-                () -> assertThat("Row 1 content", result.getString(1), equalTo("PARIS")),
-                () -> assertThat("Result has row 2", result.next(), equalTo(true)),
-                () -> assertThat("Row 2 content", result.getString(1), equalTo("New York")));
+        assertQueryResults(rlsConnection, "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE",
+                new Object[][] { { "PARIS" }, { "NEW YORK" } });
 
     }
 
@@ -82,5 +74,31 @@ class RowLevelSecurityDialectIT {
                 .properties(Map.of("IS_LOCAL", "true", "LOG_LEVEL", "ALL", "DEBUG_ADDRESS", "10.0.2.15:3000")) //
                 .sourceSchema(sourceSchema) //
                 .build();
+    }
+
+    private void assertQueryResults(final Connection connection, final String sql, final Object[][] expectedResults) {
+        try (final Statement statement = connection.createStatement()) {
+            final ResultSet result = statement.executeQuery(sql);
+            int rowNumber = 1;
+            for (final Object[] row : expectedResults) {
+                if (result.next()) {
+                    int columnNumber = 1;
+                    for (final Object value : row) {
+                        final Object expectedValue = expectedResults[rowNumber - 1][columnNumber - 1];
+                        if (!value.equals(expectedValue)) {
+                            throw new AssertionError("Result deviates in row " + rowNumber + ", column " + columnNumber
+                                    + ". Expected: '" + expectedValue + "' But was: '" + value + "'.");
+                        }
+                        ++columnNumber;
+                    }
+                    ++rowNumber;
+                } else {
+                    throw new AssertionError("Expected result set ot have " + expectedResults
+                            + " rows, but it only had " + rowNumber + ".");
+                }
+            }
+        } catch (final SQLException exception) {
+            throw new AssertionError("Unable to execute statement to assert query result", exception);
+        }
     }
 }
