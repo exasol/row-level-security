@@ -19,6 +19,7 @@ import com.exasol.adapter.sql.*;
 /**
  * RLS-specific query rewriter.
  */
+// [impl->dsn~query-rewriter~1]
 public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(RowLevelSecurityQueryRewriter.class.getName());
     private final TableProtectionStatus tableProtectionStatus;
@@ -60,38 +61,26 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         final UserInformation userInformation = new UserInformation(exaMetadata.getCurrentUser(), schemaName,
                 EXA_RLS_USERS_TABLE_NAME);
         final String tableName = ((SqlTable) select.getFromClause()).getName();
-        final boolean protectedWithExaRowRoles = this.tableProtectionStatus.isTableRoleProtected(tableName);
-        final boolean protectedWithExaRowTenants = this.tableProtectionStatus.isTableTenantProtected(tableName);
-        logTableProtectionInfo(protectedWithExaRowRoles, protectedWithExaRowTenants);
-        if (protectedWithExaRowRoles || protectedWithExaRowTenants) {
+        final TableProtectionDetails protection = this.tableProtectionStatus.getTableProtectionDetails(tableName);
+        logTableProtectionInfo(tableName, protection);
+        if (protection.isProtected()) {
             final SqlStatementSelect protectedSelectStatement = getProtectedSqlStatementSelect(select, userInformation,
-                    protectedWithExaRowRoles, protectedWithExaRowTenants);
+                    protection);
             return this.delegateRewriter.rewrite(protectedSelectStatement, exaMetadata, properties);
         } else {
             return this.delegateRewriter.rewrite(statement, exaMetadata, properties);
         }
     }
 
-    private void logTableProtectionInfo(final boolean protectedWithExaRowRoles,
-            final boolean protectedWithExaRowTenants) {
-        if (protectedWithExaRowRoles) {
-            LOGGER.info(() -> "Table is protected with " + EXA_ROW_ROLES_COLUMN_NAME);
-        }
-        if (protectedWithExaRowTenants) {
-            LOGGER.info(() -> "Table is protected with " + EXA_ROW_TENANT_COLUMN_NAME);
-        }
-        if (!protectedWithExaRowRoles && !protectedWithExaRowTenants) {
-            LOGGER.info(() -> "Table is unprotected");
-        }
+    private void logTableProtectionInfo(final String tableName, final TableProtectionDetails protection) {
+        LOGGER.info(() -> "Table \"" + tableName + "\": " + protection.describe());
     }
 
     private SqlStatementSelect getProtectedSqlStatementSelect(final SqlStatementSelect select,
-            final UserInformation userInformation, final boolean protectedWithExaRowRoles,
-            final boolean protectedWithExaRowTenants) throws SQLException {
+            final UserInformation userInformation, final TableProtectionDetails protection) throws SQLException {
         final SqlSelectList sqlSelectList = getSqlSelectList(select);
         final SqlStatementSelect.Builder rlsStatementBuilder = copyOriginalClauses(select, sqlSelectList);
-        final SqlNode whereClause = createWhereClause(select, userInformation, protectedWithExaRowRoles,
-                protectedWithExaRowTenants);
+        final SqlNode whereClause = createWhereClause(select, userInformation, protection);
         rlsStatementBuilder.whereClause(whereClause);
         return rlsStatementBuilder.build();
     }
@@ -143,9 +132,10 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     }
 
     private SqlNode createWhereClause(final SqlStatementSelect select, final UserInformation userInformation,
-            final boolean protectedWithExaRowRoles, final boolean protectedWithExaRowTenants) throws SQLException {
-        final Optional<SqlNode> whereClauseForRoles = setWhereClauseForRoles(protectedWithExaRowRoles, userInformation);
-        final Optional<SqlNode> whereClauseForTenants = setWhereClauseForTenants(protectedWithExaRowTenants,
+            final TableProtectionDetails protection) throws SQLException {
+        final Optional<SqlNode> whereClauseForRoles = setWhereClauseForRoles(protection.isRoleProtected(),
+                userInformation);
+        final Optional<SqlNode> whereClauseForTenants = setWhereClauseForTenants(protection.isTenantProtected(),
                 userInformation);
         final List<SqlNode> arguments = new ArrayList<>(3);
         if (select.hasFilter()) {

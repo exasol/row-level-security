@@ -6,7 +6,9 @@ import java.util.Map;
 /**
  * This class provides information about tables' protection.
  */
+// [impl->dsn~table-protection-status~2]
 public class TableProtectionStatus {
+    private static final TableProtectionDetails UNPROTECTED_TABLE_DETAILS = TableProtectionDetails.builder().build();
     private final Map<String, TableProtectionDetails> protectedTables;
 
     /**
@@ -19,10 +21,24 @@ public class TableProtectionStatus {
     }
 
     /**
+     * Get the protection details for a specific table.
+     *
+     * @param tableName name of the table for which the protection status is checked
+     * @return protection details
+     */
+    public TableProtectionDetails getTableProtectionDetails(final String tableName) {
+        if (this.protectedTables.containsKey(tableName)) {
+            return this.protectedTables.get(tableName);
+        } else {
+            return UNPROTECTED_TABLE_DETAILS;
+        }
+    }
+
+    /**
      * Check if a table is protected with roles security.
      *
      * @param tableName name of the table to check
-     * @return true if protected
+     * @return {@code true} if protected
      */
     public boolean isTableRoleProtected(final String tableName) {
         return this.getProtectedTables().containsKey(tableName)
@@ -33,11 +49,32 @@ public class TableProtectionStatus {
      * Check if a table is protected with tenants security.
      *
      * @param tableName name of the table to check
-     * @return true if protected
+     * @return {@code true} if protected
      */
     public boolean isTableTenantProtected(final String tableName) {
         return this.getProtectedTables().containsKey(tableName)
                 && this.getProtectedTables().get(tableName).isTenantProtected();
+    }
+
+    /**
+     * Check if a table is protected with group security.
+     *
+     * @param tableName name of the table to check
+     * @return {@code true} if protected
+     */
+    public boolean isTableGroupProtected(final String tableName) {
+        return this.getProtectedTables().containsKey(tableName)
+                && this.getProtectedTables().get(tableName).isGroupProtected();
+    }
+
+    /**
+     * Check if a table is protected with any kind of RLS security.
+     *
+     * @param tableName name of the table to check
+     * @return {@code true} if protected
+     */
+    public boolean isTableProtected(final String tableName) {
+        return isTableRoleProtected(tableName) || isTableTenantProtected(tableName) || isTableGroupProtected(tableName);
     }
 
     /**
@@ -65,29 +102,20 @@ public class TableProtectionStatus {
         private final Map<String, TableProtectionDetails> protectedTables = new HashMap<>();
 
         /**
-         * Add a table to the list of protected tables.
-         *
-         * @param tableName       name of the protected table
-         * @param roleProtected   {@code true} if the table is role-protected
-         * @param tenantProtected {@code true} if the table is tenant-protected
-         * @return builder instance for fluent programming
-         */
-        public Builder addTable(final String tableName, final boolean roleProtected, final boolean tenantProtected) {
-            this.protectedTables.put(tableName, new TableProtectionDetails(roleProtected, tenantProtected));
-            return this;
-        }
-
-        /**
          * Add a table that is role-protected.
          *
          * @param tableName name of the protected table
          * @return builder instance for fluent programming
          */
         public Builder addRoleProtectedTable(final String tableName) {
-            final TableProtectionDetails oldValue = this.protectedTables.get(tableName);
-            final boolean tenantProtected = (oldValue != null) && oldValue.isTenantProtected();
-            this.protectedTables.put(tableName, new TableProtectionDetails(true, tenantProtected));
+            this.protectedTables.put(tableName, getProtectionDetailsBuilder(tableName).roleProtected(true).build());
             return this;
+        }
+
+        private TableProtectionDetails.Builder getProtectionDetailsBuilder(final String tableName) {
+            return this.protectedTables.containsKey(tableName)
+                    ? TableProtectionDetails.builder(this.protectedTables.get(tableName))
+                    : TableProtectionDetails.builder();
         }
 
         /**
@@ -97,9 +125,18 @@ public class TableProtectionStatus {
          * @return builder instance for fluent programming
          */
         public Builder addTenantProtectedTable(final String tableName) {
-            final TableProtectionDetails oldValue = this.protectedTables.get(tableName);
-            final boolean roleProtected = (oldValue != null) && oldValue.isRoleProtected();
-            this.protectedTables.put(tableName, new TableProtectionDetails(roleProtected, true));
+            this.protectedTables.put(tableName, getProtectionDetailsBuilder(tableName).tenantProtected(true).build());
+            return this;
+        }
+
+        /**
+         * Add a table that is group-protected.
+         *
+         * @param tableName name of the protected table
+         * @return builder instance for fluent programming
+         */
+        public Builder addGroupProtectedTable(final String tableName) {
+            this.protectedTables.put(tableName, getProtectionDetailsBuilder(tableName).groupProtected(true).build());
             return this;
         }
 

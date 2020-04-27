@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_ROLES_COLUMN_NAME;
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_TENANT_COLUMN_NAME;
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.*;
 
 import java.sql.*;
 
@@ -10,6 +9,7 @@ import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 /**
  * Reads the list of protected tables and the protection mechanism from the database.
  */
+// [impl->dsn~table-protection-status-reader~1]
 public class TableProtectionStatusReader {
     private static final int TABLE_NAME_COLUMN = 3;
     private static final int COLUMN_NAME_COLUMN = 4;
@@ -33,6 +33,7 @@ public class TableProtectionStatusReader {
      * @param schemaName  name of the schema to be scanned
      * @return table protection status
      */
+    // [impl->dsn~table-protection-status-identifies-protected-tables~2]
     public TableProtectionStatus read(final String catalogName, final String schemaName) {
         try {
             final TableProtectionStatus.Builder builder = TableProtectionStatus.builder();
@@ -45,6 +46,8 @@ public class TableProtectionStatusReader {
                     builder.addRoleProtectedTable(tableName);
                 } else if (EXA_ROW_TENANT_COLUMN_NAME.equals(columnName)) {
                     builder.addTenantProtectedTable(tableName);
+                } else if (EXA_ROW_GROUP_COLUMN_NAME.equals(columnName)) {
+                    builder.addGroupProtectedTable(tableName);
                 }
             }
             return builder.build();
