@@ -105,21 +105,6 @@ Covers:
 
 Needs: dsn
 
-#### Only Accessible Rows Contribute to Aggregate Functions
-`req~only-accessible-rows-contribute-to-aggregate-functions~1`
-
-If row access is controlled by RLS and a user invokes an aggregate function, then only the rows accessible to that user contributed to the result of the aggregate function.
-
-Rationale:
-
-This prevents attackers from gaining information about restricted columns through the side channel of aggregate functions.
-
-Covers:
-
-* [feat~row-level-security~1](#row-level-security)
-
-Needs: dsn
-
 ### Row Level Security with Tenants 
 
 #### Tables With Tenant Restrictions

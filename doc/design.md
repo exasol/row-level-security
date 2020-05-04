@@ -2,7 +2,7 @@
 
 # Introduction
 
-## Acknowledgements
+## Acknowledgments
 
 This document's section structure is derived from the "[arc42](https://arc42.org/)" architectural template by Dr. Gernot Starke, Dr. Peter Hruschka.
 
@@ -11,7 +11,7 @@ This document's section structure is derived from the "[arc42](https://arc42.org
 This section introduces technical system constraints.
 
 ## Bit-wise Functions Limited to 64 Bits
-`const~bit-wise-functions-limited-to-64-bits~1`
+`constr~bit-wise-functions-limited-to-64-bits~1`
 
 In Exasol bit-wise functions (like `BIT_AND` or `BIT_OR`) are limited to 64 bit.
 
@@ -154,15 +154,15 @@ Covers:
 
 Needs: impl, utest, itest
 
-### `QueryRewriter` Treats Protected Tables with Both Roles and Tenants Restrictions
-`query-rewriter-treats-protected-tables-with-roles-and-tenant-restrictions~1`
+### `QueryRewriter` Treats Protected Tables with Roles and Tenants Restrictions
+`dsn~query-rewriter-treats-protected-tables-with-roles-and-tenant-restrictions~1`
 
 If a table contains both `exa_row_roles` and `exa_row_tenant`columns, then the `QueryRewriter` applies both security schemes. 
 That means a user has to be marked as a tenant and have the right role in due to see a row's content.
 
 Covers:
 
-* `req~tables-with-roles-and-tenant-restrictions~1`
+* `req~tables-with-role-and-tenant-restrictions~1`
 
 Needs: impl, utest, itest
 
