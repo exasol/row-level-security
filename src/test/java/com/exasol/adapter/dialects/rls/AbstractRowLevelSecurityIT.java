@@ -24,8 +24,8 @@ import com.exasol.dbbuilder.*;
 
 @Tag("integration")
 @Testcontainers
-class RowLevelSecurityDialectIT {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RowLevelSecurityDialectIT.class);
+abstract class AbstractRowLevelSecurityIT {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRowLevelSecurityIT.class);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
@@ -34,6 +34,17 @@ class RowLevelSecurityDialectIT {
     private static AdapterScript adapterScript = null;
     private static ConnectionDefinition connectionDefinition = null;
     private static DatabaseObjectFactory factory = null;
+
+    /**
+     * Define the properties with which the Virtual Schema under test is created.
+     * <p>
+     * All derived classes must implement this in order to parameterize the execution of the test cases listed in this
+     * abstract class.
+     * </p>
+     *
+     * @return properties with which the Virtual Schema is created
+     */
+    protected abstract Map<String, String> getVirtualSchemaProperties();
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
@@ -92,7 +103,7 @@ class RowLevelSecurityDialectIT {
                 .adapterScript(adapterScript) //
                 .dialectName("EXASOL_RLS") //
                 .connectionDefinition(connectionDefinition) //
-                .properties(Map.of("IS_LOCAL", "true", "LOG_LEVEL", "ALL", "DEBUG_ADDRESS", "10.0.2.15:3000")) //
+                .properties(getVirtualSchemaProperties()) //
                 .sourceSchema(sourceSchema) //
                 .build();
     }

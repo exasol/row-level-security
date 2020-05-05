@@ -25,7 +25,7 @@ import com.exasol.containers.ExasolContainerConstants;
 @Tag("integration")
 @Testcontainers
 class QueryRuntimeIT {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OldRowLevelSecurityDialectIT.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryRuntimeIT.class);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
