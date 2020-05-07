@@ -13,7 +13,6 @@ import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -28,8 +27,7 @@ class QueryRuntimeIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryRuntimeIT.class);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
-                    .withLogConsumer(new Slf4jLogConsumer(LOGGER));
+            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
 
     @BeforeAll
     static void beforeAll() throws Exception {

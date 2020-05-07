@@ -10,9 +10,6 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -25,11 +22,9 @@ import com.exasol.dbbuilder.*;
 @Tag("integration")
 @Testcontainers
 abstract class AbstractRowLevelSecurityIT {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRowLevelSecurityIT.class);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE) //
-                    .withLogConsumer(new Slf4jLogConsumer(LOGGER));
+            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
     private static VirtualSchemaQueryChecker checker = null;
     private static AdapterScript adapterScript = null;
     private static ConnectionDefinition connectionDefinition = null;
