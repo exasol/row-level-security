@@ -18,6 +18,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
+import com.exasol.dbbuilder.*;
 
 // [itest->dsn~add-a-new-role~1]
 @Tag("integration")
@@ -36,10 +37,9 @@ public class AddRlsRoleIT {
         final Connection connection = container.createConnectionForUser(container.getUsername(),
                 container.getPassword());
         statement = connection.createStatement();
-        sqlTestSetupManager = new SqlTestSetupManager(statement);
-        sqlTestSetupManager.createTestSchema(RLS_SCHEMA_NAME);
-        sqlTestSetupManager.createScript(PATH_TO_EXA_RLS_BASE);
-        sqlTestSetupManager.createScript(PATH_TO_ADD_RLS_ROLE);
+        final DatabaseObjectFactory factory = new ExasolObjectFactory(connection);
+        final Schema scriptSchema = factory.createSchema("SCRIPT_SCHEMA");
+        scriptSchema.
     }
 
     // [itest->dsn~add-rls-role-creates-a-table~1]
