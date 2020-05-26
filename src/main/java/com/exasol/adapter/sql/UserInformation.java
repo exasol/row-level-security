@@ -122,7 +122,7 @@ public final class UserInformation {
      */
     public synchronized List<String> getGroups() throws SQLException {
         if (this.cachedGroups == null) {
-            final String sql = "SELECT \"EXA_GROUP\" FROM \"" + this.schemaName + "\".\"" + EXA_USER_GROUPS_TABLE_NAME
+            final String sql = "SELECT \"EXA_GROUP\" FROM \"" + this.schemaName + "\".\"" + EXA_GROUP_MEMBERS_TABLE_NAME
                     + "\" WHERE \"EXA_USER_NAME\"='" + this.currentUser + "'";
             try (final Statement statement = this.getConnection().createStatement()) {
                 try (final ResultSet result = statement.executeQuery(sql)) {
@@ -138,7 +138,7 @@ public final class UserInformation {
                     }
                     if (badGroups) {
                         LOGGER.warning(() -> "Ignored malformed groups of user \"" + this.currentUser
-                                + "\". Please make sure that entries in " + EXA_USER_GROUPS_TABLE_NAME
+                                + "\". Please make sure that entries in " + EXA_GROUP_MEMBERS_TABLE_NAME
                                 + " are neither NULL nor blank.");
                     }
                 }

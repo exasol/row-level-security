@@ -85,7 +85,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>hamcrest-resultset-matcher</artifactId>
-            <version>0.1.0</version>
+            <version>0.2.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -121,7 +121,7 @@
         <dependency>
            <groupId>com.exasol</groupId>
            <artifactId>test-db-builder-java</artifactId>
-           <version>0.1.0</version>
+           <version>0.2.0</version>
            <scope>test</scope>
         </dependency>
     </dependencies>

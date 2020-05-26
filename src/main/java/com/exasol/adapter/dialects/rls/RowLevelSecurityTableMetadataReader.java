@@ -15,7 +15,7 @@ import com.exasol.adapter.jdbc.ColumnMetadataReader;
  */
 public class RowLevelSecurityTableMetadataReader extends BaseTableMetadataReader {
     private static final List<String> HIDDEN_TABLES = List.of(EXA_RLS_USERS_TABLE_NAME, EXA_ROLES_MAPPING_TABLE_NAME,
-            EXA_USER_GROUPS_TABLE_NAME);
+            EXA_GROUP_MEMBERS_TABLE_NAME);
 
     /**
      * Create a new instance of a {@link RowLevelSecurityTableMetadataReader}.

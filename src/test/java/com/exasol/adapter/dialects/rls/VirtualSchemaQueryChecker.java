@@ -15,16 +15,15 @@ public final class VirtualSchemaQueryChecker {
     }
 
     public void assertUserQuery(final User user, final String sql, final Object[][] expectedResults) {
-        final Connection rlsConnection = logIn(user);
+        final Connection rlsConnection = logIn(user.getName(), user.getPassword());
         assertQueryResults(rlsConnection, sql, expectedResults);
     }
 
-    private Connection logIn(final User user) {
+    private Connection logIn(final String userName, final String password) {
         try {
-            return this.container.createConnectionForUser(user.getName(), user.getPassword());
+            return this.container.createConnectionForUser(userName, password);
         } catch (final SQLException exception) {
-            throw new AssertionError("Unable to prepare test. Logging in user \"" + user.getName() + "\" failed.",
-                    exception);
+            throw new AssertionError("Unable to prepare test. Logging in user \"" + userName + "\" failed.", exception);
         }
     }
 
@@ -79,7 +78,7 @@ public final class VirtualSchemaQueryChecker {
     }
 
     public void assertUserCanNotAccessTables(final User user, final Table... tables) {
-        final Connection rlsConnection = logIn(user);
+        final Connection rlsConnection = logIn(user.getName(), user.getPassword());
         final List<Table> hiddenTables = new ArrayList<>();
         for (final Table table : tables) {
             try {

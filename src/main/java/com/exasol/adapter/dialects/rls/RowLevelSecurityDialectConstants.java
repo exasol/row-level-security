@@ -14,7 +14,7 @@ public final class RowLevelSecurityDialectConstants {
     public static final String EXA_ROW_GROUP_COLUMN_NAME = "EXA_ROW_GROUP";
     public static final String EXA_RLS_USERS_TABLE_NAME = "EXA_RLS_USERS";
     public static final String EXA_ROLES_MAPPING_TABLE_NAME = "EXA_ROLES_MAPPING";
-    public static final String EXA_USER_GROUPS_TABLE_NAME = "EXA_USER_GROUPS";
+    public static final String EXA_GROUP_MEMBERS_TABLE_NAME = "EXA_GROUP_MEMBERS";
     public static final List<String> RLS_COLUMNS = List.of(EXA_ROW_ROLES_COLUMN_NAME, EXA_ROW_TENANT_COLUMN_NAME,
             EXA_ROW_GROUP_COLUMN_NAME);
 

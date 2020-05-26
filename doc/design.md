@@ -255,7 +255,7 @@ Covers:
 
 Needs: impl, itest
 
-#### `ASSIGN_ROLES_TO_USER` creates a table
+#### `ASSIGN_ROLES_TO_USER` Creates a Table
 `dsn~assign-roles-to-user-creates-a-table~1`
 
 `ASSIGN_ROLES_TO_USER` creates a table `EXA_RLS_USERS (EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK DECIMAL(18,0)` if it does not exist.
@@ -266,7 +266,7 @@ Covers:
 
 Needs: impl, itest
 
-#### `ASSIGN_ROLES_TO_USER` creates a role
+#### `ASSIGN_ROLES_TO_USER` Creates a Role
 `dsn~assign-roles-to-user-creates-a-role~1`
 
 `ASSIGN_ROLES_TO_USER` creates a new row with the user name and the role mask if the user name is not in the `EXA_RLS_USERS` table yet. 
@@ -278,7 +278,7 @@ Covers:
 
 Needs: impl, itest
 
-### Delete a role
+### Delete a Role
 `dsn~delete-a-role~1`
 
 Administrators delete existing roles using `DELETE_RLS_ROLE` with the following parameters:
@@ -291,7 +291,7 @@ Covers:
 
 Needs: impl, itest
 
-#### `DELETE_RLS_ROLE` removes a role from administrative tables
+#### `DELETE_RLS_ROLE` Removes a Role From Administrative Tables
 `dsn~delete-rls-role-removes-a-role-from-administrative-tables~1`
 
 `DELETE_RLS_ROLE` removes a role from `EXA_ROLES_MAPPING` and `EXA_RLS_USERS` tables if the role exists.
@@ -302,7 +302,7 @@ Covers:
 
 Needs: impl, itest
 
-#### `DELETE_RLS_ROLE` removes a role from roles-secured tables
+#### `DELETE_RLS_ROLE` Removes a Role From Roles-secured Tables
 `dsn~delete-rls-role-removes-a-role-from-roles-secured-tables~1`
 
 `DELETE_RLS_ROLE` removes a deleted role from all tables that contain `EXA_ROW_ROLES` column.
@@ -312,6 +312,31 @@ Covers:
 * `req~user-roles~1`
 
 Needs: impl, itest
+
+## Add a User to a Group
+
+#### `ADD_GROUP_MEMBER` Add a User to a Group
+`dsn~add-group-member-adds-a-user-to-a-group~1`
+
+`ADD_GROUP_MEMBER` adds a user to one or more given groups.
+
+Covers:
+
+* `req~user-groups~1`
+
+Needs: impl, itest
+
+#### `ADD_GROUP_MEMBER` Creates a Table
+`dsn~add-group-member-creates-a-table~1`
+
+`ADD_GROUP_MEMBER` creates the table `EXA_GROUP_MEMBERS (EXA_USER_NAME VARCHAR(128), EXA_GROUP VARCHAR(128))` if it does not exist.
+
+Covers:
+
+* `req~user-groups~1`
+
+Needs: impl, itest
+
 
 # Cross-cutting Concerns
 
