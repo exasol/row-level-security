@@ -1,7 +1,9 @@
 -- [impl->dsn~add-rls-role-creates-a-table~1]
 -- [impl->dsn~add-rls-roles-checks-parameters~1]
---/ [impl->dsn~assign-roles-to-user-creates-a-table~1]
+-- [impl->dsn~assign-roles-to-user-creates-a-table~1]
+--[[
 CREATE OR REPLACE SCRIPT EXA_RLS_BASE AS
+--]]
 query([[CREATE TABLE IF NOT EXISTS ::s.EXA_ROLES_MAPPING(ROLE_NAME VARCHAR(128), ROLE_ID DECIMAL(2,0))]],
       { s = exa.meta.script_schema })
 query([[CREATE TABLE IF NOT EXISTS ::s.EXA_RLS_USERS(EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK DECIMAL(20,0))]],
@@ -45,4 +47,6 @@ function get_roles_mask(roles)
    if roles_not_found_list ~= '' then error('The following roles were not found: '..roles_not_found_list..'.') end
    return role_mask
 end
+--[[
 /
+--]]
