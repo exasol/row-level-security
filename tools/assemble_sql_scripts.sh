@@ -20,7 +20,8 @@ else
     for script in $scripts ; do
         echo "Adding '$script'"
 	append "-- Script source '$(basename "$script")'"
-        sed -e's/ *\[impl->.*\].*//' -e's/^--$//' $script >> "$assembly"
+        #sed -e's/ *\[impl->.*\].*//' -e's/^--[][]*$//' $script >> "$assembly"
+        grep -vP '^--(/?\s*\[impl|\[\[|\]\])' "$script" >> "$assembly"
         append ";"
         append ""
     done
