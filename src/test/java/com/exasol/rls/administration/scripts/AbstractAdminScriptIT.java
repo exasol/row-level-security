@@ -1,50 +1,43 @@
 package com.exasol.rls.administration.scripts;
 
-import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.file.Path;
 import java.sql.*;
 
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
-import com.exasol.containers.ExasolContainerConstants;
 import com.exasol.dbbuilder.*;
 
-@Testcontainers
-public class AbstractAdminScriptIT {
-    @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
-    private static Statement statement;
-    private static Connection connection;
+public abstract class AbstractAdminScriptIT {
+    protected static Schema schema;
     protected static Script script;
     protected static DatabaseObjectFactory factory;
 
-    protected static synchronized Connection getConnection() throws NoDriverFoundException, SQLException {
-        if (connection == null) {
-            connection = container.createConnection("");
-        }
-        return connection;
-    }
-
-    protected static Statement getStatement() throws NoDriverFoundException, SQLException {
-        if (statement == null) {
-            statement = getConnection().createStatement();
-        }
-        return statement;
-    }
-
-    protected static void intitializeScript(final String scriptName, final Path scriptPath) throws SQLException {
-        factory = new ExasolObjectFactory(getConnection());
-        final Schema schema = factory.createSchema(scriptName + "_SCHEMA");
-        factory.executeSqlFile(PATH_TO_EXA_RLS_BASE, scriptPath);
+    protected static void initialize(final ExasolContainer<? extends ExasolContainer<?>> container,
+            final String scriptName, final Path... scriptFilePaths) throws SQLException {
+        final Connection connection = container.createConnection("");
+        factory = new ExasolObjectFactory(connection);
+        schema = factory.createSchema(scriptName + "_SCHEMA");
+        factory.executeSqlFile(scriptFilePaths);
         script = schema.getScript(scriptName);
     }
 
+    protected abstract Connection getConnection() throws NoDriverFoundException, SQLException;
+
+    protected void execute(final String sql) throws SQLException {
+        getConnection().createStatement().execute(sql);
+    }
+
     protected ResultSet query(final String sql) throws SQLException {
-        return getStatement().executeQuery(sql);
+        return getConnection().createStatement().executeQuery(sql);
+    }
+
+    protected static void assertScriptThrows(final String expectedMessageFragment, final Object... parameters) {
+        final Throwable exception = assertThrows(DatabaseObjectException.class, () -> script.execute(parameters));
+        assertThat(exception.getCause().getMessage(), containsString(expectedMessageFragment));
     }
 }

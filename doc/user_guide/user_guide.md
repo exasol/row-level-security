@@ -212,7 +212,13 @@ EXECUTE SCRIPT LIST_RLS_GROUPS();
 To add a user named `BOB` to the RLS group `COWORKERS`, run the following command:
 
 ```sql
-EXECUTE SCRIPT ADD_RLS_GROUP_MEMBER(`COWORKERS`, `BOB`);
+EXECUTE SCRIPT ADD_USER_TO_GROUP('BOB', ARRAY('COWORKERS'));
+```
+
+Thanks to the array, you can also add the same user to multiple groups at the same time.
+
+```sql
+EXECUTE SCRIPT ADD_USER_TO_GROUP('BOB', ARRAY('COWORKERS', 'DEVELOPERS'));
 ```
 
 #### Removing a User From a Group
@@ -220,7 +226,7 @@ EXECUTE SCRIPT ADD_RLS_GROUP_MEMBER(`COWORKERS`, `BOB`);
 To remove the user `BOB` from the RLS group `COWORKERS`) run:
 
 ```sql
-EXECUTE SCRIPT REMOVE_RLS_GROUP_MEMBER(`COWORKERS`, `BOB`);
+EXECUTE SCRIPT REMOVE_USER_FROM_GROUP('BOB', ARRAY('COWORKERS'));
 ```
 
 #### Protecting a Table With Group-based RLS

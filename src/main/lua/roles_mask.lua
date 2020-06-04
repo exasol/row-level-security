@@ -1,6 +1,6 @@
 -- [impl->dsn~get-a-role-mask~1]
 --[[
-CREATE OR REPLACE LUA SET SCRIPT roles_mask(role_id int) RETURNS INT AS
+CREATE OR REPLACE LUA SET SCRIPT ROLES_MASK(role_id int) RETURNS INT AS
 --]]
 function run(ctx)
    roles_mask = 0

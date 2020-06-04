@@ -19,8 +19,7 @@ if [[ $# < 2 ]]; then
 else
     for script in $scripts ; do
         echo "Adding '$script'"
-	append "-- Script source '$(basename "$script")'"
-        #sed -e's/ *\[impl->.*\].*//' -e's/^--[][]*$//' $script >> "$assembly"
+	    append "-- Script source '$(basename "$script")'"
         grep -vP '^--(/?\s*\[impl|\[\[|\]\])' "$script" >> "$assembly"
         append ";"
         append ""

@@ -229,6 +229,7 @@ Needs: impl, itest
 Covers:
 
 * `req~user-roles~1`
+* `constr~bit-wise-functions-limited-to-64-bits~1`
 
 Needs: impl, itest
 
@@ -240,6 +241,8 @@ Administrators get role masks using `ROLES_MASK` with the following parameters:
 * List of role names
 
 `ROLES_MASK` returns a decimal value.
+
+Needs: impl, itest
 
 ### Assign roles to a user
 `dsn~assign-roles-to-a-user~1`
@@ -315,28 +318,84 @@ Needs: impl, itest
 
 ## Add a User to a Group
 
-#### `ADD_GROUP_MEMBER` Add a User to a Group
-`dsn~add-group-member-adds-a-user-to-a-group~1`
+#### `ADD_USER_TO_GROUP` Adds a User to a Group
+`dsn~add-user-to-group~1`
 
-`ADD_GROUP_MEMBER` adds a user to one or more given groups.
-
-Covers:
-
-* `req~user-groups~1`
-
-Needs: impl, itest
-
-#### `ADD_GROUP_MEMBER` Creates a Table
-`dsn~add-group-member-creates-a-table~1`
-
-`ADD_GROUP_MEMBER` creates the table `EXA_GROUP_MEMBERS (EXA_USER_NAME VARCHAR(128), EXA_GROUP VARCHAR(128))` if it does not exist.
+`ADD_USER_TO_GROUP` adds a user to one or more given groups.
 
 Covers:
 
-* `req~user-groups~1`
+* `req~assigning-users-to-groups ~1`
 
 Needs: impl, itest
 
+#### `ADD_USER_TO_GROUP` Creates Group Member Table
+`dsn~adding-user-to-group-creates-member-table~1`
+
+`ADD_USER_TO_GROUP` creates the table `EXA_GROUP_MEMBERS (EXA_USER_NAME VARCHAR(128), EXA_GROUP VARCHAR(128))` if it does not exist.
+
+Covers:
+
+* `req~assigning-users-to-groups ~1`
+
+Needs: impl, itest
+
+#### `ADD_USER_TO_GROUP` Validates User Name
+`dsn~add-user-to-group-validates-user-name~1`
+
+`ADD_USER_TO_GROUP` validates that the user name is a valid Exasol identifier before adding the user to groups.
+
+Covers:
+
+* `req~assigning-users-to-groups ~1`
+
+Needs: impl, itest
+
+#### `ADD_USER_TO_GROUP` Validates Group Names
+`dsn~add-user-to-group-validates-group-names~1`
+
+`ADD_USER_TO_GROUP` validates that the group names are all valid Exasol identifier before adding the user to groups.
+
+Covers:
+
+* `req~assigning-users-to-groups ~1`
+
+Needs: impl, itest
+
+## Remove a User From a Group
+
+#### `REMOVE_USER_FROM_GROUP` Removes a User From a Group
+`dsn~remove-user-from-group~1`
+
+`REMOVE_USER_FROM_GROUP` adds a user to one or more given groups.
+
+Covers:
+
+* `req~removing-users-from-groups~1`
+
+Needs: impl, itest
+
+#### `REMOVE_USER_FROM_GROUP` Validates User Name
+`dsn~remove-user-from-group-validates-user-name~1`
+
+`REMOVE_USER_FROM_GROUP` validates that the user name is a valid Exasol identifier before adding the user to groups.
+
+Covers:
+
+* `req~removing-users-from-groups~1`
+
+Needs: impl, itest
+
+#### `REMOVE_USER_FROM_GROUP` Validates Group Names
+`dsn~remove-user-from-group-validates-group-names~1`
+
+`REMOVE_USER_FROM_GROUP` validates that the group names are all valid Exasol identifier before adding the user to groups.
+
+Covers:
+
+* `req~removing-users-from-groups~1`
+
+Needs: impl, itest
 
 # Cross-cutting Concerns
 
@@ -374,7 +433,7 @@ This allows using bit-wise operators in role checks which are very efficient. It
 Covers:
 
 * `req~user-roles~1`
-* `const~bit-wise-functions-limited-to-64-bits~1`
+* `constr~bit-wise-functions-limited-to-64-bits~1`
 
 Needs: impl, utest
 

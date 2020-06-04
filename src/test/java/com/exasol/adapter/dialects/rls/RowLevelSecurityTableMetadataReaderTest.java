@@ -25,7 +25,7 @@ class RowLevelSecurityTableMetadataReaderTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "EXA_RLS_USERS", "EXA_ROLES_MAPPING", "EXA_USER_GROUPS" })
+    @ValueSource(strings = { "EXA_RLS_USERS", "EXA_ROLES_MAPPING", "EXA_GROUP_MEMBERS" })
     void testIsTableIncludedByMappingFalse(final String tableName) {
         assertThat(this.metadataReader.isTableIncludedByMapping(tableName), equalTo(false));
     }

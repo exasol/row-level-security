@@ -137,6 +137,17 @@ Covers:
 
 Needs: dsn
 
+#### Removing Users From Groups
+`req~removing-users-from-groups~1`
+
+Data Owners remove users for one or groups they are currently a member of.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
 #### Tables With Group Restrictions
 `req~tables-with-group-restrictions~1`
 
@@ -145,6 +156,21 @@ Data Owners can define a single group for each row in the table that has access.
 Rationale:
 
 This allows an arbitrary number of users to share read from the same table.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+#### Listing Groups
+`req~listing-groups~1`
+
+Data owners can list all existing groups.
+
+Rationale:
+
+This allows data owner to see if a group already exists.
 
 Covers:
 
@@ -235,7 +261,7 @@ Needs: dsn
 ##### RLS-protected Query Execution Time
 `qr~rls-protected-query-execution-time~1`
 
-The Performance degradation caused by and RLS-protected query compared to the same query without RLS is below the greater of
+The Performance degradation caused by an RLS-protected query compared to the same query without RLS is below the greater of
 
 * two seconds or
 * 10%
@@ -250,4 +276,4 @@ Covers:
 
 * [qg~affordable-performance-hit~1](#affordable-performance-hit)
 
-Needs: dsn
+Needs: qs

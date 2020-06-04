@@ -22,6 +22,7 @@ import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
 
 @Tag("integration")
+@Tag("virtual-schema")
 @Testcontainers
 class QueryRuntimeIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryRuntimeIT.class);

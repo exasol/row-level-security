@@ -1,20 +1,21 @@
 package com.exasol.rls.administration.scripts;
 
-import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
-import static com.exasol.tools.TestsConstants.*;
-import static org.hamcrest.CoreMatchers.containsString;
+import static com.exasol.matcher.ResultSetStructureMatcher.table;
+import static com.exasol.tools.TestsConstants.PATH_TO_ASSIGN_ROLES_TO_USER;
+import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.stream.Stream;
 
-import com.exasol.tools.SqlTestSetupManager;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -24,76 +25,77 @@ import com.exasol.containers.ExasolContainerConstants;
 // [itest->dsn~assign-roles-to-a-user~1]
 @Tag("integration")
 @Testcontainers
-public class AssignRolesToUserIT {
+public class AssignRolesToUserIT extends AbstractAdminScriptIT {
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_RLS_USERS = "EXA_RLS_USERS";
-    private static final String EXA_RLS_USERS_PROJECTION = "EXA_RLS_USERS_PROJECTION";
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
-    private static Statement statement;
-    private static SqlTestSetupManager sqlTestSetupManager;
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        final Connection connection = container.createConnectionForUser(container.getUsername(),
-                container.getPassword());
-        statement = connection.createStatement();
-        sqlTestSetupManager = new SqlTestSetupManager(statement);
-        sqlTestSetupManager.createTestSchema(RLS_SCHEMA_NAME);
-        sqlTestSetupManager.createScript(PATH_TO_EXA_RLS_BASE);
-        sqlTestSetupManager.createScript(PATH_TO_ASSIGN_ROLES_TO_USER);
-        sqlTestSetupManager.createExaRolesMappingProjection(EXA_ROLES_MAPPING,
-                "('Sales', 1), ('Development', 2), ('Finance', 3),  ('Support', 4)");
+        initialize(container, "ASSIGN_ROLES_TO_USER", PATH_TO_EXA_RLS_BASE, PATH_TO_ASSIGN_ROLES_TO_USER);
+        schema.createTable(EXA_ROLES_MAPPING, "ROLE_NAME", "VARCHAR(128)", "ROLE_ID", "DECIMAL(2,0)") //
+                .insert("Sales", 1) //
+                .insert("Development", 2) //
+                .insert("Finance", 3) //
+                .insert("Support", 4);
+    }
+
+    @AfterEach
+    void afterEach() throws SQLException {
+        execute("DROP TABLE IF EXISTS " + getUserTableName());
+    }
+
+    private String getUserTableName() {
+        return schema.getFullyQualifiedName() + "." + EXA_RLS_USERS;
+    }
+
+    @Override
+    protected Connection getConnection() throws NoDriverFoundException, SQLException {
+        return container.createConnection("");
     }
 
     // [itest->dsn~assign-roles-to-user-creates-a-table~1]
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]
     @ParameterizedTest
     @MethodSource("provideValuesForTestAssignRolesToUser")
-    void testAssignRolesToUser(final String rolesToAssign, final int maskValue) throws SQLException {
-        final SQLException thrown = assertThrows(SQLException.class,
-                () -> statement.execute("SELECT * FROM " + EXA_RLS_USERS));
-        assertThat(thrown.getMessage(), containsString("object EXA_RLS_USERS not found"));
-        statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY(" + rolesToAssign + "))");
-        sqlTestSetupManager.createExaRlsUsersProjection(EXA_RLS_USERS_PROJECTION, "('RLS_USR_1', " + maskValue + ")");
-        final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS_PROJECTION);
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS);
-        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
-        sqlTestSetupManager.cleanUpTables(EXA_RLS_USERS_PROJECTION, EXA_RLS_USERS);
+    void testAssignRolesToUser(final List<String> rolesToAssign, final int maskValue) throws SQLException {
+        script.execute("MONICA", rolesToAssign);
+        assertThat(query("SELECT EXA_USER_NAME, EXA_ROLE_MASK FROM " + getUserTableName()), table() //
+                .row("MONICA", maskValue) //
+                .matchesFuzzily());
     }
 
     private static Stream<Arguments> provideValuesForTestAssignRolesToUser() {
-        return Stream.of(Arguments.of("'Sales'", 1), //
-                Arguments.of("'Sales', 'Development'", 3), //
-                Arguments.of("'Sales', 'Support'", 9), //
-                Arguments.of("'Sales', 'Development', 'Finance', 'Support'", 15));
+        return Stream.of(Arguments.of(List.of("Sales"), 1), //
+                Arguments.of(List.of("Sales", "Development"), 3), //
+                Arguments.of(List.of("Sales", "Support"), 9), //
+                Arguments.of(List.of("Sales", "Development", "Finance", "Support"), 15));
     }
 
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]
     @Test
     void testAssignRolesToUserUpdatesUserRoles() throws SQLException {
-        statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Sales', 'Development'))");
-        statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY('Sales'))");
-        sqlTestSetupManager.createExaRlsUsersProjection(EXA_RLS_USERS_PROJECTION, "('RLS_USR_1', 1)");
-        final ResultSet expectedResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS_PROJECTION);
-        final ResultSet actualResultSet = statement.executeQuery("SELECT * FROM " + EXA_RLS_USERS);
-        assertThat(actualResultSet, matchesResultSet(expectedResultSet));
-        sqlTestSetupManager.cleanUpTables(EXA_RLS_USERS_PROJECTION, EXA_RLS_USERS);
+        script.execute("NORBERT", List.of("Sales", "Development"));
+        script.execute("NORBERT", List.of("Sales"));
+        assertThat(query("SELECT EXA_USER_NAME, EXA_ROLE_MASK FROM " + getUserTableName()), table() //
+                .row("NORBERT", 1) //
+                .matchesFuzzily());
     }
 
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]
     @ParameterizedTest
     @MethodSource("provideValuesForTestAssignUnknownRoleToUserThrowsRoleNotFoundException")
-    void testAssignUnknownRoleToUserThrowsRoleNotFoundException(final String allRoles, final String unknownRoles) {
-        final SQLException thrown = assertThrows(SQLException.class,
-                () -> statement.execute("EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_1', ARRAY(" + allRoles + "))"));
-        assertThat(thrown.getMessage(), containsString("The following roles were not found: " + unknownRoles));
+    void testAssignUnknownRoleToUserThrowsRoleNotFoundException(final List<String> allRoles,
+            final List<String> unknownRoles) {
+        assertScriptThrows("The following roles were not found: " + String.join(", ", unknownRoles), "THE_USER",
+                allRoles);
     }
 
     private static Stream<Arguments> provideValuesForTestAssignUnknownRoleToUserThrowsRoleNotFoundException() {
-        return Stream.of(Arguments.of("'Cats'", "Cats"), //
-                Arguments.of("'Cats', 'Sales'", "Cats"), //
-                Arguments.of("'Sales', 'Cats', 'Dogs'", "Dogs, Cats"));
+        return Stream.of(Arguments.of(List.of("Cats"), List.of("Cats")), //
+                Arguments.of(List.of("Cats", "Sales"), List.of("Cats")), //
+                Arguments.of(List.of("Sales", "Cats", "Dogs"), List.of("Dogs", "Cats")));
     }
 }

@@ -2,8 +2,8 @@ package com.exasol.rls.administration.scripts;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_GROUP_MEMBERS_TABLE_NAME;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
-import static com.exasol.tools.TestsConstants.PATH_TO_ADD_USER_TO_GROUP;
 import static com.exasol.tools.TestsConstants.PATH_TO_EXA_IDENTIFIER;
+import static com.exasol.tools.TestsConstants.PATH_TO_REMOVE_USER_FROM_GROUP;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -20,25 +20,29 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
+import com.exasol.dbbuilder.Table;
 
 @Testcontainers
 @Tag("integration")
-public class AddUserToGroupIT extends AbstractAdminScriptIT {
+public class RemoveUserFromGroupIT extends AbstractAdminScriptIT {
     @Container
     static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
+    private Table memberTable;
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        initialize(container, "ADD_USER_TO_GROUP", PATH_TO_EXA_IDENTIFIER, PATH_TO_ADD_USER_TO_GROUP);
+        initialize(container, "REMOVE_USER_FROM_GROUP", PATH_TO_EXA_IDENTIFIER, PATH_TO_REMOVE_USER_FROM_GROUP);
+    }
+
+    @BeforeEach
+    void beforeEach() {
+        this.memberTable = schema.createTable(EXA_GROUP_MEMBERS_TABLE_NAME, "EXA_USER_NAME", "VARCHAR(128)",
+                "EXA_GROUP", "VARCHAR(128)");
     }
 
     @AfterEach
     void afterEach() throws SQLException {
-        execute("DELETE FROM " + getGroupMembersTableName());
-    }
-
-    private String getGroupMembersTableName() {
-        return schema.getFullyQualifiedName() + "." + EXA_GROUP_MEMBERS_TABLE_NAME;
+        execute("DROP TABLE " + this.memberTable.getFullyQualifiedName());
     }
 
     @Override
@@ -46,20 +50,19 @@ public class AddUserToGroupIT extends AbstractAdminScriptIT {
         return container.createConnection("");
     }
 
-    // [itest->dsn~add-user-to-group~1]
-    // [itest->dsn~adding-user-to-group-creates-member-table~1]
     @Test
-    void testAddUserToGroup() throws SQLException {
-        factory.createLoginUser("ROLF");
-        factory.createLoginUser("GABI");
-        script.execute("ROLF", List.of("HANDCRAFTERS", "COLLECTORS"));
-        script.execute("GABI", List.of("ARTISTS", "HANDCRAFTERS"));
-        assertThat(query("SELECT * FROM " + getGroupMembersTableName() + " ORDER BY EXA_USER_NAME, EXA_GROUP"), //
+    void testRemoveUserFromGroup() throws SQLException {
+        this.memberTable.insert("ROLF", "ARTISTS") //
+                .insert("ROLF", "HANDCRAFTERS") //
+                .insert("ROLF", "TEACHERS") //
+                .insert("GABI", "HANDCRAFTERS");
+        script.execute("ROLF", List.of("ARTISTS", "HANDCRAFTERS"));
+        assertThat(
+                query("SELECT * FROM " + this.memberTable.getFullyQualifiedName()
+                        + " ORDER BY EXA_USER_NAME, EXA_GROUP"), //
                 table("VARCHAR", "VARCHAR") //
-                        .row("GABI", "ARTISTS") //
                         .row("GABI", "HANDCRAFTERS") //
-                        .row("ROLF", "COLLECTORS") //
-                        .row("ROLF", "HANDCRAFTERS") //
+                        .row("ROLF", "TEACHERS") //
                         .matches());
     }
 
@@ -68,25 +71,31 @@ public class AddUserToGroupIT extends AbstractAdminScriptIT {
                 "$STARTS_WITH_SPECIAL_CHAR", null);
     }
 
-    // [itest->dsn~add-user-to-group-validates-user-name~1]
-    @CsvSource({ "'',<null>", "'   ','\"   \"'", "' LEADING_SPACE','\" LEADING_SPACE\"'",
-            "'TRAILING_SPACE ', '\"TRAILING_SPACE \"'", "'CONTAINS SPACE','\"CONTAINS SPACE\"'",
-            "'CONTAINS-DASH','\"CONTAINS-DASH\"'", "'$STARTS_WITH_SPECIAL_CHAR','\"$STARTS_WITH_SPECIAL_CHAR\"'",
+    @CsvSource({ "'',<null>", //
+            "'   ','\"   \"'", //
+            "' LEADING_SPACE','\" LEADING_SPACE\"'", //
+            "'TRAILING_SPACE ', '\"TRAILING_SPACE \"'", //
+            "'CONTAINS SPACE','\"CONTAINS SPACE\"'", //
+            "'CONTAINS-DASH','\"CONTAINS-DASH\"'", //
+            "'$STARTS_WITH_SPECIAL_CHAR','\"$STARTS_WITH_SPECIAL_CHAR\"'", //
             ",'<null>'" })
     @ParameterizedTest
-    void testAddUserToGroupValidatesUserName(final String identifier, final String mangledIdentifier) {
+    void testRemoveUserFromGroupValidatesUserName(final String identifier, final String mangledIdentifier) {
         assertScriptThrows(
                 "Invalid username " + mangledIdentifier
                         + ". Must be a valid identifier (numbers, letters and underscores only).",
                 identifier, List.of("IRRELEVANT"));
     }
 
-    // [itest->dsn~add-user-to-group-validates-group-names~1]
-    @CsvSource({ "'',<null>", "'   ','\"   \"'", "' LEADING_SPACE','\" LEADING_SPACE\"'",
-            "'TRAILING_SPACE ', '\"TRAILING_SPACE \"'", "'CONTAINS SPACE','\"CONTAINS SPACE\"'",
-            "'CONTAINS-DASH','\"CONTAINS-DASH\"'", "'$STARTS_WITH_SPECIAL_CHAR','\"$STARTS_WITH_SPECIAL_CHAR\"'" })
+    @CsvSource({ "'',<null>", //
+            "'   ','\"   \"'", //
+            "' LEADING_SPACE','\" LEADING_SPACE\"'", //
+            "'TRAILING_SPACE ', '\"TRAILING_SPACE \"'", //
+            "'CONTAINS SPACE','\"CONTAINS SPACE\"'", //
+            "'CONTAINS-DASH','\"CONTAINS-DASH\"'", //
+            "'$STARTS_WITH_SPECIAL_CHAR','\"$STARTS_WITH_SPECIAL_CHAR\"'" })
     @ParameterizedTest
-    void testAddUserToGroupValidatesGroups(final String identifier, final String mangledIdentifier) {
+    void testRemoveUserFromGroupValidatesGroups(final String identifier, final String mangledIdentifier) {
         assertScriptThrows("Groups found that are not valid identifiers (numbers, letters and underscores only): "
                 + mangledIdentifier, "THE_USER", List.of("GROUP_A", identifier, "GROUP_C"));
     }

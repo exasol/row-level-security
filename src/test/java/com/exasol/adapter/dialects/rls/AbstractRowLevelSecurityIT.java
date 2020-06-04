@@ -20,6 +20,7 @@ import com.exasol.containers.ExasolContainerConstants;
 import com.exasol.dbbuilder.*;
 
 @Tag("integration")
+@Tag("virtual-schema")
 @Testcontainers
 abstract class AbstractRowLevelSecurityIT {
     @Container
@@ -111,7 +112,7 @@ abstract class AbstractRowLevelSecurityIT {
                 .insert("Moskow", "COLD") //
                 .insert("Horta", "MODERATE") //
                 .insert("Rio", "HOT");
-        sourceSchema.createTable("EXA_USER_GROUPS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_GROUP", "VARCHAR(128)") //
+        sourceSchema.createTable("EXA_GROUP_MEMBERS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_GROUP", "VARCHAR(128)") //
                 .insert("USER_G", "COLD") //
                 .insert("USER_G", "MODERATE");
         final VirtualSchema virtualSchema = installVirtualSchema("VS_GROUP", sourceSchema);
@@ -158,7 +159,7 @@ abstract class AbstractRowLevelSecurityIT {
     @Test
     void testTablesHiddenThroughVirtualSchema() {
         final Schema sourceSchema = factory.createSchema("HIDDEN_TABLES_SCHEMA");
-        final Table groupTable = sourceSchema.createTable("EXA_USER_GROUPS", "EXA_USER_NAME", "VARCHAR(128)",
+        final Table groupTable = sourceSchema.createTable("EXA_GROUP_MEMBERS", "EXA_USER_NAME", "VARCHAR(128)",
                 "EXA_GROUP", "VARCHAR(128)");
         final Table userTable = sourceSchema.createTable("EXA_RLS_USERS", "EXA_USER_NAME", "VARCHAR(128)",
                 "EXA_ROLE_MASK", "DECIMAL(20)");

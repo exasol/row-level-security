@@ -3,30 +3,49 @@ package com.exasol.rls.administration.scripts;
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROLES_MAPPING_TABLE_NAME;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static com.exasol.tools.TestsConstants.PATH_TO_ADD_RLS_ROLE;
+import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.exasol.containers.ExasolContainer;
 import com.exasol.dbbuilder.DatabaseObjectException;
 
 // [itest->dsn~add-a-new-role~1]
 @Tag("integration")
+@Testcontainers
 public class AddRlsRoleIT extends AbstractAdminScriptIT {
+    @Container
+    static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
+
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        intitializeScript("ADD_RLS_ROLE", PATH_TO_ADD_RLS_ROLE);
+        initialize(container, "ADD_RLS_ROLE", PATH_TO_EXA_RLS_BASE, PATH_TO_ADD_RLS_ROLE);
     }
 
     @AfterEach
     void afterEach() throws SQLException {
-        getStatement().execute("DELETE FROM " + EXA_ROLES_MAPPING_TABLE_NAME);
+        execute("DELETE FROM " + getRolesMappingTableName());
+    }
+
+    private String getRolesMappingTableName() {
+        return schema.getFullyQualifiedName() + "." + EXA_ROLES_MAPPING_TABLE_NAME;
+    }
+
+    @Override
+    protected Connection getConnection() throws NoDriverFoundException, SQLException {
+        return container.createConnection("");
     }
 
     // [itest->dsn~add-rls-role-creates-a-table~1]
@@ -35,7 +54,7 @@ public class AddRlsRoleIT extends AbstractAdminScriptIT {
         script.execute("Sales", 1);
         script.execute("Development", 2);
         script.execute("Finance", 3);
-        assertThat(query("SELECT * FROM " + EXA_ROLES_MAPPING_TABLE_NAME), //
+        assertThat(query("SELECT * FROM " + getRolesMappingTableName()), //
                 table("VARCHAR", "SMALLINT") //
                         .row("Sales", (short) 1) //
                         .row("Development", (short) 2) //
