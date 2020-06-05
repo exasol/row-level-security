@@ -10,6 +10,7 @@ import java.sql.*;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
@@ -23,6 +24,7 @@ import com.exasol.containers.ExasolContainerConstants;
 
 @Tag("integration")
 @Tag("virtual-schema")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true") // CI is usually to slow for a realistic result
 @Testcontainers
 class QueryRuntimeIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryRuntimeIT.class);
