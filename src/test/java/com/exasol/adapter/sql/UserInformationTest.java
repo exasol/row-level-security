@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.jdbc.ConnectionFactory;
+import com.exasol.db.ExasolIdentifier;
 
 @ExtendWith(MockitoExtension.class)
 class UserInformationTest {
@@ -32,7 +33,8 @@ class UserInformationTest {
     @BeforeEach
     void beforeEach() throws SQLException {
         when(this.connectionFactoryMock.getConnection()).thenReturn(this.connectionMock);
-        this.userInformation = new UserInformation("sys", "schema", this.connectionFactoryMock);
+        this.userInformation = new UserInformation(ExasolIdentifier.of("sys"), ExasolIdentifier.of("schema"),
+                this.connectionFactoryMock);
     }
 
     @Test

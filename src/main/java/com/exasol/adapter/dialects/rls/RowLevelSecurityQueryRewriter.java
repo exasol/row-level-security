@@ -17,6 +17,7 @@ import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.metadata.DataType.ExaCharset;
 import com.exasol.adapter.sql.*;
+import com.exasol.db.ExasolIdentifier;
 
 /**
  * RLS-specific query rewriter.
@@ -62,8 +63,8 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
             final AdapterProperties properties) throws SQLException, AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) statement;
         final String schemaName = properties.getSchemaName();
-        final UserInformation userInformation = new UserInformation(exaMetadata.getCurrentUser(), schemaName,
-                this.connectionFactory);
+        final UserInformation userInformation = new UserInformation(ExasolIdentifier.of(exaMetadata.getCurrentUser()),
+                ExasolIdentifier.of(schemaName), this.connectionFactory);
         final String tableName = ((SqlTable) select.getFromClause()).getName();
         final TableProtectionDetails protection = this.tableProtectionStatus.getTableProtectionDetails(tableName);
         logTableProtectionInfo(tableName, protection);
@@ -174,7 +175,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     private SqlNode createTenantsNode(final UserInformation userInformation) {
         final SqlNode left = new SqlColumn(1,
                 ColumnMetadata.builder().name(EXA_ROW_TENANT_COLUMN_NAME).type(DataType.createDecimal(20, 0)).build());
-        final SqlNode right = new SqlLiteralString(userInformation.getCurrentUser());
+        final SqlNode right = new SqlLiteralString(userInformation.getCurrentUser().toString());
         return new SqlPredicateEqual(left, right);
     }
 

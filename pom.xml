@@ -120,10 +120,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-           <groupId>com.exasol</groupId>
-           <artifactId>test-db-builder-java</artifactId>
-           <version>0.2.0</version>
-           <scope>test</scope>
+            <groupId>com.exasol</groupId>
+            <artifactId>test-db-builder-java</artifactId>
+            <version>0.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.jqno.equalsverifier</groupId>
+            <artifactId>equalsverifier</artifactId>
+            <version>3.3</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

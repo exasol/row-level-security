@@ -10,14 +10,15 @@ import java.util.logging.Logger;
 
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
+import com.exasol.db.Identifier;
 
 /**
  * This class collect information about a user's roles.
  */
 public final class UserInformation {
     private static final Logger LOGGER = Logger.getLogger(UserInformation.class.getName());
-    private final String schemaName;
-    private final String currentUser;
+    private final Identifier schemaName;
+    private final Identifier currentUser;
     private final ConnectionFactory connectionFactory;
     private String cachedRoleMask = null;
     private List<String> cachedGroups = null;
@@ -30,7 +31,7 @@ public final class UserInformation {
      * @param schemaName        mane of the schema
      * @param connectionFactory factory for JDBC database connections
      */
-    public UserInformation(final String currentUser, final String schemaName,
+    public UserInformation(final Identifier currentUser, final Identifier schemaName,
             final ConnectionFactory connectionFactory) {
         this.schemaName = schemaName;
         this.currentUser = currentUser;
@@ -42,7 +43,7 @@ public final class UserInformation {
      *
      * @return current session's user
      */
-    public String getCurrentUser() {
+    public Identifier getCurrentUser() {
         return this.currentUser;
     }
 
@@ -54,10 +55,14 @@ public final class UserInformation {
     public synchronized String getRoleMask() {
         if (this.cachedRoleMask == null) {
             final String query = "SELECT EXA_ROLE_MASK FROM " + this.schemaName + "." + EXA_RLS_USERS_TABLE_NAME
-                    + " WHERE EXA_USER_NAME = '" + this.currentUser + "'";
-            try (final ResultSet resultSet = getConnection().prepareStatement(query).executeQuery()) {
-                final long mask = setUserMask(resultSet);
-                this.cachedRoleMask = toUnsignedString(mask);
+                    + " WHERE EXA_USER_NAME = ?";
+            try (final PreparedStatement statement = getConnection().prepareStatement(query)) {
+                statement.setString(1, this.currentUser.toString());
+                try (final ResultSet resultSet = statement.executeQuery()) {
+                    final long mask = setUserMask(resultSet);
+                    this.cachedRoleMask = toUnsignedString(mask);
+
+                }
             } catch (final SQLException exception) {
                 throw new RemoteMetadataReaderException("Unable to read role mask from " + EXA_RLS_USERS_TABLE_NAME
                         + ". Caused by: " + exception.getMessage(), exception);

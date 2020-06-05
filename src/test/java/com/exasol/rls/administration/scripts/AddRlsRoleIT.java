@@ -4,9 +4,7 @@ import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.E
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static com.exasol.tools.TestsConstants.PATH_TO_ADD_RLS_ROLE;
 import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -20,7 +18,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
-import com.exasol.dbbuilder.DatabaseObjectException;
 
 // [itest->dsn~add-a-new-role~1]
 @Tag("integration")
@@ -66,27 +63,21 @@ public class AddRlsRoleIT extends AbstractAdminScriptIT {
     @Test
     void testAddRlsRoleExistingIdException() throws SQLException {
         script.execute("Sales", 1);
-        final Throwable thrown = assertThrows(DatabaseObjectException.class, () -> script.execute("Finance", 1))
-                .getCause();
-        assertThat(thrown.getMessage(), containsString("Role id 1 already exists (role name \"Sales\")."));
+        assertScriptThrows("Role id 1 already exists (role name \"Sales\").", "Finance", 1);
     }
 
     // [itest->dsn~add-rls-roles-checks-parameters~1]
     @ParameterizedTest
     @ValueSource(strings = { "SALES", "Sales", "sales" })
-    void testAddRlsRoleExistingNameException(final String role_name) throws SQLException {
+    void testAddRlsRoleExistingNameException(final String roleName) throws SQLException {
         script.execute("Sales", 1);
-        final Throwable thrown = assertThrows(DatabaseObjectException.class,
-                () -> script.execute(script.execute(role_name, 2))).getCause();
-        assertThat(thrown.getMessage(), containsString("Role name \"" + role_name + "\" already exists (role id 1)."));
+        assertScriptThrows("Role name \"" + roleName + "\" already exists (role id 1).", roleName, 2);
     }
 
     // [itest->dsn~add-rls-roles-checks-parameters~1]
     @ParameterizedTest
     @ValueSource(ints = { -5, 0, 64, 70 })
     void testAddRlsRoleInvalidRoleIdException(final int rlsRole) throws SQLException {
-        final Throwable thrown = assertThrows(DatabaseObjectException.class, () -> script.execute("Sales", rlsRole))
-                .getCause();
-        assertThat(thrown.getMessage(), containsString("Invalid role id. Role id must be between 1 and 63."));
+        assertScriptThrows("Invalid role id. Role id must be between 1 and 63.", "Sales", rlsRole);
     }
 }
