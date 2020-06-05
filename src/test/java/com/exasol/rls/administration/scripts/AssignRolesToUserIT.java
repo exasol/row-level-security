@@ -25,7 +25,7 @@ import com.exasol.containers.ExasolContainerConstants;
 // [itest->dsn~assign-roles-to-a-user~1]
 @Tag("integration")
 @Testcontainers
-public class AssignRolesToUserIT extends AbstractAdminScriptIT {
+class AssignRolesToUserIT extends AbstractAdminScriptIT {
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_RLS_USERS = "EXA_RLS_USERS";
     @Container
