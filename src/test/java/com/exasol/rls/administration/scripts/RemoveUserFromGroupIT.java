@@ -24,7 +24,7 @@ import com.exasol.dbbuilder.Table;
 
 @Testcontainers
 @Tag("integration")
-public class RemoveUserFromGroupIT extends AbstractAdminScriptIT {
+class RemoveUserFromGroupIT extends AbstractAdminScriptIT {
     @Container
     static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
     private Table memberTable;

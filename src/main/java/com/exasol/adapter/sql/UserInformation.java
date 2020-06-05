@@ -17,7 +17,7 @@ import com.exasol.db.Identifier;
  */
 public final class UserInformation {
     private static final Logger LOGGER = Logger.getLogger(UserInformation.class.getName());
-    private final Identifier schemaName;
+    private final Identifier schema;
     private final Identifier currentUser;
     private final ConnectionFactory connectionFactory;
     private String cachedRoleMask = null;
@@ -27,13 +27,13 @@ public final class UserInformation {
     /**
      * Create a new instance of {@link UserInformation}
      *
-     * @param currentUser       name of the current user
-     * @param schemaName        mane of the schema
+     * @param currentUser       current user identifier
+     * @param schema            schema identifier
      * @param connectionFactory factory for JDBC database connections
      */
-    public UserInformation(final Identifier currentUser, final Identifier schemaName,
+    public UserInformation(final Identifier currentUser, final Identifier schema,
             final ConnectionFactory connectionFactory) {
-        this.schemaName = schemaName;
+        this.schema = schema;
         this.currentUser = currentUser;
         this.connectionFactory = connectionFactory;
     }
@@ -52,9 +52,11 @@ public final class UserInformation {
      *
      * @return role mask as a String
      */
+    @SuppressWarnings("java:S2077") // SQL injection via schema prevented by wrapping schema in validated Identifier
+    // object.
     public synchronized String getRoleMask() {
         if (this.cachedRoleMask == null) {
-            final String query = "SELECT EXA_ROLE_MASK FROM " + this.schemaName + "." + EXA_RLS_USERS_TABLE_NAME
+            final String query = "SELECT EXA_ROLE_MASK FROM " + this.schema + "." + EXA_RLS_USERS_TABLE_NAME
                     + " WHERE EXA_USER_NAME = ?";
             try (final PreparedStatement statement = getConnection().prepareStatement(query)) {
                 statement.setString(1, this.currentUser.toString());
@@ -125,12 +127,15 @@ public final class UserInformation {
      * @return list of groups
      * @throws SQLException if group membership can't be read from database
      */
+    @SuppressWarnings("java:S2077") // SQL injection via schema prevented by wrapping schema in validated Identifier
+                                    // object.
     public synchronized List<String> getGroups() throws SQLException {
         if (this.cachedGroups == null) {
-            final String sql = "SELECT \"EXA_GROUP\" FROM \"" + this.schemaName + "\".\"" + EXA_GROUP_MEMBERS_TABLE_NAME
-                    + "\" WHERE \"EXA_USER_NAME\"='" + this.currentUser + "'";
-            try (final Statement statement = this.getConnection().createStatement()) {
-                try (final ResultSet result = statement.executeQuery(sql)) {
+            final String sql = "SELECT \"EXA_GROUP\" FROM \"" + this.schema + "\".\"" + EXA_GROUP_MEMBERS_TABLE_NAME
+                    + "\" WHERE \"EXA_USER_NAME\" = ?";
+            try (final PreparedStatement statement = this.getConnection().prepareStatement(sql)) {
+                statement.setString(1, this.currentUser.toString());
+                try (final ResultSet result = statement.executeQuery()) {
                     this.cachedGroups = new ArrayList<>();
                     boolean badGroups = false;
                     while (result.next()) {

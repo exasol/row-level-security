@@ -23,7 +23,7 @@ import com.exasol.tools.TestsConstants;
 // [itest->dsn~get-a-role-mask~1]
 @Tag("integration")
 @Testcontainers
-public class RolesMaskIT extends AbstractAdminScriptIT {
+class RolesMaskIT extends AbstractAdminScriptIT {
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";

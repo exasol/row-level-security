@@ -20,7 +20,7 @@ import com.exasol.dbbuilder.Table;
 
 @Tag("integration")
 @Testcontainers
-public class ListRlsGroupsIT extends AbstractAdminScriptIT {
+class ListRlsGroupsIT extends AbstractAdminScriptIT {
     @Container
     static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
 

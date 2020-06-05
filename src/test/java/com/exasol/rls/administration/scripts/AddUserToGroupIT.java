@@ -23,7 +23,7 @@ import com.exasol.containers.ExasolContainer;
 
 @Testcontainers
 @Tag("integration")
-public class AddUserToGroupIT extends AbstractAdminScriptIT {
+class AddUserToGroupIT extends AbstractAdminScriptIT {
     @Container
     static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
 

@@ -22,7 +22,7 @@ import com.exasol.containers.ExasolContainer;
 // [itest->dsn~add-a-new-role~1]
 @Tag("integration")
 @Testcontainers
-public class AddRlsRoleIT extends AbstractAdminScriptIT {
+class AddRlsRoleIT extends AbstractAdminScriptIT {
     @Container
     static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
 
