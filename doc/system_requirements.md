@@ -86,7 +86,7 @@ Needs: dsn
 #### Tables With Role Restrictions
 `req~tables-with-role-restrictions~1`
 
-Data Owners can define a set roles from which a user must have at least one in order to read a row.
+Data Owners can define a set of roles from which a user must have at least one in order to read a row.
 
 Needs: dsn
 
@@ -120,7 +120,7 @@ Needs: dsn
 
 ### Row Level Security with Groups
 
-"Groups" are a functionality that allows shared access to rows based on a users membership in groups.
+"Groups" are a functionality that allows shared access to rows based on a user's membership in groups.
 
 #### Assigning Users to Groups
 `req~assigning-users-to-groups ~1`
@@ -140,7 +140,7 @@ Needs: dsn
 #### Removing Users From Groups
 `req~removing-users-from-groups~1`
 
-Data Owners remove users for one or groups they are currently a member of.
+Data Owners remove users for one or more groups they are currently a member of.
 
 Covers:
 
