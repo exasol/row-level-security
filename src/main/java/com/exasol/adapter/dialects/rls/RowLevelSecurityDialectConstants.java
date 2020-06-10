@@ -3,6 +3,9 @@ package com.exasol.adapter.dialects.rls;
 import java.math.BigInteger;
 import java.util.List;
 
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.DataType.ExaCharset;
+
 /**
  * This class contains constants used in Row Level Security dialect.
  */
@@ -17,6 +20,10 @@ public final class RowLevelSecurityDialectConstants {
     public static final String EXA_GROUP_MEMBERS_TABLE_NAME = "EXA_GROUP_MEMBERS";
     public static final List<String> RLS_COLUMNS = List.of(EXA_ROW_ROLES_COLUMN_NAME, EXA_ROW_TENANT_COLUMN_NAME,
             EXA_ROW_GROUP_COLUMN_NAME);
+    public static final List<String> HIDDEN_TABLES = List.of(EXA_RLS_USERS_TABLE_NAME, EXA_ROLES_MAPPING_TABLE_NAME,
+            EXA_GROUP_MEMBERS_TABLE_NAME);
+    public static final DataType IDENTIFIER_TYPE = DataType.createVarChar(128, ExaCharset.ASCII);
+    public static final DataType MASK_TYPE = DataType.createDecimal(20, 0);
 
     private RowLevelSecurityDialectConstants() {
         // prevent instantiation

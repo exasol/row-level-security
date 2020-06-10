@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
+import static com.exasol.dbbuilder.AdapterScript.Language.JAVA;
 import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
@@ -7,12 +8,11 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 import java.nio.file.Path;
 import java.sql.*;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -21,41 +21,45 @@ import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
+import com.exasol.dbbuilder.*;
 
 @Tag("integration")
 @Tag("virtual-schema")
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true") // CI is usually to slow for a realistic result
 @Testcontainers
 class QueryRuntimeIT {
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueryRuntimeIT.class);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
             ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
+    private static ExasolObjectFactory factory;
 
     @BeforeAll
     static void beforeAll() throws Exception {
-        createSourceTables();
+        factory = new ExasolObjectFactory(container.createConnection(""));
+        final Schema sourceSchema = createSourceSchema();
         uploadRlsAdapter();
-        createRowLevelSecuritySchema();
+        createRowLevelSecuritySchema(sourceSchema);
     }
 
-    private static void createSourceTables() throws NoDriverFoundException, SQLException {
-        final Connection connection = container.createConnection("");
-        executeQueries(connection, //
-                "CREATE SCHEMA SIMPLE_SALES", //
-                "CREATE TABLE SIMPLE_SALES.ORDER_ITEM (ORDER_ID DECIMAL(18,0), CUSTOMER VARCHAR(50)," //
-                        + " PRODUCT VARCHAR(100), QUANTITY DECIMAL(18,0), EXA_ROW_ROLES DECIMAL(20,0))", //
-                "INSERT INTO SIMPLE_SALES.ORDER_ITEM VALUES\n" //
-                        + "(1, 'John Smith', 'Pen', 3, 1),\n" //
-                        + "(1, 'John Smith', 'Paper', 100, 3),\n" //
-                        + "(1, 'John Smith', 'Eraser', 1, 7),\n" //
-                        + "(2, 'Jane Doe', 'Pen', 2, 2),\n" //
-                        + "(2, 'Jane Doe', 'Paper', 200, 1)", //
-                "CREATE TABLE SIMPLE_SALES.EXA_RLS_USERS(EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK DECIMAL(20,0))",
-                "INSERT INTO SIMPLE_SALES.EXA_RLS_USERS VALUES\n" //
-                        + "('SALES', 1),\n" //
-                        + "('DEVELOPMENT', 2),\n" //
-                        + "('FINANCE', 4)");
+    private static Schema createSourceSchema() throws NoDriverFoundException, SQLException {
+        final Schema sourceSchema = factory.createSchema("SIMPLE_SALES");
+        sourceSchema.createTableBuilder("ORDER_ITEM") //
+                .column("ORDER_ID", "DECIMAL(18,0)") //
+                .column("CUSTOMER", "VARCHAR(50)") //
+                .column("PRODUCT", "VARCHAR(100)") //
+                .column("QUANTITY", "DECIMAL(18,0)") //
+                .column("EXA_ROW_ROLES", "DECIMAL(20,0)") //
+                .build() //
+                .insert(1, "John Smith", "Pen", 3, 1) //
+                .insert(1, "John Smith", "Paper", 100, 3) //
+                .insert(1, "John Smith", "Eraser", 1, 7) //
+                .insert(2, "Jane Doe", "Pen", 2, 2) //
+                .insert(2, "Jane Doe", "Paper", 200, 1);
+        sourceSchema.createTable("EXA_RLS_USERS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_ROLE_MASK", "DECIMAL(20,0)")
+                .insert("SALES", 1) //
+                .insert("DEVELOPMENT", 2) //
+                .insert("FINANCE", 4);
+        return sourceSchema;
     }
 
     private static void uploadRlsAdapter() throws InterruptedException, BucketAccessException, TimeoutException {
@@ -63,35 +67,23 @@ class QueryRuntimeIT {
         container.getDefaultBucket().uploadFile(localAdapterPath, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
     }
 
-    private static void createRowLevelSecuritySchema() throws SQLException {
-        final Connection connection = container.createConnection("");
+    private static void createRowLevelSecuritySchema(final Schema sourceSchema) throws SQLException {
         final Bucket bucket = container.getDefaultBucket();
-        executeQueries(connection, //
-                "CREATE SCHEMA RLS_SCHEMA", //
-                "CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS\n" //
-                        + "    %scriptclass com.exasol.adapter.RequestDispatcher;\n" //
-                        + "    %jar /buckets/" + bucket.getBucketFsName() + "/" + bucket.getBucketName() //
-                        + "/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";\n" //
-                        + "/", //
-                "CREATE CONNECTION EXASOL_JDBC_CONNECTION TO 'jdbc:exa:localhost:" //
-                        + container.getExposedPorts().get(0) + "' USER '" + container.getUsername()
-                        + "' IDENTIFIED BY '" //
-                        + container.getPassword() + "'", //
-                "CREATE VIRTUAL SCHEMA RLS_VS \n" //
-                        + "    USING RLS_SCHEMA.RLS_VS_ADAPTER\n" //
-                        + "    WITH\n" //
-                        + "    SQL_DIALECT     = 'EXASOL_RLS'\n" //
-                        + "    CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'\n" //
-                        + "    SCHEMA_NAME     = 'SIMPLE_SALES'\n" //
-                        + "    IS_LOCAL        = 'true'");
-    }
-
-    private static void executeQueries(final Connection connection, final String... sqls) throws SQLException {
-        final Statement statement = connection.createStatement();
-        for (final String sql : sqls) {
-            LOGGER.info(sql);
-            statement.execute(sql);
-        }
+        final Schema rlsSchema = factory.createSchema("RLS_SCHEMA");
+        final String scriptContent = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
+                + "%jar /buckets/" + bucket.getBucketFsName() + "/" + bucket.getBucketName() //
+                + "/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";";
+        final AdapterScript adapterScript = rlsSchema.createAdapterScript("RLS_VS_ADAPTER", JAVA, scriptContent);
+        final ConnectionDefinition connectionDefinition = factory.createConnectionDefinition("EXASOL_JDBC_CONNECTION",
+                "jdbc:exa:localhost:" + container.getExposedPorts().get(0), container.getUsername(),
+                container.getPassword());
+        factory.createVirtualSchemaBuilder("RLS_VS") //
+                .adapterScript(adapterScript) //
+                .dialectName("EXASOL_RLS") //
+                .connectionDefinition(connectionDefinition) //
+                .sourceSchema(sourceSchema) //
+                .properties(Map.of("IS_LOCAL", "true")) //
+                .build();
     }
 
     // [itest->qs~total-runtime-of-secured-simple-query~1]

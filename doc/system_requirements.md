@@ -151,7 +151,7 @@ Needs: dsn
 #### Tables With Group Restrictions
 `req~tables-with-group-restrictions~1`
 
-Data Owners can define a single group for each row in the table that has access.
+Data Owners can define a single group for each row in the table, so that this group is allowed to read the row.
 
 Rationale:
 

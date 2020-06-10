@@ -75,10 +75,6 @@ abstract class AbstractRowLevelSecurityIT {
                 container.getUsername(), container.getPassword());
     }
 
-    @BeforeEach
-    void beforeEach() {
-    }
-
     @Test
     void testTenantRestrictedTable() {
         final Schema sourceSchema = factory.createSchema("TENANT_PROTECTED_SCHEMA");

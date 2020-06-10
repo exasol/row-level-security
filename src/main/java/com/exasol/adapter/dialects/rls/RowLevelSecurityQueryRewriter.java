@@ -15,7 +15,6 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.*;
-import com.exasol.adapter.metadata.DataType.ExaCharset;
 import com.exasol.adapter.sql.*;
 import com.exasol.db.ExasolIdentifier;
 
@@ -24,8 +23,6 @@ import com.exasol.db.ExasolIdentifier;
  */
 // [impl->dsn~query-rewriter~1]
 public class RowLevelSecurityQueryRewriter implements QueryRewriter {
-    private static final DataType IDENTIFIER_TYPE = DataType.createVarChar(128, ExaCharset.ASCII);
-    private static final DataType MASK_TYPE = DataType.createDecimal(20, 0);
     private static final Logger LOGGER = Logger.getLogger(RowLevelSecurityQueryRewriter.class.getName());
     private final TableProtectionStatus tableProtectionStatus;
     private final QueryRewriter delegateRewriter;

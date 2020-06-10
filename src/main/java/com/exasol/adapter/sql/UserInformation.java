@@ -137,16 +137,16 @@ public final class UserInformation {
                 statement.setString(1, this.currentUser.toString());
                 try (final ResultSet result = statement.executeQuery()) {
                     this.cachedGroups = new ArrayList<>();
-                    boolean badGroups = false;
+                    boolean foundIllegalGroupName = false;
                     while (result.next()) {
                         final String group = result.getString(1);
                         if ((group == null) || group.isBlank()) {
-                            badGroups = true;
+                            foundIllegalGroupName = true;
                         } else {
                             this.cachedGroups.add(group);
                         }
                     }
-                    if (badGroups) {
+                    if (foundIllegalGroupName) {
                         LOGGER.warning(() -> "Ignored malformed groups of user \"" + this.currentUser
                                 + "\". Please make sure that entries in " + EXA_GROUP_MEMBERS_TABLE_NAME
                                 + " are neither NULL nor blank.");

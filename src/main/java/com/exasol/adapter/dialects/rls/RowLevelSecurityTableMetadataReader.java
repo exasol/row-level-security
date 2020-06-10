@@ -1,9 +1,8 @@
 package com.exasol.adapter.dialects.rls;
 
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.*;
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.HIDDEN_TABLES;
 
 import java.sql.Connection;
-import java.util.List;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
@@ -14,9 +13,6 @@ import com.exasol.adapter.jdbc.ColumnMetadataReader;
  * This class implements RLS-specific reading of table metadata.
  */
 public class RowLevelSecurityTableMetadataReader extends BaseTableMetadataReader {
-    private static final List<String> HIDDEN_TABLES = List.of(EXA_RLS_USERS_TABLE_NAME, EXA_ROLES_MAPPING_TABLE_NAME,
-            EXA_GROUP_MEMBERS_TABLE_NAME);
-
     /**
      * Create a new instance of a {@link RowLevelSecurityTableMetadataReader}.
      *
