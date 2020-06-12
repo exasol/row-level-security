@@ -374,6 +374,13 @@ The minimum requirements for a regular user in order to be able to access the RL
 * User is allowed to create sessions (`GRANT CREATE SESSION`)
 * User can execute `SELECT` statements on the Virtual Schema (`GRANT SELECT`)
 
+## Public Data
+
+To recap: data in an RLS-protected schema is publicly readable if
+
+* either the table does not use any of the RLS protection mechanisms
+* or the table is protected with [role-based security](#role-based-security) and selected rows are assigned to the special "public role"
+
 ## Background Knowledge
 
 ### Connection Types

@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.HIDDEN_TABLES;
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.RLS_METADATA_TABLES;
 
 import java.sql.Connection;
 
@@ -29,6 +29,6 @@ public class RowLevelSecurityTableMetadataReader extends BaseTableMetadataReader
 
     @Override
     public boolean isTableIncludedByMapping(final String tableName) {
-        return !HIDDEN_TABLES.contains(tableName);
+        return !RLS_METADATA_TABLES.contains(tableName);
     }
 }
