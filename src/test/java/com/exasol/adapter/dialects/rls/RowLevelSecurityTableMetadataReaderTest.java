@@ -5,10 +5,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import com.exasol.adapter.AdapterProperties;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import com.exasol.adapter.AdapterProperties;
 
 class RowLevelSecurityTableMetadataReaderTest {
     private RowLevelSecurityTableMetadataReader metadataReader;
@@ -25,8 +25,8 @@ class RowLevelSecurityTableMetadataReaderTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "EXA_RLS_USERS", "EXA_ROLES_MAPPING" })
-    void testIsTableIncludedByMappingFalse(String tableName) {
+    @ValueSource(strings = { "EXA_RLS_USERS", "EXA_ROLES_MAPPING", "EXA_GROUP_MEMBERS" })
+    void testIsTableIncludedByMappingFalse(final String tableName) {
         assertThat(this.metadataReader.isTableIncludedByMapping(tableName), equalTo(false));
     }
 }

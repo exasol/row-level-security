@@ -17,10 +17,13 @@ As mentioned before, RLS is a specialized implementation of a [Virtual Schema](h
 RLS comes in three flavors which can also be used in combination:
 
 1. Role-based security
-2. Tenant-based security
-3. Public data
+1. Tenant-based security
+1. Group-based security
+1. Public data
 
 The main difference between the two variants is the use case behind them. In a role-based scenario you want multiple people to be able to access the same rows &mdash; based on roles that are assigned to those users. The number of roles in this scenario is small. Tenant security on the other hand assumes that data belongs to a tenant and that other tenants are not allowed see that data.
+
+Group-based also allow multiple user to access one row. Users can be members of multiple groups, but each row can belong to only one group.
 
 Public data &mdash; as the name suggests &mdash; is data accessible for all users, independently of roles or whether they own the data.
 
@@ -65,7 +68,7 @@ EXECUTE SCRIPT ADD_RLS_ROLE('Development', 2);
 EXECUTE SCRIPT ADD_RLS_ROLE('Finance', 3);
 ```
 
-#### Getting a List of Created Roles
+#### Listing Roles
 
 Example:
 
@@ -103,7 +106,7 @@ This script will be added in an upcoming release.
 
 #### Protecting a Table With Role-based RLS
 
-In case you want to use Role-based security, add a column called `EXA_ROW_ROLES DECIMAL(20,0)` to all the tables you want to protect.
+In case you want to use role-based security, add a column called `EXA_ROW_ROLES DECIMAL(20,0)` to all the tables you want to protect.
 
 For our example we will create very simple order item list as shown below.
 
@@ -183,6 +186,81 @@ CREATE OR REPLACE TABLE SIMPLE_SALES.ORDER_ITEM_WITH_TENANT
 ```
 
 For each row define which tenant it belongs to. The tenant is identical to a username in Exasol.
+
+### Group-based security
+
+If you apply group-based security, each row in a protected table can be associated with exactly one group. Users can be members of multiple groups though. This is very similar to the user group concept of a typical unix-style filesystem.
+
+#### Creating Groups
+
+To create a new group `COWORKERS` run the following script:
+
+```sql
+EXECUTE SCRIPT ADD_RLS_GROUP('COWORKERS');
+```
+
+#### Listing Groups
+
+The following statement shows a list of groups:
+
+```sql
+EXECUTE SCRIPT LIST_RLS_GROUPS();
+```
+
+#### Adding a User to a Group
+
+To add a user named `BOB` to the RLS group `COWORKERS`, run the following command:
+
+```sql
+EXECUTE SCRIPT ADD_USER_TO_GROUP('BOB', ARRAY('COWORKERS'));
+```
+
+Thanks to the array, you can also add the same user to multiple groups at the same time.
+
+```sql
+EXECUTE SCRIPT ADD_USER_TO_GROUP('BOB', ARRAY('COWORKERS', 'DEVELOPERS'));
+```
+
+#### Removing a User From a Group
+
+To remove the user `BOB` from the RLS group `COWORKERS`) run:
+
+```sql
+EXECUTE SCRIPT REMOVE_USER_FROM_GROUP('BOB', ARRAY('COWORKERS'));
+```
+
+#### Protecting a Table With Group-based RLS
+
+In case you want to use group-based security, add a column called `EXA_ROW_GROUP VARCHAR(128)` to all the tables you want to protect.
+
+For our example we will create very simple order item list as shown below.
+
+```sql
+CREATE OR REPLACE TABLE MY_SCHEMA.ORDER_ITEM 
+(  
+    ORDER_ID DECIMAL(18,0),  
+    CUSTOMER VARCHAR(50),  
+    PRODUCT VARCHAR(100),  
+    QUANTITY DECIMAL(18,0),
+    EXA_ROW_GROUP VARCHAR(128)  
+);
+```
+
+When inserting records into this table, provide the name of the group in the column `EXA_ROW_GROUP`.
+
+`NULL` or blank values prohibit access to the row.
+
+### Protection Scheme Combinations
+
+In this section we discuss which combinations of protection schemes are supported and what their combined effects are. Combinations that are not listed are forbidden.
+
+### Tenant- Plus Role-Security
+
+If a table is protected with tenant- and role-security, a user must be the tenant *and* have the right role to access a row.
+
+### Tenant- Plus Group-Security
+
+In case you combine tenant- and group-security, a user must either be the tenant or be in the group stated in a row to access it.
 
 ## Creating the Virtual Schema
 
@@ -295,6 +373,13 @@ The minimum requirements for a regular user in order to be able to access the RL
 * User must exist (`CREATE USER`)
 * User is allowed to create sessions (`GRANT CREATE SESSION`)
 * User can execute `SELECT` statements on the Virtual Schema (`GRANT SELECT`)
+
+## Public Data
+
+To recap: data in an RLS-protected schema is publicly readable if
+
+* either the table does not use any of the RLS protection mechanisms
+* or the table is protected with [role-based security](#role-based-security) and selected rows are assigned to the special "public role"
 
 ## Background Knowledge
 

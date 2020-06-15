@@ -1,11 +1,8 @@
 package com.exasol.adapter.dialects.rls;
 
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_ROLES_COLUMN_NAME;
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROW_TENANT_COLUMN_NAME;
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.RLS_COLUMNS;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +15,7 @@ import com.exasol.adapter.metadata.ColumnMetadata;
  * This class implements RLS-specific reading of column metadata.
  */
 public class RowLevelSecurityColumnMetadataReader extends ExasolColumnMetadataReader {
+
     /**
      * Create a new instance of the {@link RowLevelSecurityColumnMetadataReader}.
      *
@@ -40,9 +38,9 @@ public class RowLevelSecurityColumnMetadataReader extends ExasolColumnMetadataRe
         return newColumnMetadataList;
     }
 
-    private void hideRlsSystemColumnsInMetadata(final List<ColumnMetadata> newColumnMetadataList, final ColumnMetadata columnMetadata) {
-        final String name = columnMetadata.getName();
-        if (!name.equals(EXA_ROW_ROLES_COLUMN_NAME) && !name.equals(EXA_ROW_TENANT_COLUMN_NAME)) {
+    private void hideRlsSystemColumnsInMetadata(final List<ColumnMetadata> newColumnMetadataList,
+            final ColumnMetadata columnMetadata) {
+        if (!RLS_COLUMNS.contains(columnMetadata.getName())) {
             newColumnMetadataList.add(columnMetadata);
         }
     }

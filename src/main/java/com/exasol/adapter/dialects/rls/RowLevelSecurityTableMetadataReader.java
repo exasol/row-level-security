@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_RLS_USERS_TABLE_NAME;
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROLES_MAPPING_TABLE_NAME;
+import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.RLS_METADATA_TABLES;
 
 import java.sql.Connection;
 
@@ -14,7 +13,6 @@ import com.exasol.adapter.jdbc.ColumnMetadataReader;
  * This class implements RLS-specific reading of table metadata.
  */
 public class RowLevelSecurityTableMetadataReader extends BaseTableMetadataReader {
-
     /**
      * Create a new instance of a {@link RowLevelSecurityTableMetadataReader}.
      *
@@ -31,6 +29,6 @@ public class RowLevelSecurityTableMetadataReader extends BaseTableMetadataReader
 
     @Override
     public boolean isTableIncludedByMapping(final String tableName) {
-        return !tableName.equals(EXA_RLS_USERS_TABLE_NAME) && !tableName.equals(EXA_ROLES_MAPPING_TABLE_NAME);
+        return !RLS_METADATA_TABLES.contains(tableName);
     }
 }

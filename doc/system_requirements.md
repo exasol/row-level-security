@@ -71,7 +71,7 @@ Needs: req
 #### User Roles
 `req~user-roles~1`
 
-Data Owners can assign zero or more roles to users.
+Data Owners can assign between zero and 63 roles to users.
 
 Rationale:
 
@@ -83,36 +83,10 @@ Covers:
 
 Needs: dsn
 
-#### Tables With Row Restrictions
-`req~tables-with-row-restrictions~1`
+#### Tables With Role Restrictions
+`req~tables-with-role-restrictions~1`
 
-Data Owners can define for each table whether or not access to individual rows is restricted.
-
-Covers:
-
-* [feat~row-level-security~1](#row-level-security)
-
-Needs: dsn
-
-#### Granting Row Read Access Based on User Role
-`req~granting-row-read-access-based-on-user-role~1`
-
-Data Owners can define the role a user must have in order to read a row.
-
-Needs: dsn
-
-#### Public Rows
-`req~public-rows~1`
-
-Data Owners can define rows that all users can read, regardless of those users' roles.
-
-Rationale:
-
-This allows data owners to make non-confidential data public in a table otherwise restricted by row-level security.
-
-Covers:
-
-* [feat~row-level-security~1](#row-level-security)
+Data Owners can define a set of roles from which a user must have at least one in order to read a row.
 
 Needs: dsn
 
@@ -131,25 +105,10 @@ Covers:
 
 Needs: dsn
 
-#### Only Accessible Rows Contribute to Aggregate Functions
-`req~only-accessible-rows-contribute-to-aggregate-functions~1`
-
-If row access is controlled by RLS and a user invokes an aggregate function, then only the rows accessible to that user contributed to the result of the aggregate function.
-
-Rationale:
-
-This prevents attackers from gaining information about restricted columns through the side channel of aggregate functions.
-
-Covers:
-
-* [feat~row-level-security~1](#row-level-security)
-
-Needs: dsn
-
 ### Row Level Security with Tenants 
 
-#### Tables With Tenants Restrictions
-`req~tables-with-tenants-restrictions~1`
+#### Tables With Tenant Restrictions
+`req~tables-with-tenant-restrictions~1`
 
 Data Owners can define for each row in the table if it belongs to only one user (tenant).
 
@@ -159,10 +118,76 @@ Covers:
 
 Needs: dsn
 
-#### Tables with Both Roles and Tenants Restrictions
-`req~tables-with-both-roles-and-tenants-restrictions~1`
+### Row Level Security with Groups
 
-If a table contains both roles restrictions and tenants restrictions, both of them are applied.
+"Groups" are a functionality that allows shared access to rows based on a user's membership in groups.
+
+#### Assigning Users to Groups
+`req~assigning-users-to-groups ~1`
+
+Data Owners can assign zero or more users to a named group.
+
+Rationale:
+
+A group is a set of people sharing access rights on group-protected rows.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+#### Removing Users From Groups
+`req~removing-users-from-groups~1`
+
+Data Owners remove users for one or more groups they are currently a member of.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+#### Tables With Group Restrictions
+`req~tables-with-group-restrictions~1`
+
+Data Owners can define a single group for each row in the table, so that this group is allowed to read the row.
+
+Rationale:
+
+This allows an arbitrary number of users to share read from the same table.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+#### Listing Groups
+`req~listing-groups~1`
+
+Data owners can list all existing groups.
+
+Rationale:
+
+This allows data owner to see if a group already exists.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+### Protection Scheme Combinations
+
+Protection schemes like role-based, tenant-based or group-based security can be used in valid combinations. This section explains what combinations exist and which effect they have.
+
+Combinations not listed in this section are not supported.
+
+#### Tables with Role and Tenant Restrictions
+`req~tables-with-role-and-tenant-restrictions~1`
+
+If a table contains role restrictions and tenant restrictions, both of them are applied.
 To access the data a user needs: 
     1. To be the right tenant.
     2. To be assigned to at least one of the roles that the data owner granted access to.
@@ -173,7 +198,42 @@ Covers:
 
 Needs: dsn
 
-### Unprotected tables
+#### Tables with Group and Tenant Restrictions
+`req~tables-with-group-and-tenant-restrictions`
+
+If a table contains group restrictions and tenant restrictions, the user needs to fulfill at least one of the two access criteria.
+To access the data a user needs: 
+    * To be the right tenant _or_
+    * To be member of the group the row belongs to
+
+Obviously this means access is also granted if the user is both tenant and member of the group at the same time.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+### Public Access
+
+Even in an RLS-protected Virtual Schema there are cases where users need publicly accessible data. Public access come in two variants, where either a whole table or view is publicly readable or single rows are.
+
+#### Public Rows
+`req~public-rows~1`
+
+Data Owners can define rows that all users can read, regardless of those users' roles.
+
+Rationale:
+
+This allows data owners to make non-confidential data public in a table otherwise restricted by row-level security.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+#### Unprotected tables
 `req~unprotected-tables~1`
 
 Data Owners can leave a table unprotected. In this case all users can access all data in the table.
@@ -181,6 +241,8 @@ Data Owners can leave a table unprotected. In this case all users can access all
 Covers:
 
 * [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
 
 ## Quality Requirements
 
@@ -199,7 +261,7 @@ Covers:
 ##### RLS-protected Query Execution Time
 `qr~rls-protected-query-execution-time~1`
 
-The Performance degradation caused by and RLS-protected query compared to the same query without RLS is below the greater of
+The Performance degradation caused by an RLS-protected query compared to the same query without RLS is below the greater of
 
 * two seconds or
 * 10%
@@ -214,4 +276,4 @@ Covers:
 
 * [qg~affordable-performance-hit~1](#affordable-performance-hit)
 
-Needs: dsn
+Needs: qs

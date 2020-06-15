@@ -14,6 +14,7 @@ import com.exasol.adapter.jdbc.*;
 /**
  * This class implements Row Level Security dialect.
  */
+// [impl->dsn~row-level-security-sql-dialect~1]
 public class RowLevelSecurityDialect extends ExasolSqlDialect {
     static final String NAME = "EXASOL_RLS";
     private static final Capabilities CAPABILITIES = createCapabilityList();

@@ -4,7 +4,8 @@ import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.*
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.exasol.ExaMetadata;
@@ -15,10 +16,12 @@ import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.*;
 import com.exasol.adapter.sql.*;
+import com.exasol.db.ExasolIdentifier;
 
 /**
  * RLS-specific query rewriter.
  */
+// [impl->dsn~query-rewriter~1]
 public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(RowLevelSecurityQueryRewriter.class.getName());
     private final TableProtectionStatus tableProtectionStatus;
@@ -57,43 +60,57 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
             final AdapterProperties properties) throws SQLException, AdapterException {
         final SqlStatementSelect select = (SqlStatementSelect) statement;
         final String schemaName = properties.getSchemaName();
-        final UserInformation userInformation = new UserInformation(exaMetadata.getCurrentUser(), schemaName,
-                EXA_RLS_USERS_TABLE_NAME);
+        final UserInformation userInformation = new UserInformation(ExasolIdentifier.of(exaMetadata.getCurrentUser()),
+                ExasolIdentifier.of(schemaName), this.connectionFactory);
         final String tableName = ((SqlTable) select.getFromClause()).getName();
-        final boolean protectedWithExaRowRoles = this.tableProtectionStatus.isTableRoleProtected(tableName);
-        final boolean protectedWithExaRowTenants = this.tableProtectionStatus.isTableTenantProtected(tableName);
-        logTableProtectionInfo(protectedWithExaRowRoles, protectedWithExaRowTenants);
-        if (protectedWithExaRowRoles || protectedWithExaRowTenants) {
+        final TableProtectionDetails protection = this.tableProtectionStatus.getTableProtectionDetails(tableName);
+        logTableProtectionInfo(tableName, protection);
+        if (protection.isProtected()) {
             final SqlStatementSelect protectedSelectStatement = getProtectedSqlStatementSelect(select, userInformation,
-                    protectedWithExaRowRoles, protectedWithExaRowTenants);
+                    protection);
             return this.delegateRewriter.rewrite(protectedSelectStatement, exaMetadata, properties);
         } else {
             return this.delegateRewriter.rewrite(statement, exaMetadata, properties);
         }
     }
 
-    private void logTableProtectionInfo(final boolean protectedWithExaRowRoles,
-            final boolean protectedWithExaRowTenants) {
-        if (protectedWithExaRowRoles) {
-            LOGGER.info(() -> "Table is protected with " + EXA_ROW_ROLES_COLUMN_NAME);
-        }
-        if (protectedWithExaRowTenants) {
-            LOGGER.info(() -> "Table is protected with " + EXA_ROW_TENANT_COLUMN_NAME);
-        }
-        if (!protectedWithExaRowRoles && !protectedWithExaRowTenants) {
-            LOGGER.info(() -> "Table is unprotected");
-        }
+    private void logTableProtectionInfo(final String tableName, final TableProtectionDetails protection) {
+        LOGGER.info(() -> "Table \"" + tableName + "\": " + protection.describe());
     }
 
     private SqlStatementSelect getProtectedSqlStatementSelect(final SqlStatementSelect select,
-            final UserInformation userInformation, final boolean protectedWithExaRowRoles,
-            final boolean protectedWithExaRowTenants) throws SQLException {
+            final UserInformation userInformation, final TableProtectionDetails protection) throws SQLException {
         final SqlSelectList sqlSelectList = getSqlSelectList(select);
         final SqlStatementSelect.Builder rlsStatementBuilder = copyOriginalClauses(select, sqlSelectList);
-        final SqlNode whereClause = createWhereClause(select, userInformation, protectedWithExaRowRoles,
-                protectedWithExaRowTenants);
+        final SqlNode whereClause = createWhereClause(select, userInformation, protection);
         rlsStatementBuilder.whereClause(whereClause);
         return rlsStatementBuilder.build();
+    }
+
+    private SqlSelectList getSqlSelectList(final SqlStatementSelect select) {
+        final SqlSelectList oldSelectList = select.getSelectList();
+        if (oldSelectList.isSelectStar()) {
+            final List<TableMetadata> tableMetadata = new ArrayList<>();
+            final SqlStatementSelect newSelectStatement = (SqlStatementSelect) oldSelectList.getParent();
+            SqlGenerationHelper.addMetadata(newSelectStatement.getFromClause(), tableMetadata);
+            return SqlSelectList.createRegularSelectList(getSelectListWithColumns(tableMetadata));
+        } else {
+            return oldSelectList;
+        }
+    }
+
+    private List<SqlNode> getSelectListWithColumns(final List<TableMetadata> tableMetadata) {
+        final List<SqlNode> selectListElements = new ArrayList<>(tableMetadata.size());
+        for (int i = 0; i < tableMetadata.size(); i++) {
+            final TableMetadata tableMeta = tableMetadata.get(i);
+            for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
+                final SqlColumn sqlColumn = new SqlColumn(i, columnMeta);
+                if (!RLS_COLUMNS.contains(sqlColumn.getName())) {
+                    selectListElements.add(sqlColumn);
+                }
+            }
+        }
+        return selectListElements;
     }
 
     private SqlStatementSelect.Builder copyOriginalClauses(final SqlStatementSelect select,
@@ -115,87 +132,92 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         return rlsStatementBuilder;
     }
 
-    private SqlSelectList getSqlSelectList(final SqlStatementSelect select) {
-        final SqlSelectList oldSelectList = select.getSelectList();
-        if (oldSelectList.isSelectStar()) {
-            final List<TableMetadata> tableMetadata = new ArrayList<>();
-            final SqlStatementSelect newSelectStatement = (SqlStatementSelect) oldSelectList.getParent();
-            SqlGenerationHelper.addMetadata(newSelectStatement.getFromClause(), tableMetadata);
-            return SqlSelectList.createRegularSelectList(getSelectListWithColumns(tableMetadata));
-        } else {
-            return oldSelectList;
-        }
-    }
-
-    private List<SqlNode> getSelectListWithColumns(final List<TableMetadata> tableMetadata) {
-        final List<SqlNode> selectListElements = new ArrayList<>(tableMetadata.size());
-        for (int i = 0; i < tableMetadata.size(); i++) {
-            final TableMetadata tableMeta = tableMetadata.get(i);
-            for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
-                final SqlColumn sqlColumn = new SqlColumn(i, columnMeta);
-                if (!sqlColumn.getName().equals(EXA_ROW_ROLES_COLUMN_NAME)
-                        && !sqlColumn.getName().equals(EXA_ROW_TENANT_COLUMN_NAME)) {
-                    selectListElements.add(sqlColumn);
-                }
-            }
-        }
-        return selectListElements;
-    }
-
     private SqlNode createWhereClause(final SqlStatementSelect select, final UserInformation userInformation,
-            final boolean protectedWithExaRowRoles, final boolean protectedWithExaRowTenants) throws SQLException {
-        final Optional<SqlNode> whereClauseForRoles = setWhereClauseForRoles(protectedWithExaRowRoles, userInformation);
-        final Optional<SqlNode> whereClauseForTenants = setWhereClauseForTenants(protectedWithExaRowTenants,
-                userInformation);
-        final List<SqlNode> arguments = new ArrayList<>(3);
+            final TableProtectionDetails protection) throws SQLException {
         if (select.hasFilter()) {
-            arguments.add(select.getWhereClause());
-        }
-        whereClauseForRoles.ifPresent(arguments::add);
-        whereClauseForTenants.ifPresent(arguments::add);
-        if ((arguments.size() == 2) || (arguments.size() == 3)) {
-            return new SqlPredicateAnd(arguments);
-        } else if (arguments.size() == 1) {
-            return arguments.get(0);
+            return combineRegularFilterWithRlsFilter(select, userInformation, protection);
         } else {
-            throw new IllegalArgumentException("Unexpected size of the result set.");
+            return createRlsFilter(userInformation, protection);
         }
     }
 
-    private Optional<SqlNode> setWhereClauseForTenants(final boolean protectedWithExaRowTenants,
-            final UserInformation userInformation) {
-        if (protectedWithExaRowTenants) {
-            return Optional.of(getExaRowTenantsNode(userInformation));
+    private SqlNode combineRegularFilterWithRlsFilter(final SqlStatementSelect select,
+            final UserInformation userInformation, final TableProtectionDetails protection) throws SQLException {
+        final SqlNode where = select.getWhereClause();
+        if (protection.isTenantProtected()) {
+            if (protection.isRoleProtected()) {
+                return and(where, createTenantsNode(userInformation), createRolesNode(userInformation));
+            } else if (protection.isGroupProtected()) {
+                return and(where, or(createTenantsNode(userInformation), createGroupNode(userInformation)));
+            } else {
+                return and(where, createTenantsNode(userInformation));
+            }
+        } else if (protection.isRoleProtected()) {
+            return and(where, createRolesNode(userInformation));
+        } else if (protection.isGroupProtected()) {
+            return and(where, createGroupNode(userInformation));
         } else {
-            return Optional.empty();
+            return where;
         }
     }
 
-    private SqlNode getExaRowTenantsNode(final UserInformation userInformation) {
+    private SqlNode and(final SqlNode... operands) {
+        return new SqlPredicateAnd(List.of(operands));
+    }
+
+    private SqlNode or(final SqlNode... operands) {
+        return new SqlPredicateOr(List.of(operands));
+    }
+
+    private SqlNode createTenantsNode(final UserInformation userInformation) {
         final SqlNode left = new SqlColumn(1,
                 ColumnMetadata.builder().name(EXA_ROW_TENANT_COLUMN_NAME).type(DataType.createDecimal(20, 0)).build());
-        final SqlNode right = new SqlLiteralString(userInformation.getCurrentUser());
+        final SqlNode right = new SqlLiteralString(userInformation.getCurrentUser().toString());
         return new SqlPredicateEqual(left, right);
     }
 
-    private Optional<SqlNode> setWhereClauseForRoles(final boolean protectedWithExaRowRoles,
-            final UserInformation userInformation) throws SQLException {
-        if (protectedWithExaRowRoles) {
-            final String exaRoleMask = userInformation.getRoleMask(this.connectionFactory.getConnection());
-            final SqlPredicateNotEqual whereClauseForRoles = new SqlPredicateNotEqual(
-                    createRoleCheckPredicate(exaRoleMask), new SqlLiteralExactnumeric(BigDecimal.valueOf(0)));
-            return Optional.of(whereClauseForRoles);
-
-        } else {
-            return Optional.empty();
-        }
+    private SqlNode createRolesNode(final UserInformation userInformation) {
+        final String exaRoleMask = userInformation.getRoleMask();
+        return new SqlPredicateNotEqual(createRoleCheckPredicate(exaRoleMask),
+                new SqlLiteralExactnumeric(BigDecimal.valueOf(0)));
     }
 
     private SqlNode createRoleCheckPredicate(final String exaRoleMask) {
-        final List<SqlNode> arguments = new ArrayList<>(2);
-        arguments.add(new SqlColumn(1,
-                ColumnMetadata.builder().name(EXA_ROW_ROLES_COLUMN_NAME).type(DataType.createDecimal(20, 0)).build()));
-        arguments.add(new SqlLiteralExactnumeric(new BigDecimal(exaRoleMask)));
-        return new SqlFunctionScalar(ScalarFunction.BIT_AND, arguments, true, false);
+        final List<SqlNode> operands = List.of(createColumn(EXA_ROW_ROLES_COLUMN_NAME, MASK_TYPE),
+                new SqlLiteralExactnumeric(new BigDecimal(exaRoleMask)));
+        return new SqlFunctionScalar(ScalarFunction.BIT_AND, operands, true, false);
+    }
+
+    private SqlColumn createColumn(final String name, final DataType type) {
+        return new SqlColumn(1, ColumnMetadata.builder().name(name).type(type).build());
+    }
+
+    private SqlNode createGroupNode(final UserInformation userInformation) throws SQLException {
+        final List<String> groups = userInformation.getGroups();
+        LOGGER.fine(() -> "Filtering results by user's memebership in groups: " + groups.toString());
+        final List<SqlNode> groupNodes = new ArrayList<>(groups.size());
+        for (final String group : groups) {
+            groupNodes.add(new SqlLiteralString(group));
+        }
+        return new SqlPredicateInConstList(createColumn(EXA_ROW_GROUP_COLUMN_NAME, IDENTIFIER_TYPE), groupNodes);
+    }
+
+    private SqlNode createRlsFilter(final UserInformation userInformation, final TableProtectionDetails protection)
+            throws SQLException {
+        if (protection.isTenantProtected()) {
+            if (protection.isRoleProtected()) {
+                return and(createTenantsNode(userInformation), createRolesNode(userInformation));
+            } else if (protection.isGroupProtected()) {
+                return or(createTenantsNode(userInformation), createGroupNode(userInformation));
+            } else {
+                return createTenantsNode(userInformation);
+            }
+        } else if (protection.isRoleProtected()) {
+            return createRolesNode(userInformation);
+        } else if (protection.isGroupProtected()) {
+            return createGroupNode(userInformation);
+        } else {
+            throw new IllegalArgumentException("Unfiltered WHERE clause in RLS.");
+        }
     }
 }

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.stream.Stream;
 
-import com.exasol.tools.SqlTestSetupManager;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -20,11 +19,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
+import com.exasol.tools.SqlTestSetupManager;
 
 // [itest->dsn~delete-a-role~1]
 @Tag("integration")
 @Testcontainers
-public class DeleteRlsRoleIT {
+class DeleteRlsRoleIT {
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_ROLES_MAPPING_PROJECTION = "EXA_ROLES_MAPPING_PROJECTION";
     private static final String EXA_RLS_USERS = "EXA_RLS_USERS";
