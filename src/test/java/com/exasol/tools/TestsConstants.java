@@ -3,7 +3,7 @@ package com.exasol.tools;
 import java.nio.file.Path;
 
 public final class TestsConstants {
-    public static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-dist-1.0.2.jar";
+    public static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-dist-1.1.0.jar";
     private static final Path ADMIN_SCRIPT_BASE_PATH = Path.of("src/main/lua/");
     public static final Path PATH_TO_EXA_RLS_BASE = ADMIN_SCRIPT_BASE_PATH.resolve("exa_rls_base.lua");
     public static final Path PATH_TO_EXA_IDENTIFIER = ADMIN_SCRIPT_BASE_PATH.resolve("exa_identifier.lua");

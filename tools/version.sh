@@ -8,31 +8,40 @@ readonly file_find_regex='.*\.(md|yaml|sql|java)'
 readonly script=$(basename $0)
 
 main() {
-    case "$1" in
-        help)
-            usage
-            ;;
-        verify)
-            verify
-            ;;
-        unify)
-            unify
-            ;;
-        *)
-            log "Unknown command: \"$1\""
-            log
-            usage
-            exit 1
-            ;;
-    esac
+    if [[ "$#" -eq 0 ]]
+    then
+        extract_product_version "$master_pom"
+    else
+        case "$1" in
+            help | '-h' | '--help' | usage)
+                usage
+                ;;
+            verify)
+                verify
+                ;;
+            unify)
+                unify
+                ;;
+            *)
+                log "Unknown command: \"$1\""
+                log
+                usage
+                exit 1
+                ;;
+        esac
+    fi
 }
 
 usage () {
-    log "Usage: $script help"
+    log "Usage: $script"
+    log "       $script help | -h | --help | usage"
     log "       $script verify"
     log "       $script unify"
     log
     log "Run from the root directory \"$root_dir\""
+    log
+    log "Running the script without parameter returns the current version from the master"
+    log "POM file."
     log
     log "This script can serve as a checkpoint using 'verify' as command. The exit value"
     log "is zero when all detected version numbers match the ones on the master POM file."
@@ -62,7 +71,7 @@ verify_current_directory() {
 }
 
 extract_product_version() {
-    grep -oP "product\.version>[^<]*<" "$1" | sed -e's/^.*>\s*//' -e's/\s*<//'
+    grep -oP "<version>[^<]*<" "$1" | head -n1 | sed -e's/^.*>\s*//' -e's/\s*<//'
 }
 
 log () {
