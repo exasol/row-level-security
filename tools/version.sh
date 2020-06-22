@@ -40,11 +40,11 @@ usage () {
     log
     log "Run from the root directory \"$root_dir\""
     log
-    log "Running the script without parameter returns the current version from the master"
+    log "Running the script without parameter returns the current version from the main"
     log "POM file."
     log
     log "This script can serve as a checkpoint using 'verify' as command. The exit value"
-    log "is zero when all detected version numbers match the ones on the master POM file."
+    log "is zero when all detected version numbers match the ones on the main POM file."
     log "It is non-zero if there is a mismatch."
     log
     log "Used with the command 'unify' this script rewrites all occurrences of divergent"
