@@ -1,4 +1,4 @@
-Exasol Row Level Security 1.1.0, released 2020-06-??.
+# Exasol Row Level Security 1.1.0, released 2020-06-25
 
 ## Summary
 

@@ -36,6 +36,7 @@ Restrict access to rows (datasets) in tables to &hellip;
 
 * [User Guide](doc/user_guide/user_guide.md)
 * [Tutorial](doc/user_guide/tutorial.md)
+* [Changelog](doc/changes/changelog.md)
 
 ### Information for Contributors
 
