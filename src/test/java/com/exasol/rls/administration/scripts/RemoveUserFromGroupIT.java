@@ -50,6 +50,7 @@ class RemoveUserFromGroupIT extends AbstractAdminScriptIT {
         return container.createConnection("");
     }
 
+    // [itest->dsn~remove-user-from-group~1]
     @Test
     void testRemoveUserFromGroup() throws SQLException {
         this.memberTable.insert("ROLF", "ARTISTS") //
@@ -71,6 +72,7 @@ class RemoveUserFromGroupIT extends AbstractAdminScriptIT {
                 "$STARTS_WITH_SPECIAL_CHAR", null);
     }
 
+    // [itest->dsn~remove-user-from-group-validates-user-name~1]
     @CsvSource({ "'',<null>", //
             "'   ','\"   \"'", //
             "' LEADING_SPACE','\" LEADING_SPACE\"'", //
@@ -87,6 +89,7 @@ class RemoveUserFromGroupIT extends AbstractAdminScriptIT {
                 identifier, List.of("IRRELEVANT"));
     }
 
+    // [itest->dsn~remove-user-from-group-validates-group-names~1]
     @CsvSource({ "'',<null>", //
             "'   ','\"   \"'", //
             "' LEADING_SPACE','\" LEADING_SPACE\"'", //

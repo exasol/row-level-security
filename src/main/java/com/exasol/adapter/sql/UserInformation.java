@@ -1,7 +1,6 @@
 package com.exasol.adapter.sql;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.*;
-import static java.lang.Long.toUnsignedString;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,6 +14,7 @@ import com.exasol.db.Identifier;
 /**
  * This class collect information about a user's roles.
  */
+// [impl->dsn~user-information~2]
 public final class UserInformation {
     private static final Logger LOGGER = Logger.getLogger(UserInformation.class.getName());
     private final Identifier schema;
@@ -52,6 +52,7 @@ public final class UserInformation {
      *
      * @return role mask as a String
      */
+    // [impl->dsn~roles-are-represented-by-the-bits-of-a-64-bit-integer~1]
     @SuppressWarnings("java:S2077") // SQL injection via schema prevented by wrapping schema in validated Identifier
     // object.
     public synchronized String getRoleMask() {
@@ -62,8 +63,7 @@ public final class UserInformation {
                 statement.setString(1, this.currentUser.toString());
                 try (final ResultSet resultSet = statement.executeQuery()) {
                     final long mask = setUserMask(resultSet);
-                    this.cachedRoleMask = toUnsignedString(mask);
-
+                    this.cachedRoleMask = Long.toUnsignedString(mask);
                 }
             } catch (final SQLException exception) {
                 throw new RemoteMetadataReaderException("Unable to read role mask from " + EXA_RLS_USERS_TABLE_NAME
@@ -80,6 +80,7 @@ public final class UserInformation {
         return this.sharedConnection;
     }
 
+    // [impl->dsn~all-users-have-the-public-access-role~1]
     private long setUserMask(final ResultSet resultSet) throws SQLException {
         if ((resultSet != null) && resultSet.next()) {
             final long exaRoleMask = resultSet.getLong("exa_role_mask");

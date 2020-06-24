@@ -4,6 +4,7 @@ CREATE OR REPLACE SCRIPT DELETE_RLS_ROLE(role_name) AS
 -- [impl->dsn~delete-a-role~1]
 -- [impl->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
 -- [impl->dsn~delete-rls-role-removes-a-role-from-roles-secured-tables~1]
+-- [impl->dsn~delete-rls-role-removes-a-role-from-user-table~1]
 import(exa.meta.script_schema .. '.EXA_RLS_BASE', 'BASE')
 
 function assert_role_exists()

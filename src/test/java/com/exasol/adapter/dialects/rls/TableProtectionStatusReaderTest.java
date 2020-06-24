@@ -17,10 +17,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 class TableProtectionStatusReaderTest {
     private static final String PROTECTED_TABLE_NAME = "TableA";
 
+    // [utest->dsn~table-protection-status-reader-identifies-protected-tables~2]
+    // [utest->dsn~table-protection-status-reader-identifies-unprotected-tables~2]
     @CsvSource({ //
             EXA_ROW_ROLES_COLUMN_NAME + ", true, false, false", //
             EXA_ROW_TENANT_COLUMN_NAME + ", false, true, false", //
-            EXA_ROW_GROUP_COLUMN_NAME + ", false, false, true" //
+            EXA_ROW_GROUP_COLUMN_NAME + ", false, false, true", //
+            "NOT_A_PROTECTION_COLUMN, false, false, false" //
     })
     @ParameterizedTest
     void testIsTableXProteced(final String protectionColumnName, final boolean roleProtected,

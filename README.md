@@ -22,8 +22,13 @@ Protect access to database tables on a per-row level based on roles and / or ten
 
 ## Features
 
-* Restrict access to rows (datasets) in tables to a set of roles
-* Restrict access to rows to tenants
+Restrict access to rows (datasets) in tables to &hellip;
+
+* set of roles
+* tenants (owners)
+* group of users
+* combination of group and tenant
+* combination of group and role
 
 ## Table of Contents
 
@@ -75,4 +80,5 @@ Running the Virtual Schema requires a Java Runtime version 11 or later.
 | [Maven Jacoco Plugin](https://www.eclemma.org/jacoco/trunk/doc/maven.html)          | Code coverage metering                                 | Eclipse Public License 2.0    |
 | [Maven Source Plugin](https://maven.apache.org/plugins/maven-source-plugin/)        | Creating a source code JAR                             | Apache License 2.0            |
 | [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0            |
+| [OpenFastTrace Maven Plugin](https://github.com/itsallcode/openfasttrace-maven-plugin) |Requirement Tracing                                  | GPL V3                        |
 | [OSS Index Maven Plugin](https://sonatype.github.io/ossindex-maven/maven-plugin/)   | Dependency security monitoring                         | Apache License 2.0            |

@@ -201,10 +201,16 @@ EXECUTE SCRIPT ADD_RLS_GROUP('COWORKERS');
 
 #### Listing Groups
 
-The following statement shows a list of groups:
+The following statement shows a list of groups and the number of their members:
 
 ```sql
-EXECUTE SCRIPT LIST_RLS_GROUPS();
+EXECUTE SCRIPT LIST_ALL_GROUPS();
+```
+
+If you want to list the groups user called `ALICE` is a member of, type the following:
+
+```sql
+EXECUTE SCRIPT LIST_USER_GROUPS('ALICE');
 ```
 
 #### Adding a User to a Group

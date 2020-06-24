@@ -122,6 +122,17 @@ Needs: dsn
 
 "Groups" are a functionality that allows shared access to rows based on a user's membership in groups.
 
+#### User Groups
+`req~user-groups~1`
+
+A user can be a member of zero or more user groups.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
 #### Assigning Users to Groups
 `req~assigning-users-to-groups ~1`
 
@@ -163,14 +174,29 @@ Covers:
 
 Needs: dsn
 
-#### Listing Groups
-`req~listing-groups~1`
+#### Listing All Groups
+`req~listing-all-groups~1`
 
-Data owners can list all existing groups.
+Data owners can list all existing groups including the number of members of each group.
 
 Rationale:
 
 This allows data owner to see if a group already exists.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+#### Listing a User's Groups
+`req~listing-a-users-groups~1`
+
+Data owners can list the groups a user is a member of.
+
+Rationale:
+
+This allows data owners to validate a user's group membership.
 
 Covers:
 
