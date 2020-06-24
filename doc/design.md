@@ -298,7 +298,7 @@ Needs: impl, itest
 #### `DELETE_RLS_ROLE` Removes a Role From User Table
 `dsn~delete-rls-role-removes-a-role-from-user-table~1`
 
-`DELETE_RLS_ROLE` removes a rolw from the user table `EXA_RLS_USERS`.
+`DELETE_RLS_ROLE` removes a role from the user table `EXA_RLS_USERS`.
 
 Covers:
 
@@ -357,7 +357,7 @@ Needs: impl, itest
 #### `REMOVE_USER_FROM_GROUP` Removes a User From a Group
 `dsn~remove-user-from-group~1`
 
-`REMOVE_USER_FROM_GROUP` removes a user to one or more given groups.
+`REMOVE_USER_FROM_GROUP` removes a user from one or more given groups.
 
 Covers:
 
@@ -368,7 +368,7 @@ Needs: impl, itest
 #### `REMOVE_USER_FROM_GROUP` Validates User Name
 `dsn~remove-user-from-group-validates-user-name~1`
 
-`REMOVE_USER_FROM_GROUP` validates that the user name is a valid Exasol identifier before removing the user frp, groups.
+`REMOVE_USER_FROM_GROUP` validates that the user name is a valid Exasol identifier before removing the user from groups.
 
 Covers:
 
