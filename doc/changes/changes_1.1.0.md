@@ -19,6 +19,7 @@ Additionally we updated the dependencies and introduced dependency scanning.
 * Added `org.sonatype.ossindex.maven:ossindex-maven-plugin:3.1.0`
 * Added `org.itsallcode:openfasttrace-maven-plugin:0.1.0`
 * Added `org.codehaus.mojo:build-helper-maven-plugin` `3.2.0`
+* Updated `com.exasol:exasol-testcontainers` from `2.0.1` to `2.0.2`
 * Updated `org.junit.jupiter:junit-jupiter-engine` from `5.6.1` to `5.6.2`
 * Updated `org.junit.jupiter:junit-jupiter-params` from `5.6.1` to `5.6.2`
 * Updated `org.junit.platform:junit-platform-runner` from `1.6.1` to `1.6.2`

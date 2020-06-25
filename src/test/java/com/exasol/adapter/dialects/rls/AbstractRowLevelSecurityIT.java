@@ -237,7 +237,9 @@ abstract class AbstractRowLevelSecurityIT {
         sourceSchema.createTable("EXA_RLS_USERS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_ROLE_MASK", "DECIMAL(20)") //
                 .insert("ULF", 0);
         final VirtualSchema virtualSchema = installVirtualSchema("VS_ROLE_FILTER", sourceSchema);
-        final User user = factory.createLoginUser("ULF").grant(virtualSchema, SELECT);
+        final User user = factory.createLoginUser("ULF") //
+                .grant(virtualSchema, SELECT) //
+                .grant(sourceSchema, SELECT);
         final String virtualTableName = virtualSchema.getName() + "." + sourceTable.getName();
         try (final ResultSet result = queryForUser(
                 "SELECT PUSHDOWN_SQL FROM (EXPLAIN VIRTUAL SELECT * FROM " + virtualTableName + ")", user)) {
