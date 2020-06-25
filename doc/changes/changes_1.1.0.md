@@ -16,13 +16,13 @@ Additionally we updated the dependencies and introduced dependency scanning.
  
 ## Dependency updates
  
-* Added `org.sonatype.ossindex.maven` - `ossindex-maven-plugin` `3.1.0`
-* Added `org.itsallcode` - `openfasttrace-maven-plugin` `0.1.0`
-* Added `org.codehaus.mojo` - `build-helper-maven-plugin` `3.2.0`
-* Updated `org.junit.jupiter` - `junit-jupiter-engine` from `5.6.1` to `5.6.2`
-* Updated `org.junit.jupiter` - `junit-jupiter-params` from `5.6.1` to `5.6.2`
-* Updated `org.junit.platform` - `junit-platform-runner` from `1.6.1` to `1.6.2`
-* Updated `org.maven` - `maven-assembly-plugin` from `3.2.0` to `3.3.0`
-* Updated `org.codehaus.mojo` - `exec-maven-plugin` from `1.6.0` to `3.0.0`
-* Removed `com.exasol` - `virtual-schema-common-jdbc` (is transitive in `exasol-virtual-schema`)
-* Removed `com.exasol` - `virtual-schema-common-java` (is transitive in `exasol-virtual-schema`)
+* Added `org.sonatype.ossindex.maven:ossindex-maven-plugin:3.1.0`
+* Added `org.itsallcode:openfasttrace-maven-plugin:0.1.0`
+* Added `org.codehaus.mojo:build-helper-maven-plugin` `3.2.0`
+* Updated `org.junit.jupiter:junit-jupiter-engine` from `5.6.1` to `5.6.2`
+* Updated `org.junit.jupiter:junit-jupiter-params` from `5.6.1` to `5.6.2`
+* Updated `org.junit.platform:junit-platform-runner` from `1.6.1` to `1.6.2`
+* Updated `org.maven:maven-assembly-plugin` from `3.2.0` to `3.3.0`
+* Updated `org.codehaus.mojo:exec-maven-plugin` from `1.6.0` to `3.0.0`
+* Removed `com.exasol:virtual-schema-common-jdbc` (is transitive in `exasol-virtual-schema`)
+* Removed `com.exasol:virtual-schema-common-java` (is transitive in `exasol-virtual-schema`)

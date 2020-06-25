@@ -180,7 +180,7 @@
                     <descriptors>
                         <descriptor>src/assembly/all-dependencies.xml</descriptor>
                     </descriptors>
-                    <finalName>row-level-security-dist-${product.version}</finalName>
+                    <finalName>row-level-security-dist-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
@@ -226,7 +226,7 @@
                         <configuration>
                             <executable>${basedir}/tools/assemble_sql_scripts.sh</executable>
                             <arguments>
-                                <argument>target/administration-sql-scripts-${product.version}.sql</argument>
+                                <argument>target/administration-sql-scripts-${project.version}.sql</argument>
                                 <argument>${src.admin.scripts}/exa_rls_base.lua</argument>
                                 <argument>${src.admin.scripts}/exa_identifier.lua</argument>
                                 <argument>${src.admin.scripts}/add_rls_role.lua</argument>
