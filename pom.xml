@@ -227,14 +227,14 @@
                             <executable>${basedir}/tools/assemble_sql_scripts.sh</executable>
                             <arguments>
                                 <argument>target/administration-sql-scripts-${project.version}.sql</argument>
-                                <argument>${src.admin.scripts}/exa_rls_base.lua</argument>
-                                <argument>${src.admin.scripts}/exa_identifier.lua</argument>
-                                <argument>${src.admin.scripts}/add_rls_role.lua</argument>
-                                <argument>${src.admin.scripts}/assign_roles_to_user.lua</argument>
-                                <argument>${src.admin.scripts}/delete_rls_role.lua</argument>
-                                <argument>${src.admin.scripts}/roles_mask.lua</argument>
-                                <argument>${src.admin.scripts}/add_user_to_group.lua</argument>
-                                <argument>${src.admin.scripts}/remove_user_from_group.lua</argument>
+                                <argument>${source.admin.scripts}/exa_rls_base.lua</argument>
+                                <argument>${source.admin.scripts}/exa_identifier.lua</argument>
+                                <argument>${source.admin.scripts}/add_rls_role.lua</argument>
+                                <argument>${source.admin.scripts}/assign_roles_to_user.lua</argument>
+                                <argument>${source.admin.scripts}/delete_rls_role.lua</argument>
+                                <argument>${source.admin.scripts}/roles_mask.lua</argument>
+                                <argument>${source.admin.scripts}/add_user_to_group.lua</argument>
+                                <argument>${source.admin.scripts}/remove_user_from_group.lua</argument>
                             </arguments>
                         </configuration>
                     </execution>
