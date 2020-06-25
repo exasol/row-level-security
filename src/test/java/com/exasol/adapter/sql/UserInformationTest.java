@@ -20,8 +20,8 @@ import com.exasol.db.ExasolIdentifier;
 
 @ExtendWith(MockitoExtension.class)
 class UserInformationTest {
-    private static final String DEFAULT_MASK_WITH_PUBLIC_VALUE = "9223372036854775808";
     public static final BigInteger MAX_ALLOWED_VALUE = BigInteger.valueOf(2).pow(63);
+    private static final String DEFAULT_MASK_WITH_PUBLIC_VALUE = MAX_ALLOWED_VALUE.toString();
     @Mock
     private ConnectionFactory connectionFactoryMock;
     @Mock
@@ -37,6 +37,7 @@ class UserInformationTest {
                 this.connectionFactoryMock);
     }
 
+    // [utest->dsn~roles-are-represented-by-the-bits-of-a-64-bit-integer~1]
     @Test
     void testGetRoleMaskValidMask() throws SQLException {
         final ResultSet resultSetMock = mock(ResultSet.class);
@@ -48,6 +49,7 @@ class UserInformationTest {
         assertThat(this.userInformation.getRoleMask(), equalTo("9223372036854775811"));
     }
 
+    // [utest->dsn~all-users-have-the-public-access-role~1]
     @Test
     void testGetRoleMaskEmptyResultSetWithDefaultMask() throws SQLException {
         when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);

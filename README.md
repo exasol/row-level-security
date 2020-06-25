@@ -22,8 +22,13 @@ Protect access to database tables on a per-row level based on roles and / or ten
 
 ## Features
 
-* Restrict access to rows (datasets) in tables to a set of roles
-* Restrict access to rows to tenants
+Restrict access to rows (datasets) in tables to &hellip;
+
+* set of roles
+* tenants (owners)
+* group of users
+* combination of group and tenant
+* combination of group and role
 
 ## Table of Contents
 
@@ -31,6 +36,7 @@ Protect access to database tables on a per-row level based on roles and / or ten
 
 * [User Guide](doc/user_guide/user_guide.md)
 * [Tutorial](doc/user_guide/tutorial.md)
+* [Changelog](doc/changes/changelog.md)
 
 ### Information for Contributors
 
@@ -68,6 +74,7 @@ Running the Virtual Schema requires a Java Runtime version 11 or later.
 | Dependency                                                                          | Purpose                                                | License                       |
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
 | [Apache Maven](https://maven.apache.org/)                                           | Build tool                                             | Apache License 2.0            |
+| [Build Helper Maven Plugin](http://www.mojohaus.org/build-helper-maven-plugin/)     | Register non-standard source directories (here Lua)    | MIT License                   |
 | [Exec Maven Plugin](https://www.mojohaus.org/exec-maven-plugin/)                    | Execute external processes                             | Apache License 2.0            |
 | [Maven Assembly Plugin](https://maven.apache.org/plugins/maven-assembly-plugin/)    | Building JAR archives                                  | Apache License 2.0            |
 | [Maven Compiler Plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)    | Setting required Java version                          | Apache License 2.0            |
@@ -75,4 +82,5 @@ Running the Virtual Schema requires a Java Runtime version 11 or later.
 | [Maven Jacoco Plugin](https://www.eclemma.org/jacoco/trunk/doc/maven.html)          | Code coverage metering                                 | Eclipse Public License 2.0    |
 | [Maven Source Plugin](https://maven.apache.org/plugins/maven-source-plugin/)        | Creating a source code JAR                             | Apache License 2.0            |
 | [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0            |
+| [OpenFastTrace Maven Plugin](https://github.com/itsallcode/openfasttrace-maven-plugin) |Requirement Tracing                                  | GPL V3                        |
 | [OSS Index Maven Plugin](https://sonatype.github.io/ossindex-maven/maven-plugin/)   | Dependency security monitoring                         | Apache License 2.0            |

@@ -58,13 +58,17 @@ Covers:
 Needs: impl
 
 ## `UserInformation`
-`dsn~user-information~1`
+`dsn~user-information~2`
 
-The `UserInformation` keeps details about the users role assignments.
+The `UserInformation` keeps details about the user's
+
+1. role assignments
+1. group memberships
 
 Covers:
 
 * `req~user-roles~1`
+* `req~user-groups~1`
 
 Needs: impl
 
@@ -82,7 +86,7 @@ Covers:
 
 Needs: impl
 
-## TableProtectionStatusReader`
+## `TableProtectionStatusReader`
 `dsn~table-protection-status-reader~1`
 
 The `TableProtectionStatusReader` extracts the `TableProtectionStatus` from the metadata of the RLS-protected schema.
@@ -96,19 +100,6 @@ Needs: impl
 # Runtime
 
 ## Row-level Data Access Protection
-
-### `RowLevelSecurityDialect` Reads Custom Properties
-`dsn~rls-dialect-reads-custom-properties~1`
-
-The `RowLevelSecurityDialect` reads the following custom properties:
-
-1. `SCHEMA_NAME`: name of the schema where tables are placed
-
-Covers:
-
-* `req~user-roles~1`
-
-Needs: impl, utest, itest
 
 ### `UserInformation` Reads User Roles
 `dsn~user-information-reads-user-roles`
@@ -124,8 +115,8 @@ Covers:
 
 Needs: impl, utest, itest
 
-### `TableProtectionStatus` Identifies Protected Tables
-`dsn~query-rewriter-identifies-protected-tables~2`
+### `TableProtectionStatusReader` Identifies Protected Tables
+`dsn~table-protection-status-reader-identifies-protected-tables~2`
 
 The `QueryRewriter` identifies a table as protected with row-level security, if that table has at least on of the following columns: 
 
@@ -140,19 +131,18 @@ Covers:
 * `req~tables-with-tenant-restrictions~1`
 * `req~tables-with-group-restrictions~1`
 
-Needs: impl, utest, itest
+Needs: impl, utest
 
-### `QueryRewriter` Identifies Unprotected Tables
-`dsn~query-rewriter-identifies-unprotected-tables~1`
+### `TableProtectionStatusReader` Identifies Unprotected Tables
+`dsn~table-protection-status-reader-identifies-unprotected-tables~2`
 
-The `QueryRewriter` identifies a table as unprotected, if that table does not have a column named `exa_row_roles` or `exa_row_tenant`.
-The `QueryRewriter` does not modify an unprotected table.
+The `QueryRewriter` identifies a table as unprotected, if none of the conditions listed in [`dsn~table-protection-status-reader-identifies-protected-tables~2`](#tableprotectionstatusreader-identifies-protected-tables) apply.
 
 Covers:
 
 * `req~unprotected-tables~1`
 
-Needs: impl, utest, itest
+Needs: impl, utest
 
 ### `QueryRewriter` Treats Protected Tables with Roles and Tenants Restrictions
 `dsn~query-rewriter-treats-protected-tables-with-roles-and-tenant-restrictions~1`
@@ -164,18 +154,7 @@ Covers:
 
 * `req~tables-with-role-and-tenant-restrictions~1`
 
-Needs: impl, utest, itest
-
-### `QueryRewriter` Replaces Tables
-`dsn~query-rewriter-replaces-tables~1`
-
-If a table is protected with row level security, the `QueryRewriter` replaces this table with sub-select that only yields columns the user is allowed to read.
-
-Covers:
-
-* `req~rows-users-are-allowed-to-read~1`
-
-Needs: impl, utest, itest
+Needs: impl, itest
 
 ### `QueryRewriter` Adds Row Filter for Roles
 `dsn~query-rewriter-adds-row-filter-for-roles~1`
@@ -186,7 +165,7 @@ Covers:
 
 * `req~rows-users-are-allowed-to-read~1`
 
-Needs: impl, utest, itest
+Needs: impl, itest
 
 ## RLS Administration
  
@@ -316,7 +295,18 @@ Covers:
 
 Needs: impl, itest
 
-## Add a User to a Group
+#### `DELETE_RLS_ROLE` Removes a Role From User Table
+`dsn~delete-rls-role-removes-a-role-from-user-table~1`
+
+`DELETE_RLS_ROLE` removes a role from the user table `EXA_RLS_USERS`.
+
+Covers:
+
+* `req~user-roles~1`
+
+Needs: impl, itest
+
+### Add a User to a Group
 
 #### `ADD_USER_TO_GROUP` Adds a User to a Group
 `dsn~add-user-to-group~1`
@@ -362,12 +352,12 @@ Covers:
 
 Needs: impl, itest
 
-## Remove a User From a Group
+### Remove a User From a Group
 
 #### `REMOVE_USER_FROM_GROUP` Removes a User From a Group
 `dsn~remove-user-from-group~1`
 
-`REMOVE_USER_FROM_GROUP` adds a user to one or more given groups.
+`REMOVE_USER_FROM_GROUP` removes a user from one or more given groups.
 
 Covers:
 
@@ -378,7 +368,7 @@ Needs: impl, itest
 #### `REMOVE_USER_FROM_GROUP` Validates User Name
 `dsn~remove-user-from-group-validates-user-name~1`
 
-`REMOVE_USER_FROM_GROUP` validates that the user name is a valid Exasol identifier before adding the user to groups.
+`REMOVE_USER_FROM_GROUP` validates that the user name is a valid Exasol identifier before removing the user from groups.
 
 Covers:
 
@@ -389,11 +379,35 @@ Needs: impl, itest
 #### `REMOVE_USER_FROM_GROUP` Validates Group Names
 `dsn~remove-user-from-group-validates-group-names~1`
 
-`REMOVE_USER_FROM_GROUP` validates that the group names are all valid Exasol identifier before adding the user to groups.
+`REMOVE_USER_FROM_GROUP` validates that the group names are all valid Exasol identifier before removing the user from groups.
 
 Covers:
 
 * `req~removing-users-from-groups~1`
+
+Needs: impl, itest
+
+### Other Group Administration Functions
+
+#### `LIST_ALL_GROUPS` Lists all Existing RLS Groups
+`dsn~listing-all-groups~1`
+
+`LIST_GROUPS` lists all currently existing groups including the number of members of each group.
+
+Covers:
+
+* `req~listing-all-groups~1`
+
+Needs: impl, itest
+
+#### `LIST_USER_GROUPS` Lists all Groups a User is a Member of
+`dsn~listing-a-users-groups~1`
+
+`LIST_GROUPS` lists all groups a user is a member of.
+
+Covers:
+
+* `req~listing-a-users-groups~1`
 
 Needs: impl, itest
 
@@ -446,7 +460,7 @@ Covers:
 
 * `req~user-roles~1`
 
-Needs: impl, utest
+Needs: impl, itest
 
 ### All Users Have the Public Access Role
 `dsn~all-users-have-the-public-access-role~1`
@@ -472,7 +486,7 @@ Covers:
 
 * `req~user-roles~1`
 
-Needs: impl, utest, itest
+Needs: impl, itest
 
 # Quality Scenarios
 

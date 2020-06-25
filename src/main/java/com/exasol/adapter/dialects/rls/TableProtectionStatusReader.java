@@ -33,7 +33,8 @@ public class TableProtectionStatusReader {
      * @param schemaName  name of the schema to be scanned
      * @return table protection status
      */
-    // [impl->dsn~table-protection-status-identifies-protected-tables~2]
+    // [impl->dsn~table-protection-status-reader-identifies-protected-tables~2]
+    // [impl->dsn~table-protection-status-reader-identifies-unprotected-tables~2]
     public TableProtectionStatus read(final String catalogName, final String schemaName) {
         try {
             final TableProtectionStatus.Builder builder = TableProtectionStatus.builder();

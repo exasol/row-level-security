@@ -16,7 +16,7 @@
         <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
-        <source.admin.scripts>src/main/lua</source.admin.scripts>
+        <source.admin.scripts>${basedir}/src/main/lua</source.admin.scripts>
     </properties>
     <repositories>
         <repository>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -180,7 +180,7 @@
                     <descriptors>
                         <descriptor>src/assembly/all-dependencies.xml</descriptor>
                     </descriptors>
-                    <finalName>row-level-security-dist-${product.version}</finalName>
+                    <finalName>row-level-security-dist-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
@@ -225,16 +225,19 @@
                         </goals>
                         <configuration>
                             <executable>${basedir}/tools/assemble_sql_scripts.sh</executable>
+                            <useMavenLogger>true</useMavenLogger>
                             <arguments>
-                                <argument>target/administration-sql-scripts-${product.version}.sql</argument>
-                                <argument>${src.admin.scripts}/exa_rls_base.lua</argument>
-                                <argument>${src.admin.scripts}/exa_identifier.lua</argument>
-                                <argument>${src.admin.scripts}/add_rls_role.lua</argument>
-                                <argument>${src.admin.scripts}/assign_roles_to_user.lua</argument>
-                                <argument>${src.admin.scripts}/delete_rls_role.lua</argument>
-                                <argument>${src.admin.scripts}/roles_mask.lua</argument>
-                                <argument>${src.admin.scripts}/add_user_to_group.lua</argument>
-                                <argument>${src.admin.scripts}/remove_user_from_group.lua</argument>
+                                <argument>target/administration-sql-scripts-${project.version}.sql</argument>
+                                <argument>${source.admin.scripts}/exa_rls_base.lua</argument>
+                                <argument>${source.admin.scripts}/exa_identifier.lua</argument>
+                                <argument>${source.admin.scripts}/add_rls_role.lua</argument>
+                                <argument>${source.admin.scripts}/assign_roles_to_user.lua</argument>
+                                <argument>${source.admin.scripts}/delete_rls_role.lua</argument>
+                                <argument>${source.admin.scripts}/roles_mask.lua</argument>
+                                <argument>${source.admin.scripts}/add_user_to_group.lua</argument>
+                                <argument>${source.admin.scripts}/remove_user_from_group.lua</argument>
+                                <argument>${source.admin.scripts}/list_all_groups.lua</argument>
+                                <argument>${source.admin.scripts}/list_user_groups.lua</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -251,6 +254,39 @@
                         <goals>
                             <goal>audit</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.itsallcode</groupId>
+                <artifactId>openfasttrace-maven-plugin</artifactId>
+                <version>0.1.0</version>
+                <executions>
+                    <execution>
+                        <id>trace-requirements</id>
+                        <goals>
+                            <goal>trace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <!-- Adding the Lua sources to the list of source directories is necessary 
+                                    so that OFT can scan them. -->
+                                <source>src/main/lua</source>
+                            </sources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

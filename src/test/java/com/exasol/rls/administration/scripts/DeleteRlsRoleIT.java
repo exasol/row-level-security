@@ -65,6 +65,7 @@ class DeleteRlsRoleIT extends AbstractAdminScriptIT {
         return schema.getFullyQualifiedName() + "." + EXA_RLS_USERS_TABLE_NAME;
     }
 
+    // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
     @CsvSource({ "'Sales', 'Development', 'Finance', 'Support'", "'Development', 'Finance', 'Sales', 'Support'",
             "'Finance', 'Development', 'Sales', 'Support'", "'Support',  'Development', 'Finance', 'Sales'" })
     @ParameterizedTest
@@ -91,7 +92,7 @@ class DeleteRlsRoleIT extends AbstractAdminScriptIT {
         assertScriptThrows("Unable to delete RLS role \"Support\" because it does not exist.", "Support");
     }
 
-    // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
+    // [itest->dsn~delete-rls-role-removes-a-role-from-user-table~1]
     @ParameterizedTest
     @MethodSource("provideValuesForTestDeleteRlsRoleFromExaRlsUsers")
     void testDeleteRlsRoleFromExaRlsUsers(final String roleToDelete, final Object[][] expectedRows)
@@ -120,7 +121,7 @@ class DeleteRlsRoleIT extends AbstractAdminScriptIT {
                 Arguments.of("Support", new Object[][] { { "RLS_USR_1", 7 }, { "RLS_USR_2", 1 } }));
     }
 
-    // [itest->dsn~delete-rls-role-removes-a-role-from-user-tables~1]
+    // [itest->dsn~delete-rls-role-removes-a-role-from-roles-secured-tables~1]
     @ParameterizedTest
     @MethodSource("provideValuesForTestDeleteRlsRoleFromPayloadTable")
     void testDeleteRlsRoleFromPayloadTable(final String roleToDelete, final Object[][] expectedRows)

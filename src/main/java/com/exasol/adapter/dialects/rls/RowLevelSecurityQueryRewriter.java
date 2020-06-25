@@ -176,6 +176,10 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         return new SqlPredicateEqual(left, right);
     }
 
+    // [impl->dsn~query-rewriter-adds-row-filter-for-roles~1]
+    // [impl->dsn~null-values-in-role-ids-and-masks~1]:
+    // The BIT_AND function returns NULL in case one of its parameters is NULL.
+    // In Exasol the following comparison returns false: NULL <> 0
     private SqlNode createRolesNode(final UserInformation userInformation) {
         final String exaRoleMask = userInformation.getRoleMask();
         return new SqlPredicateNotEqual(createRoleCheckPredicate(exaRoleMask),
@@ -202,6 +206,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         return new SqlPredicateInConstList(createColumn(EXA_ROW_GROUP_COLUMN_NAME, IDENTIFIER_TYPE), groupNodes);
     }
 
+    // [impl->dsn~query-rewriter-treats-protected-tables-with-roles-and-tenant-restrictions~1]
     private SqlNode createRlsFilter(final UserInformation userInformation, final TableProtectionDetails protection)
             throws SQLException {
         if (protection.isTenantProtected()) {
