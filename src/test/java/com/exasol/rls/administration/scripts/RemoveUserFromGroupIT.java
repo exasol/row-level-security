@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.exasol.dbbuilder.dialects.Table;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -20,7 +21,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
-import com.exasol.dbbuilder.Table;
 
 @Testcontainers
 @Tag("integration")

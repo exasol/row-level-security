@@ -10,12 +10,13 @@ import java.sql.*;
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
 
 import com.exasol.containers.ExasolContainer;
-import com.exasol.dbbuilder.*;
+import com.exasol.dbbuilder.dialects.DatabaseObjectException;
+import com.exasol.dbbuilder.dialects.exasol.*;
 
 public abstract class AbstractAdminScriptIT {
-    protected static Schema schema;
+    protected static ExasolSchema schema;
     protected static Script script;
-    protected static DatabaseObjectFactory factory;
+    protected static ExasolObjectFactory factory;
 
     protected static void initialize(final ExasolContainer<? extends ExasolContainer<?>> container,
             final String scriptName, final Path... scriptFilePaths) throws SQLException {

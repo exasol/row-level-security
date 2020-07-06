@@ -1,6 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
-import static com.exasol.dbbuilder.AdapterScript.Language.JAVA;
+import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
@@ -21,7 +21,7 @@ import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
-import com.exasol.dbbuilder.*;
+import com.exasol.dbbuilder.dialects.exasol.*;
 
 @Tag("integration")
 @Tag("virtual-schema")
@@ -36,13 +36,13 @@ class QueryRuntimeIT {
     @BeforeAll
     static void beforeAll() throws Exception {
         factory = new ExasolObjectFactory(container.createConnection(""));
-        final Schema sourceSchema = createSourceSchema();
+        final ExasolSchema sourceSchema = createSourceSchema();
         uploadRlsAdapter();
         createRowLevelSecuritySchema(sourceSchema);
     }
 
-    private static Schema createSourceSchema() throws NoDriverFoundException, SQLException {
-        final Schema sourceSchema = factory.createSchema("SIMPLE_SALES");
+    private static ExasolSchema createSourceSchema() throws NoDriverFoundException, SQLException {
+        final ExasolSchema sourceSchema = factory.createSchema("SIMPLE_SALES");
         sourceSchema.createTableBuilder("ORDER_ITEM") //
                 .column("ORDER_ID", "DECIMAL(18,0)") //
                 .column("CUSTOMER", "VARCHAR(50)") //
@@ -67,9 +67,9 @@ class QueryRuntimeIT {
         container.getDefaultBucket().uploadFile(localAdapterPath, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
     }
 
-    private static void createRowLevelSecuritySchema(final Schema sourceSchema) throws SQLException {
+    private static void createRowLevelSecuritySchema(final ExasolSchema sourceSchema) throws SQLException {
         final Bucket bucket = container.getDefaultBucket();
-        final Schema rlsSchema = factory.createSchema("RLS_SCHEMA");
+        final ExasolSchema rlsSchema = factory.createSchema("RLS_SCHEMA");
         final String scriptContent = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/" + bucket.getBucketFsName() + "/" + bucket.getBucketName() //
                 + "/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";";
