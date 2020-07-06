@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.stream.Stream;
 
+import com.exasol.dbbuilder.dialects.Table;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
@@ -21,7 +22,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolContainerConstants;
-import com.exasol.dbbuilder.Table;
 import com.exasol.matcher.ResultSetStructureMatcher;
 import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 

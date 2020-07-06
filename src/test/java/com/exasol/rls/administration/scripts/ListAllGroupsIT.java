@@ -14,7 +14,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
-import com.exasol.dbbuilder.Table;
+import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.tools.TestsConstants;
 
 @Tag("integration")
