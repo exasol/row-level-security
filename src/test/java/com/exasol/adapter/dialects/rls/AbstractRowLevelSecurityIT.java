@@ -22,6 +22,7 @@ import com.exasol.containers.ExasolContainer;
 import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.dbbuilder.dialects.User;
 import com.exasol.dbbuilder.dialects.exasol.*;
+import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 
 @Tag("integration")
 @Tag("virtual-schema")
@@ -147,14 +148,17 @@ abstract class AbstractRowLevelSecurityIT {
                 .insert("USER_GT_G", "MODERATE") //
                 .insert("USER_GT_GT", "HOT");
         final VirtualSchema virtualSchema = installVirtualSchema("VS_GROUP_AND_TENANT", sourceSchema);
-        final User user_t = factory.createLoginUser("USER_GT_T").grant(virtualSchema, SELECT);
-        final User user_g = factory.createLoginUser("USER_GT_G").grant(virtualSchema, SELECT);
-        final User user_gt = factory.createLoginUser("USER_GT_GT").grant(virtualSchema, SELECT);
+        final User userTenantOnly = factory.createLoginUser("USER_GT_T").grant(virtualSchema, SELECT);
+        final User userGroupOnly = factory.createLoginUser("USER_GT_G").grant(virtualSchema, SELECT);
+        final User userGroupAndTenant = factory.createLoginUser("USER_GT_GT").grant(virtualSchema, SELECT);
         final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
-        assertAll(() -> assertThat(queryForUser(sql, user_t), table().row("Horta").row("Stockholm").matches()),
-                () -> assertThat(queryForUser(sql, user_g),
-                        table().row("Helsinki").row("Horta").row("Lhasa").row("Moskow").row("Stockholm").matches()),
-                () -> assertThat(queryForUser(sql, user_gt), table().row("Lhasa").row("Rio").matches()));
+        final Builder expectedForTenantOnlyUser = table().row("Horta").row("Stockholm");
+        final Builder expectedForGroupOnlyUser = table().row("Helsinki").row("Horta").row("Lhasa").row("Moskow")
+                .row("Stockholm");
+        final Builder expectedForGroupAndTenantUser = table().row("Lhasa").row("Rio");
+        assertAll(() -> assertThat(queryForUser(sql, userTenantOnly), expectedForTenantOnlyUser.matches()),
+                () -> assertThat(queryForUser(sql, userGroupOnly), expectedForGroupOnlyUser.matches()),
+                () -> assertThat(queryForUser(sql, userGroupAndTenant), expectedForGroupAndTenantUser.matches()));
     }
 
     // [itest->dsn~all-users-have-the-public-access-role~1]
