@@ -274,9 +274,9 @@ We prepared the schema and tables we want to protect with RLS in section ["Admin
 
 ### Installing the RLS Virtual Schema Package
 
-Upload the latest available release of [Row Level Security](https://github.com/exasol/row-level-security/releases) to Bucket FS.
+Upload the latest available release of [Row Level Security](https://github.com/exasol/row-level-security/releases) to BucketFS.
 
-Check out our [Virtual Schema deployment guide](https://github.com/exasol/virtual-schemas/blob/master/doc/user-guide/deploying_the_virtual_schema_adapter.md) for detailed information.
+Check out our [Virtual Schema user guide](https://github.com/exasol/virtual-schemas/blob/master/doc/user-guide/user_guide.md#install-the-adapter-script) for general information about adapter script installation.
 
 ### Creating the Virtual Schema Adapter Script
 
@@ -291,7 +291,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-1.1.1.jar;
+    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-1.1.2.jar;
 /
 ;
 ```
