@@ -2,6 +2,7 @@ package com.exasol.adapter.sql;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -77,5 +78,34 @@ class UserInformationTest {
         when(resultSetMock.last()).thenReturn(true);
         when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
         assertThat(this.userInformation.getRoleMask(), equalTo(DEFAULT_MASK_WITH_PUBLIC_VALUE));
+    }
+
+    @Test
+    void testGetGroups() throws SQLException {
+        final ResultSet resultSetMock = mock(ResultSet.class);
+        when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);
+        when(resultSetMock.getString(1)).thenReturn("TEACHERS", "STUDENTS");
+        when(resultSetMock.next()).thenReturn(true, true, false);
+        when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
+        assertThat(this.userInformation.getGroups(), containsInAnyOrder("TEACHERS", "STUDENTS"));
+    }
+
+    @Test
+    void testHasGroupsTrue() throws SQLException {
+        final ResultSet resultSetMock = mock(ResultSet.class);
+        when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);
+        when(resultSetMock.getString(1)).thenReturn("TEACHERS");
+        when(resultSetMock.next()).thenReturn(true, false);
+        when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
+        assertThat(this.userInformation.hasGroups(), equalTo(true));
+    }
+
+    @Test
+    void testHasGroupsFalse() throws SQLException {
+        final ResultSet resultSetMock = mock(ResultSet.class);
+        when(this.connectionMock.prepareStatement(any())).thenReturn(this.preparedStatementMock);
+        when(resultSetMock.next()).thenReturn(false);
+        when(this.preparedStatementMock.executeQuery()).thenReturn(resultSetMock);
+        assertThat(this.userInformation.hasGroups(), equalTo(false));
     }
 }

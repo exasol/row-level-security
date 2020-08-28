@@ -76,6 +76,7 @@ abstract class AbstractRowLevelSecurityIT {
                 container.getUsername(), container.getPassword());
     }
 
+    // [itest->dsn~query-rewriter-adds-row-filter-for-tenants~1]
     @Test
     void testTenantRestrictedTable() {
         final ExasolSchema sourceSchema = factory.createSchema("TENANT_PROTECTED_SCHEMA");
@@ -109,6 +110,7 @@ abstract class AbstractRowLevelSecurityIT {
                 .build();
     }
 
+    // [itest->dsn~query-rewriter-adds-row-filter-for-group~1]
     @Test
     void testGroupRestictedTable() throws SQLException {
         final ExasolSchema sourceSchema = factory.createSchema("GROUP_PROTECTED_SCHEMA");
@@ -124,6 +126,35 @@ abstract class AbstractRowLevelSecurityIT {
         final User user = factory.createLoginUser("USER_G").grant(virtualSchema, SELECT);
         final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
         assertThat(queryForUser(sql, user), table().row("Horta").row("Moskow").row("Stockholm").matches());
+    }
+
+    // [itest->dsn~query-rewriter-treats-protected-tables-with-group-and-tenant-restrictions~1]
+    @Test
+    void testGroupAndTenantRestrictedTable() throws SQLException {
+        final ExasolSchema sourceSchema = factory.createSchema("GROUP_AND_TENANT_PROTECTED_SCHEMA");
+        sourceSchema
+                .createTable("SOURCE_TABLE", "CITY", "VARCHAR(40)", "EXA_ROW_TENANT", "VARCHAR(128)", "EXA_ROW_GROUP",
+                        "VARCHAR(128)") //
+                .insert("Helsinki", null, "COLD") //
+                .insert("Horta", "USER_GT_T", "MODERATE") //
+                .insert("Lhasa", "USER_GT_GT", "COLD") //
+                .insert("Moskow", "NOONE", "COLD") //
+                .insert("Rio", null, "HOT") //
+                .insert("Stockholm", "USER_GT_T", "COLD") //
+                .insert("Vienna", null, null);
+        sourceSchema.createTable("EXA_GROUP_MEMBERS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_GROUP", "VARCHAR(128)") //
+                .insert("USER_GT_G", "COLD") //
+                .insert("USER_GT_G", "MODERATE") //
+                .insert("USER_GT_GT", "HOT");
+        final VirtualSchema virtualSchema = installVirtualSchema("VS_GROUP_AND_TENANT", sourceSchema);
+        final User user_t = factory.createLoginUser("USER_GT_T").grant(virtualSchema, SELECT);
+        final User user_g = factory.createLoginUser("USER_GT_G").grant(virtualSchema, SELECT);
+        final User user_gt = factory.createLoginUser("USER_GT_GT").grant(virtualSchema, SELECT);
+        final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
+        assertAll(() -> assertThat(queryForUser(sql, user_t), table().row("Horta").row("Stockholm").matches()),
+                () -> assertThat(queryForUser(sql, user_g),
+                        table().row("Helsinki").row("Horta").row("Lhasa").row("Moskow").row("Stockholm").matches()),
+                () -> assertThat(queryForUser(sql, user_gt), table().row("Lhasa").row("Rio").matches()));
     }
 
     // [itest->dsn~all-users-have-the-public-access-role~1]

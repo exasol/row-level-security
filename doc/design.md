@@ -144,18 +144,6 @@ Covers:
 
 Needs: impl, utest
 
-### `QueryRewriter` Treats Protected Tables with Roles and Tenants Restrictions
-`dsn~query-rewriter-treats-protected-tables-with-roles-and-tenant-restrictions~1`
-
-If a table contains both `exa_row_roles` and `exa_row_tenant`columns, then the `QueryRewriter` applies both security schemes. 
-That means a user has to be marked as a tenant and have the right role in due to see a row's content.
-
-Covers:
-
-* `req~tables-with-role-and-tenant-restrictions~1`
-
-Needs: impl, itest
-
 ### `QueryRewriter` Adds Row Filter for Roles
 `dsn~query-rewriter-adds-row-filter-for-roles~1`
 
@@ -167,7 +155,53 @@ Covers:
 
 Needs: impl, itest
 
-## RLS Administration
+### `QueryRewriter` Adds Row Filter for Tenants
+`dsn~query-rewriter-adds-row-filter-for-tenants~1`
+
+The `QueryRewriter` adds a row filter to the injected sub-query that requires the tenant of the row to match the current user's name.
+
+Covers:
+
+* `req~tables-with-tenant-restrictions~1`
+
+Needs: impl, itest
+
+### `QueryRewriter` Adds Row Filter for Group
+`dsn~query-rewriter-adds-row-filter-for-group~1`
+
+The `QueryRewriter` adds a row filter to the injected sub-query that requires that at one of the groups assigned to the current user matches the row's group.
+
+Covers:
+
+* `req~tables-with-group-restrictions~1`
+
+Needs: impl, itest
+
+### `QueryRewriter` Treats Protected Tables with Roles and Tenant Restrictions
+`dsn~query-rewriter-treats-protected-tables-with-roles-and-tenant-restrictions~1`
+
+If a table contains both `exa_row_roles` and `exa_row_tenant`columns, then the `QueryRewriter` applies both security schemes in combination. 
+That means a user has to be marked as a tenant **and** have the right role to see a row's content.
+
+Covers:
+
+* `req~tables-with-role-and-tenant-restrictions~1`
+
+Needs: impl, itest
+
+### `QueryRewriter` Treats Protected Tables with Group and Tenant Restrictions
+`dsn~query-rewriter-treats-protected-tables-with-group-and-tenant-restrictions~1`
+
+If a table contains both `exa_row_group` and `exa_row_tenant`columns, then the `QueryRewriter` applies both security schemes as alternatives. 
+That means a user has to be marked as a tenant **or** be a member of the group to see a row's content.
+
+Covers:
+
+* `req~tables-with-role-and-tenant-restrictions~1`
+
+Needs: impl, itest
+
+# RLS Administration
  
 The RLS project provides a set of convenience scripts written in Lua to make administration of RLS more user-friendly.
 

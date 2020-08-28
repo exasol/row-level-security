@@ -157,4 +157,17 @@ public final class UserInformation {
         }
         return this.cachedGroups;
     }
+
+    /**
+     * Check if the user is a member of any group.
+     *
+     * @return {@code true} if the user is assigned to at least one group.
+     * @throws SQLException if group membership can't be read from database
+     */
+    public boolean hasGroups() throws SQLException {
+        if (this.cachedGroups == null) {
+            return !getGroups().isEmpty();
+        }
+        return !this.cachedGroups.isEmpty();
+    }
 }
