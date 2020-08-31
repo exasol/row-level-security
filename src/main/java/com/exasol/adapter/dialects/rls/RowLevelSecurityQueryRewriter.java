@@ -169,6 +169,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         return new SqlPredicateOr(List.of(operands));
     }
 
+    // [impl->dsn~query-rewriter-adds-row-filter-for-tenants~1]
     private SqlNode createTenantsNode(final UserInformation userInformation) {
         final SqlNode left = new SqlColumn(1,
                 ColumnMetadata.builder().name(EXA_ROW_TENANT_COLUMN_NAME).type(DataType.createDecimal(20, 0)).build());
@@ -196,6 +197,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         return new SqlColumn(1, ColumnMetadata.builder().name(name).type(type).build());
     }
 
+    // [impl->dsn~query-rewriter-adds-row-filter-for-group~1]
     private SqlNode createGroupNode(final UserInformation userInformation) throws SQLException {
         final List<String> groups = userInformation.getGroups();
         LOGGER.fine(() -> "Filtering results by user's memebership in groups: " + groups.toString());
@@ -207,12 +209,13 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     }
 
     // [impl->dsn~query-rewriter-treats-protected-tables-with-roles-and-tenant-restrictions~1]
+    // [impl->dsn~query-rewriter-treats-protected-tables-with-group-and-tenant-restrictions~1]
     private SqlNode createRlsFilter(final UserInformation userInformation, final TableProtectionDetails protection)
             throws SQLException {
         if (protection.isTenantProtected()) {
             if (protection.isRoleProtected()) {
                 return and(createTenantsNode(userInformation), createRolesNode(userInformation));
-            } else if (protection.isGroupProtected()) {
+            } else if (protection.isGroupProtected() && userInformation.hasGroups()) {
                 return or(createTenantsNode(userInformation), createGroupNode(userInformation));
             } else {
                 return createTenantsNode(userInformation);
