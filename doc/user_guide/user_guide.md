@@ -19,13 +19,16 @@ RLS comes in three flavors which can also be used in combination:
 1. Role-based security
 1. Tenant-based security
 1. Group-based security
-1. Public data
 
-The main difference between the two variants is the use case behind them. In a role-based scenario you want multiple people to be able to access the same rows &mdash; based on roles that are assigned to those users. The number of roles in this scenario is small. Tenant security on the other hand assumes that data belongs to a tenant and that other tenants are not allowed see that data.
+The main difference between the three variants is the use case behind them.
 
-Group-based also allow multiple user to access one row. Users can be members of multiple groups, but each row can belong to only one group.
+In a *role-based* scenario you want multiple people to be able to access the same rows &mdash; based on roles that are assigned to those users. The number of roles in this scenario is small.
 
-Public data &mdash; as the name suggests &mdash; is data accessible for all users, independently of roles or whether they own the data.
+*Tenant* security on the other hand assumes that data belongs to a tenant and that other tenants are not allowed see that data.
+
+*Group-based* also allows multiple users to access one row. Users can be members of multiple groups, but each row can belong to only one group.
+
+All of the flavors allow for *public* data &mdash; as the name suggests, this data is accessible for all users, independently of roles or whether they own the data.
 
 ### Protection Scopes of RLS
 
