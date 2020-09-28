@@ -12,10 +12,8 @@ addons:
   sonarcloud:
     organization: exasol
 
-# Verify that the product version is correct everywhere.
 # Create an empty Docker config to avoid error message about missing config.
 before_script:
-  - ./tools/version.sh verify
   - mkdir "$HOME"/.docker
   - echo '{}' > "$HOME"/.docker/config.json
 
