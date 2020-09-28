@@ -53,7 +53,6 @@ Running the Virtual Schema requires a Java Runtime version 11 or later.
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
 | [Exasol DB Fundamentals](https://github.com/exasol/db-fundamentals-java)            | Basic database building blocks                         | MIT License                   |
 | [Exasol Virtual Schema](https://github.com/exasol/exasol-virtual-schema)            | Virtual Schemas adapter for Exasol sources             | MIT License                   |
-| [Exasol Virtual Schema JDBC](https://github.com/exasol/virtual-schema-common-jdbc)  | Common module for JDBC-based Virtual Schemas adapters  | MIT License                   |
 | [Exasol JDBC Driver](https://www.exasol.com/portal/display/DOWNLOAD/Exasol+Download+Section)  | JDBC driver for Exasol database              | MIT License                   |
 
 ### Test Dependencies
