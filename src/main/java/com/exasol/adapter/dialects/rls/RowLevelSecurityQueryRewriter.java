@@ -171,8 +171,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
 
     // [impl->dsn~query-rewriter-adds-row-filter-for-tenants~1]
     private SqlNode createTenantsNode(final UserInformation userInformation) {
-        final SqlNode left = new SqlColumn(1,
-                ColumnMetadata.builder().name(EXA_ROW_TENANT_COLUMN_NAME).type(DataType.createDecimal(20, 0)).build());
+        final SqlNode left = createColumn(EXA_ROW_TENANT_COLUMN_NAME, DataType.createDecimal(20, 0));
         final SqlNode right = new SqlLiteralString(userInformation.getCurrentUser().toString());
         return new SqlPredicateEqual(left, right);
     }
@@ -200,6 +199,22 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     // [impl->dsn~query-rewriter-adds-row-filter-for-group~1]
     private SqlNode createGroupNode(final UserInformation userInformation) throws SQLException {
         final List<String> groups = userInformation.getGroups();
+        if (groups.size() == 1) {
+            return createSingleGroupNode(groups.get(0));
+        } else {
+            return createMultiGroupNode(groups);
+        }
+    }
+
+    // This is an optimization to keep memory usage down in corner cases where a user is assigned to a single group
+    // only.
+    private SqlNode createSingleGroupNode(final String group) {
+        LOGGER.fine(() -> "Filtering results by user's memebership in a single group: " + group);
+        return new SqlPredicateEqual(createColumn(EXA_ROW_GROUP_COLUMN_NAME, IDENTIFIER_TYPE),
+                new SqlLiteralString(group));
+    }
+
+    private SqlNode createMultiGroupNode(final List<String> groups) {
         LOGGER.fine(() -> "Filtering results by user's memebership in groups: " + groups.toString());
         final List<SqlNode> groupNodes = new ArrayList<>(groups.size());
         for (final String group : groups) {
