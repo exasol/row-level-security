@@ -4,7 +4,7 @@ import static com.exasol.dbbuilder.dialects.exasol.ExasolObjectPrivilege.SELECT;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.nio.file.Path;
@@ -127,6 +127,27 @@ abstract class AbstractRowLevelSecurityIT {
         final User user = factory.createLoginUser("USER_G").grant(virtualSchema, SELECT);
         final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
         assertThat(queryForUser(sql, user), table().row("Horta").row("Moskow").row("Stockholm").matches());
+    }
+
+    // [itest->dsn~query-rewriter-adds-row-filter-for-group~1]
+    @Test
+    void testGroupRestictedTableWithSingleGroupOptimization() throws SQLException {
+        final ExasolSchema sourceSchema = factory.createSchema("GROUP_PROTECTED_SCHEMA_WITH_ONE_GROUP");
+        sourceSchema.createTable("SOURCE_TABLE", "CITY", "VARCHAR(40)", "EXA_ROW_GROUP", "VARCHAR(128)") //
+                .insert("Stockholm", "ANOTHER_GROUP") //
+                .insert("Rio", "THE_GROUP");
+        sourceSchema.createTable("EXA_GROUP_MEMBERS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_GROUP", "VARCHAR(128)") //
+                .insert("USER_WITH_SINGLE_GROUP", "THE_GROUP");
+        final VirtualSchema virtualSchema = installVirtualSchema("VS_SINGLE_GROUP", sourceSchema);
+        final User user = factory.createLoginUser("USER_WITH_SINGLE_GROUP").grant(virtualSchema, SELECT);
+        final String sql = "EXPLAIN VIRTUAL SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE";
+        assertThat(queryForUser(sql, user), table().row(anything(),
+                // Note that depending on whether this is a local or a remote virtual schema, we either expect a
+                // standalone SELECT statement or one wrapped into an IMPORT statement. That is why we match
+                // against a regular expression here.
+                matchesPattern(".*SELECT \"CITY\" FROM \"GROUP_PROTECTED_SCHEMA_WITH_ONE_GROUP\".\"SOURCE_TABLE\"" //
+                        + " WHERE \"EXA_ROW_GROUP\" = ''?THE_GROUP'.*"),
+                anything(), anything()).matches());
     }
 
     // [itest->dsn~query-rewriter-treats-protected-tables-with-group-and-tenant-restrictions~1]
