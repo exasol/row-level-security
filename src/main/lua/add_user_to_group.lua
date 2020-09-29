@@ -27,7 +27,7 @@ end
 function merge_new_members()
     query([[MERGE INTO ::s.EXA_GROUP_MEMBERS M
             USING EXA_NEW_GROUP_MEMBERS N
-            ON M.EXA_USER_NAME = N.EXA_USER_NAME
+            ON M.EXA_USER_NAME = N.EXA_USER_NAME AND M.EXA_GROUP = N.EXA_GROUP
             WHEN NOT MATCHED THEN INSERT VALUES (N.EXA_USER_NAME, N.EXA_GROUP)]],
     { s = exa.meta.script_schema })
 end
