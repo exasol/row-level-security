@@ -1,5 +1,7 @@
 # Exasol Row Level Security 1.2.0, released 2020-09-30
 
+Code name: Single group optimization
+
 We added an optimization for group-based security in cases where the user belongs to only one group.
 
 ## Features
