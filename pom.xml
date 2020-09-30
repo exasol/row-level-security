@@ -180,7 +180,7 @@
                     <descriptors>
                         <descriptor>src/assembly/all-dependencies.xml</descriptor>
                     </descriptors>
-                    <finalName>row-level-security-dist-${project.version}</finalName>
+                    <finalName>row-level-security-dist-${version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
