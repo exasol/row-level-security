@@ -1,4 +1,4 @@
-# Exasol Row Level Security 1.2.0, released 2020-11-17
+# Exasol Row Level Security 1.2.1, released 2020-11-17
 
 Code name: Security Update
 
