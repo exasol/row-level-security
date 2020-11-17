@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.rls;
 
 import static com.exasol.dbbuilder.dialects.exasol.ExasolObjectPrivilege.SELECT;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
+import static com.exasol.tools.TestsConstants.EXASOL_DOCKER_IMAGE_REFERENCE;
 import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -29,7 +30,8 @@ import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 @Testcontainers
 abstract class AbstractRowLevelSecurityIT {
     @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
+    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
+            EXASOL_DOCKER_IMAGE_REFERENCE);
     private static AdapterScript adapterScript = null;
     private static ConnectionDefinition connectionDefinition = null;
     private static ExasolObjectFactory factory = null;
