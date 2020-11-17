@@ -189,7 +189,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     private SqlNode createRoleCheckPredicate(final String exaRoleMask) {
         final List<SqlNode> operands = List.of(createColumn(EXA_ROW_ROLES_COLUMN_NAME, MASK_TYPE),
                 new SqlLiteralExactnumeric(new BigDecimal(exaRoleMask)));
-        return new SqlFunctionScalar(ScalarFunction.BIT_AND, operands, true, false);
+        return new SqlFunctionScalar(ScalarFunction.BIT_AND, operands);
     }
 
     private SqlColumn createColumn(final String name, final DataType type) {
