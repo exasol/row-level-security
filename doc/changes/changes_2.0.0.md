@@ -7,9 +7,9 @@ Code name: Fixed credentials exposure in EXA connection
 Row Level Security is based on the [`exasol-virtual-schema`](https://github.com/exasol/exasol-virtual-schema) and thus
 inherited a credential exposure that has been fixed in Exasol VS 4.0.0 and is now fixed in RLS too.
 
-If you used `IMPORT_FROM_EXA` in a previous version, you need to remove the old property EXA_CONNECTION_STRING,
-create a named connection definition of type EXA with CREATE CONNECTION and provide the name of that definition in the
-new property EXA_CONNECTION.
+If you used `IMPORT FROM EXA` in a previous version, you need to remove the old `EXA_CONNECTION_STRING` property,
+create a named connection definition of type EXA with `CREATE CONNECTION` and provide the name of that definition in the
+new `EXA_CONNECTION` property.
 
 The old variant is intentionally not supported anymore to tighten security.
 
@@ -19,6 +19,6 @@ The old variant is intentionally not supported anymore to tighten security.
 
 ## Dependency updates
  
-* Updated `com.exasol:exasol-virtual-schema:3.1.0` to 4.0.0
-* Updated `com.exasol:hamcrest-resultset-matcher:1.2.1` to 1.2.2
-* Updated `org.mockito:mockito-junit-jupiter:3.6.0` to 3.6.28
+* Updated `com.exasol:exasol-virtual-schema:3.1.0` to `4.0.0`
+* Updated `com.exasol:hamcrest-resultset-matcher:1.2.1` to `1.2.2`
+* Updated `org.mockito:mockito-junit-jupiter:3.6.0` to `3.6.28`
