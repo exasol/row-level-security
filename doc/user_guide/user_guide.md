@@ -333,6 +333,13 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 Recommended when protecting data with RLS where the data is on a remote instance or cluster.
 
 ```sql
+CREATE CONNECTION EXA_CONNECTION
+TO '<host-or-list>:<port>'
+USER '<user>'
+PASSWORD '<password>'
+```
+
+```sql
 CREATE VIRTUAL SCHEMA <virtual schema name> 
     USING RLS_SCHEMA.RLS_VS_ADAPTER
     WITH
@@ -340,7 +347,7 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
     SCHEMA_NAME     = '<schema name>'
     IMPORT_FROM_EXA = 'true'
-    EXA_CONNECTION_STRING = 'localhost:<port>';
+    EXA_CONNECTION  = 'EXA_CONNECTION';
 ```
 
 ### Creating a Virtual Schema with Import From JDBC

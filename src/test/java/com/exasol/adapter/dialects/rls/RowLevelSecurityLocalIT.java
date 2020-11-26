@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Tag;
 @Tag("virtual-schema")
 class RowLevelSecurityLocalIT extends AbstractRowLevelSecurityIT {
     @Override
-    protected Map<String, String> getVirtualSchemaProperties() {
+    protected Map<String, String> getConnectionSpecificVirtualSchemaProperties() {
         return Collections.emptyMap();
     }
 }
