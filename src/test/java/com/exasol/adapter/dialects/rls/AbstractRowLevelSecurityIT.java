@@ -76,7 +76,7 @@ abstract class AbstractRowLevelSecurityIT {
 
     private static void createConnectionDefinition() {
         connectionDefinition = objectFactory.createConnectionDefinition("RLS_CONNECTION",
-                "jdbc:exa:localhost" + EXASOL.getDefaultInternalDatabasePort(), EXASOL.getUsername(),
+                "jdbc:exa:localhost:" + EXASOL.getDefaultInternalDatabasePort(), EXASOL.getUsername(),
                 EXASOL.getPassword());
     }
 
