@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 public final class TestsConstants {
     public static final String ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION = "row-level-security-dist-1.2.1.jar";
-    public static final String EXASOL_DOCKER_IMAGE_REFERENCE = "exasol/docker-db:6.2.11-d1";
+    public static final String EXASOL_DOCKER_IMAGE_REFERENCE = "7.0.2";
     private static final Path ADMIN_SCRIPT_BASE_PATH = Path.of("src/main/lua/");
     public static final Path PATH_TO_EXA_RLS_BASE = ADMIN_SCRIPT_BASE_PATH.resolve("exa_rls_base.lua");
     public static final Path PATH_TO_EXA_IDENTIFIER = ADMIN_SCRIPT_BASE_PATH.resolve("exa_identifier.lua");
