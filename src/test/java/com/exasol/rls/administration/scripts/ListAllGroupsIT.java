@@ -1,6 +1,7 @@
 package com.exasol.rls.administration.scripts;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_GROUP_MEMBERS_TABLE_NAME;
+import static com.exasol.tools.TestsConstants.EXASOL_DOCKER_IMAGE_REFERENCE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
@@ -21,12 +22,13 @@ import com.exasol.tools.TestsConstants;
 @Testcontainers
 class ListAllGroupsIT extends AbstractAdminScriptIT {
     @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
+    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
+            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
     private static Table memberTable;
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        initialize(container, "LIST_ALL_GROUPS", TestsConstants.PATH_TO_LIST_ALL_GROUPS);
+        initialize(EXASOL, "LIST_ALL_GROUPS", TestsConstants.PATH_TO_LIST_ALL_GROUPS);
         memberTable = schema.createTable(EXA_GROUP_MEMBERS_TABLE_NAME, "EXA_USER_NAME", "VARCHAR(128)", "EXA_GROUP",
                 "VARCHAR(128)");
         memberTable.insert("KLAUS", "TENNIS_PLAYERS") //
@@ -37,7 +39,7 @@ class ListAllGroupsIT extends AbstractAdminScriptIT {
 
     @Override
     protected Connection getConnection() throws NoDriverFoundException, SQLException {
-        return container.createConnection("");
+        return EXASOL.createConnection("");
     }
 
     // [itest->dsn~listing-all-groups~1]

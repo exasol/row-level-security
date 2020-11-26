@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.Tag;
@@ -8,7 +9,7 @@ import org.junit.jupiter.api.Tag;
 @Tag("virtual-schema")
 class RowLevelSecurityJdbcIT extends AbstractRowLevelSecurityIT {
     @Override
-    protected Map<String, String> getVirtualSchemaProperties() {
-        return Map.of("IS_LOCAL", "true");
+    protected Map<String, String> getConnectionSpecificVirtualSchemaProperties() {
+        return Collections.emptyMap();
     }
 }

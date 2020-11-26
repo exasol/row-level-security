@@ -3,8 +3,7 @@ package com.exasol.rls.administration.scripts;
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_RLS_USERS_TABLE_NAME;
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROLES_MAPPING_TABLE_NAME;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
-import static com.exasol.tools.TestsConstants.PATH_TO_DELETE_RLS_ROLE;
-import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
+import static com.exasol.tools.TestsConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.stream.Stream;
 
-import com.exasol.dbbuilder.dialects.Table;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
@@ -21,7 +19,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
-import com.exasol.containers.ExasolContainerConstants;
+import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.matcher.ResultSetStructureMatcher;
 import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 
@@ -30,15 +28,15 @@ import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 @Testcontainers
 class DeleteRlsRoleIT extends AbstractAdminScriptIT {
     @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
+    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
+            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
     private static final String EXA_RLS_USERS = "EXA_RLS_USERS";
     private static Table rolesTable;
     private static Table usersTable;
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        initialize(container, "DELETE_RLS_ROLE", PATH_TO_EXA_RLS_BASE, PATH_TO_DELETE_RLS_ROLE);
+        initialize(EXASOL, "DELETE_RLS_ROLE", PATH_TO_EXA_RLS_BASE, PATH_TO_DELETE_RLS_ROLE);
         rolesTable = schema.createTable(EXA_ROLES_MAPPING_TABLE_NAME, "ROLE_NAME", "VARCHAR(128)", "ROLE_ID",
                 "DECIMAL(2,0)");
         usersTable = schema.createTable(EXA_RLS_USERS, "EXA_USER_NAME", "VARCHAR(128)", "EXA_ROLE_MASK",
@@ -48,7 +46,7 @@ class DeleteRlsRoleIT extends AbstractAdminScriptIT {
     // [itest->dsn~delete-rls-role-removes-a-role-from-administrative-tables~1]
     @Override
     protected Connection getConnection() throws NoDriverFoundException, SQLException {
-        return container.createConnection("");
+        return EXASOL.createConnection("");
     }
 
     @AfterEach

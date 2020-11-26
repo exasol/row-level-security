@@ -2,8 +2,7 @@ package com.exasol.rls.administration.scripts;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROLES_MAPPING_TABLE_NAME;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
-import static com.exasol.tools.TestsConstants.PATH_TO_ADD_RLS_ROLE;
-import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
+import static com.exasol.tools.TestsConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -24,11 +23,12 @@ import com.exasol.containers.ExasolContainer;
 @Testcontainers
 class AddRlsRoleIT extends AbstractAdminScriptIT {
     @Container
-    static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
+    static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
+            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        initialize(container, "ADD_RLS_ROLE", PATH_TO_EXA_RLS_BASE, PATH_TO_ADD_RLS_ROLE);
+        initialize(EXASOL, "ADD_RLS_ROLE", PATH_TO_EXA_RLS_BASE, PATH_TO_ADD_RLS_ROLE);
     }
 
     @AfterEach
@@ -42,7 +42,7 @@ class AddRlsRoleIT extends AbstractAdminScriptIT {
 
     @Override
     protected Connection getConnection() throws NoDriverFoundException, SQLException {
-        return container.createConnection("");
+        return EXASOL.createConnection("");
     }
 
     // [itest->dsn~add-rls-role-creates-a-table~1]
