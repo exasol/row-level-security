@@ -1,6 +1,5 @@
 package com.exasol.adapter.dialects.rls;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.Tag;
@@ -10,6 +9,6 @@ import org.junit.jupiter.api.Tag;
 class RowLevelSecurityLocalIT extends AbstractRowLevelSecurityIT {
     @Override
     protected Map<String, String> getConnectionSpecificVirtualSchemaProperties() {
-        return Collections.emptyMap();
+        return Map.of("IS_LOCAL", "true");
     }
 }
