@@ -2,8 +2,7 @@ package com.exasol.rls.administration.scripts;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_GROUP_MEMBERS_TABLE_NAME;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
-import static com.exasol.tools.TestsConstants.PATH_TO_ADD_USER_TO_GROUP;
-import static com.exasol.tools.TestsConstants.PATH_TO_EXA_IDENTIFIER;
+import static com.exasol.tools.TestsConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -25,11 +24,12 @@ import com.exasol.containers.ExasolContainer;
 @Tag("integration")
 class AddUserToGroupIT extends AbstractAdminScriptIT {
     @Container
-    static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
+    static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
+            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        initialize(container, "ADD_USER_TO_GROUP", PATH_TO_EXA_IDENTIFIER, PATH_TO_ADD_USER_TO_GROUP);
+        initialize(EXASOL, "ADD_USER_TO_GROUP", PATH_TO_EXA_IDENTIFIER, PATH_TO_ADD_USER_TO_GROUP);
     }
 
     @AfterEach
@@ -43,7 +43,7 @@ class AddUserToGroupIT extends AbstractAdminScriptIT {
 
     @Override
     protected Connection getConnection() throws NoDriverFoundException, SQLException {
-        return container.createConnection("");
+        return EXASOL.createConnection("");
     }
 
     // [itest->dsn~add-user-to-group~1]

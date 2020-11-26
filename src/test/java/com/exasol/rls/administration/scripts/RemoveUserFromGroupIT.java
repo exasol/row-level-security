@@ -2,8 +2,7 @@ package com.exasol.rls.administration.scripts;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_GROUP_MEMBERS_TABLE_NAME;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
-import static com.exasol.tools.TestsConstants.PATH_TO_EXA_IDENTIFIER;
-import static com.exasol.tools.TestsConstants.PATH_TO_REMOVE_USER_FROM_GROUP;
+import static com.exasol.tools.TestsConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.exasol.dbbuilder.dialects.Table;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -21,17 +19,19 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
+import com.exasol.dbbuilder.dialects.Table;
 
 @Testcontainers
 @Tag("integration")
 class RemoveUserFromGroupIT extends AbstractAdminScriptIT {
     @Container
-    static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
+    static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
+            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
     private Table memberTable;
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        initialize(container, "REMOVE_USER_FROM_GROUP", PATH_TO_EXA_IDENTIFIER, PATH_TO_REMOVE_USER_FROM_GROUP);
+        initialize(EXASOL, "REMOVE_USER_FROM_GROUP", PATH_TO_EXA_IDENTIFIER, PATH_TO_REMOVE_USER_FROM_GROUP);
     }
 
     @BeforeEach
@@ -47,7 +47,7 @@ class RemoveUserFromGroupIT extends AbstractAdminScriptIT {
 
     @Override
     protected Connection getConnection() throws NoDriverFoundException, SQLException {
-        return container.createConnection("");
+        return EXASOL.createConnection("");
     }
 
     // [itest->dsn~remove-user-from-group~1]

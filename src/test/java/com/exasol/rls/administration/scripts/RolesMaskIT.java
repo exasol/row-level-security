@@ -1,5 +1,6 @@
 package com.exasol.rls.administration.scripts;
 
+import static com.exasol.tools.TestsConstants.EXASOL_DOCKER_IMAGE_REFERENCE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -25,13 +26,14 @@ import com.exasol.tools.TestsConstants;
 @Testcontainers
 class RolesMaskIT extends AbstractAdminScriptIT {
     @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>();
+    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
+            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static Table table;
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        initialize(container, "ROLES_MASK", TestsConstants.PATH_TO_ROLES_MASK);
+        initialize(EXASOL, "ROLES_MASK", TestsConstants.PATH_TO_ROLES_MASK);
         table = schema.createTable(EXA_ROLES_MAPPING, "ROLE_NAME", "VARCHAR(128)", "ROLE_ID", "DECIMAL(2,0)") //
                 .insert("Sales", 1) //
                 .insert("Development", 2) //
@@ -41,7 +43,7 @@ class RolesMaskIT extends AbstractAdminScriptIT {
 
     @Override
     protected Connection getConnection() throws NoDriverFoundException, SQLException {
-        return container.createConnection("");
+        return EXASOL.createConnection("");
     }
 
     // [itest->dsn~get-a-role-mask~1]
