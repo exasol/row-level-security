@@ -4,9 +4,12 @@ language: java
 # To use Docker's privileged mode, we need to enable sudo.
 sudo: required
 
-matrix:
-  include:
-    - jdk: openjdk11
+jdk:
+  - openjdk11
+
+env:
+  - DOCKER_DB_VERSION=7.0.2
+  - DOCKER_DB_VERSION=6.2.11
 
 addons:
   sonarcloud:
@@ -18,7 +21,10 @@ before_script:
   - echo '{}' > "$HOME"/.docker/config.json
 
 script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent org.jacoco:jacoco-maven-plugin:prepare-agent-integration verify sonar:sonar -Dsonar.projectKey=com.exasol:row-level-security -Dsonar.login=${SONAR_TOKEN}
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent org.jacoco:jacoco-maven-plugin:prepare-agent-integration
+    verify sonar:sonar -Dsonar.login=${SONAR_TOKEN}
+    -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
+
 cache:
   directories:
     - "$HOME/.m2"
