@@ -75,8 +75,9 @@ abstract class AbstractRowLevelSecurityIT {
     }
 
     private static void createConnectionDefinition() {
-        connectionDefinition = objectFactory.createConnectionDefinition("RLS_CONNECTION", "jdbc:exa:localhost:8888",
-                EXASOL.getUsername(), EXASOL.getPassword());
+        connectionDefinition = objectFactory.createConnectionDefinition("RLS_CONNECTION",
+                "jdbc:exa:localhost" + EXASOL.getDefaultInternalDatabasePort(), EXASOL.getUsername(),
+                EXASOL.getPassword());
     }
 
     // [itest->dsn~query-rewriter-adds-row-filter-for-tenants~1]
