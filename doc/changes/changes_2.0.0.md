@@ -19,4 +19,6 @@ The old variant is intentionally not supported anymore to tighten security.
 
 ## Dependency updates
  
- * Updated `com.exasol:exasol-virtual-schema:3.1.0` to 4.0.0
+* Updated `com.exasol:exasol-virtual-schema:3.1.0` to 4.0.0
+* Updated `com.exasol:hamcrest-resultset-matcher:1.2.1` to 1.2.2
+* Updated `org.mockito:mockito-junit-jupiter:3.6.0` to 3.6.28

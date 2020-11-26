@@ -31,7 +31,7 @@ import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 abstract class AbstractRowLevelSecurityIT {
     @Container
     protected static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE);
+            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
     private static AdapterScript adapterScript = null;
     private static ConnectionDefinition connectionDefinition = null;
     protected static ExasolObjectFactory objectFactory = null;
