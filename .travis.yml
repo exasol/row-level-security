@@ -22,7 +22,9 @@ before_script:
 
 script:
   - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent org.jacoco:jacoco-maven-plugin:prepare-agent-integration
-    verify sonar:sonar -Dsonar.login=${SONAR_TOKEN}
+    verify sonar:sonar
+    -Dsonar.login=${SONAR_TOKEN}
+    -Dcom.exasol.docker.image=${DOCKER_DB_VERSION}
     -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
 
 cache:

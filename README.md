@@ -83,4 +83,5 @@ Running the Virtual Schema requires a Java Runtime version 11 or later.
 | [Maven Source Plugin](https://maven.apache.org/plugins/maven-source-plugin/)        | Creating a source code JAR                             | Apache License 2.0            |
 | [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)   | Unit testing                                           | Apache License 2.0            |
 | [OpenFastTrace Maven Plugin](https://github.com/itsallcode/openfasttrace-maven-plugin) |Requirement Tracing                                  | GPL V3                        |
+| [Project Keeper Maven Plugin](https://github.com/exasol/project-keeper-maven-plugin)| Checking project structure                             | MIT License                   |
 | [OSS Index Maven Plugin](https://sonatype.github.io/ossindex-maven/maven-plugin/)   | Dependency security monitoring                         | Apache License 2.0            |

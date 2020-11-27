@@ -163,7 +163,6 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
-
                     <execution>
                         <id>merge-it-results</id>
                         <phase>verify</phase>
