@@ -62,6 +62,7 @@ Running the Virtual Schema requires a Java Runtime version 11 or later.
 | [Exasol Testcontainers](https://github.com/exasol/exasol-testcontainers)            | Integration test Exasol instance on Docker             | MIT License                   |
 | [Hamcrest Resultset Matcher](https://github.com/exasol/hamcrest-resultset-matcher)  | Validating JDBC resultsets                             | MIT License                   |
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                   |
+| [Jacoco Agent](https://www.jacoco.org/jacoco/)                                      | Collecting coverage information                        | Eclipse Public License 2.0    |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0    |
 | [Mockito](http://site.mockito.org/)                                                 | Mocking framework                                      | MIT License                   |
 | [Test Database Builder](https://github.com/exasol/test-db-builder-java)             | Framework for writing database integration tests       | MIT License                   |
