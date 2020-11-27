@@ -17,8 +17,17 @@ The old variant is intentionally not supported anymore to tighten security.
 
 * #6: Updated to the latest version of Exasol dialect containing a security update.
 
-## Dependency updates
+## Runtime Dependency updates
  
 * Updated `com.exasol:exasol-virtual-schema:3.1.0` to `4.0.0`
+
+## Test Dependency updates
+
+* Added `org.jacoco:org.jacoco.agent:0.8.6`
 * Updated `com.exasol:hamcrest-resultset-matcher:1.2.1` to `1.2.2`
 * Updated `org.mockito:mockito-junit-jupiter:3.6.0` to `3.6.28`
+
+## Plugin Updates
+
+* Added `com.exasol:project-keeper-plugin:0.4.0`
+* Added `org.apache.maven.plugins:maven-dependency-plugin:3.1.2`
