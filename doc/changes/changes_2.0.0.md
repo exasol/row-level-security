@@ -1,4 +1,4 @@
-# Exasol Row Level Security 2.0.0, released 2020-11-26
+# Exasol Row Level Security 2.0.0, released 2020-11-27
 
 Code name: Fixed credentials exposure in EXA connection
 
