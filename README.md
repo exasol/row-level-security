@@ -85,3 +85,4 @@ Running the Virtual Schema requires a Java Runtime version 11 or later.
 | [OpenFastTrace Maven Plugin](https://github.com/itsallcode/openfasttrace-maven-plugin) |Requirement Tracing                                  | GPL V3                        |
 | [Project Keeper Maven Plugin](https://github.com/exasol/project-keeper-maven-plugin)| Checking project structure                             | MIT License                   |
 | [OSS Index Maven Plugin](https://sonatype.github.io/ossindex-maven/maven-plugin/)   | Dependency security monitoring                         | Apache License 2.0            |
+| [Maven Dependency Plugin](https://maven.apache.org/plugins/maven-dependency-plugin/)  | Unpacking Jacoco agent | Apache License 2.0 |
