@@ -271,6 +271,7 @@
                                 <argument>${source.admin.scripts}/remove_user_from_group.lua</argument>
                                 <argument>${source.admin.scripts}/list_all_groups.lua</argument>
                                 <argument>${source.admin.scripts}/list_user_groups.lua</argument>
+                                <argument>${source.admin.scripts}/list_all_roles.lua</argument>
                             </arguments>
                         </configuration>
                     </execution>

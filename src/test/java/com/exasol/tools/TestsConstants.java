@@ -16,8 +16,10 @@ public final class TestsConstants {
     public static final Path PATH_TO_REMOVE_USER_FROM_GROUP = ADMIN_SCRIPT_BASE_PATH
             .resolve("remove_user_from_group.lua");
     public static final Path PATH_TO_LIST_ALL_GROUPS = ADMIN_SCRIPT_BASE_PATH.resolve("list_all_groups.lua");
+    public static final Path PATH_TO_LIST_ALL_ROLES = ADMIN_SCRIPT_BASE_PATH.resolve("list_all_roles.lua");
     public static final Path PATH_TO_LIST_USER_GROUPS = ADMIN_SCRIPT_BASE_PATH.resolve("list_user_groups.lua");
-    public static final String RLS_SCHEMA_NAME = "RLS_SCHEMA";
+    public static final Path PATH_TO_LIST_USER_ROLES = ADMIN_SCRIPT_BASE_PATH.resolve("list_user_roles.lua");
+    public static final Path PATH_TO_BIT_POSITIONS = ADMIN_SCRIPT_BASE_PATH.resolve("bit_positions.lua");
 
     private TestsConstants() {
         // prevent instantiation
