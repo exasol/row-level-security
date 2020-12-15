@@ -432,6 +432,8 @@ Covers:
 
 * `req~listing-all-groups~1`
 
+Needs: impl, itest
+
 #### `LIST_ALL_ROLES` Lists all Existing RLS Roles
 `dsn~listing-all-roles~1`
 
