@@ -27,16 +27,6 @@ class ListUsersAndRolesIT extends AbstractAdminScriptIT {
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
         initialize(EXASOL, "LIST_USERS_AND_ROLES", PATH_TO_LIST_USERS_AND_ROLES, PATH_TO_BIT_POSITIONS);
-        schema.createTable(EXA_ROLES_MAPPING_TABLE_NAME, "ROLE_NAME", "VARCHAR(128)", "ROLE_ID", "DECIMAL(2,0)") //
-                .insert("Sales", 1) //
-                .insert("Development", 2) //
-                .insert("Finance", 3) //
-                .insert("Support", 4);
-        schema.createTable(EXA_RLS_USERS_TABLE_NAME, "EXA_USER_NAME", "VARCHAR(128)", "EXA_ROLE_MASK", "DECIMAL(20,0)") //
-                .insert("RLS_USR_1", 1) //
-                .insert("RLS_USR_2", 3) //
-                .insert("RLS_USR_3", 12) //
-        ;
     }
 
     @Override
@@ -47,12 +37,27 @@ class ListUsersAndRolesIT extends AbstractAdminScriptIT {
     // [itest->dsn~listing-users-and-roles~1]
     @Test
     void testListRlsSingleUser() {
-        assertThat(script.executeQuery(), contains( //
-                contains("RLS_USR_1", "Sales"), //
-                contains("RLS_USR_2", "Sales"), //
-                contains("RLS_USR_2", "Development"), //
-                contains("RLS_USR_3", "Finance"), //
-                contains("RLS_USR_3", "Support") //
-        ));
+        try {
+            schema.createTable(EXA_ROLES_MAPPING_TABLE_NAME, "ROLE_NAME", "VARCHAR(128)", "ROLE_ID", "DECIMAL(2,0)") //
+                    .insert("Sales", 1) //
+                    .insert("Development", 2) //
+                    .insert("Finance", 3) //
+                    .insert("Support", 4);
+            schema.createTable(EXA_RLS_USERS_TABLE_NAME, "EXA_USER_NAME", "VARCHAR(128)", "EXA_ROLE_MASK",
+                    "DECIMAL(20,0)") //
+                    .insert("RLS_USR_1", 1) //
+                    .insert("RLS_USR_2", 3) //
+                    .insert("RLS_USR_3", 12) //
+            ;
+            assertThat(script.executeQuery(), contains( //
+                    contains("RLS_USR_1", "Sales"), //
+                    contains("RLS_USR_2", "Sales"), //
+                    contains("RLS_USR_2", "Development"), //
+                    contains("RLS_USR_3", "Finance"), //
+                    contains("RLS_USR_3", "Support") //
+            ));
+        } finally {
+            schema.drop();
+        }
     }
 }

@@ -112,7 +112,7 @@ Data owners can list all existing roles.
 
 Rationale:
 
-This allows data owner to see if a role already exists.
+This allows data owners to see if a role already exists.
 
 Covers:
 
