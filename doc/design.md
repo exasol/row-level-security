@@ -454,6 +454,28 @@ Covers:
 
 Needs: impl, itest
 
+#### `LIST_USERS_AND_ROLES` Lists all Users and their Roles
+`dsn~listing-users-and-roles~1`
+
+`LIST_USERS_AND_ROLES` lists all users and their roles.
+
+Covers:
+
+* `req~listing-users-and-roles~1`
+
+Needs: impl, itest
+
+#### `LIST_USER_ROLES` Lists all Roles of the Specified User
+`dsn~listing-user-roles~1`
+
+`LIST_USER_ROLES` lists all roles of the specified user.
+
+Covers:
+
+* `req~listing-users-and-roles~1`
+
+Needs: impl, itest
+
 # Cross-cutting Concerns
 
 # Design Decisions

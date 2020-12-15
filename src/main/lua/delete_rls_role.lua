@@ -28,7 +28,7 @@ end
 function remove_role_from_protected_rows()
     res = query([[SELECT COLUMN_TABLE FROM SYS.EXA_ALL_COLUMNS
                   WHERE COLUMN_SCHEMA = :s AND COLUMN_NAME = 'EXA_ROW_ROLES']],
-                 {s = exa.meta.script_schema });
+                 {s = exa.meta.script_schema })
     for i = 1, #res do
        query([[UPDATE ::s.::t SET EXA_ROW_ROLES = EXA_ROW_ROLES - POWER(2, :i - 1)
                WHERE BIT_AND(EXA_ROW_ROLES, POWER(2, :i - 1)) != 0]],

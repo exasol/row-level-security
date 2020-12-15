@@ -5,7 +5,6 @@ import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.E
 import static com.exasol.tools.TestsConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -20,14 +19,14 @@ import com.exasol.containers.ExasolContainer;
 
 @Tag("integration")
 @Testcontainers
-class ListUserRolesIT extends AbstractAdminScriptIT {
+class ListUsersAndRolesIT extends AbstractAdminScriptIT {
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
             EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        initialize(EXASOL, "LIST_USER_ROLES", PATH_TO_LIST_USER_ROLES, PATH_TO_BIT_POSITIONS);
+        initialize(EXASOL, "LIST_USERS_AND_ROLES", PATH_TO_LIST_USERS_AND_ROLES, PATH_TO_BIT_POSITIONS);
         schema.createTable(EXA_ROLES_MAPPING_TABLE_NAME, "ROLE_NAME", "VARCHAR(128)", "ROLE_ID", "DECIMAL(2,0)") //
                 .insert("Sales", 1) //
                 .insert("Development", 2) //
@@ -45,18 +44,15 @@ class ListUserRolesIT extends AbstractAdminScriptIT {
         return EXASOL.createConnection("");
     }
 
-    // [itest->dsn~listing-user-roles~1]
+    // [itest->dsn~listing-users-and-roles~1]
     @Test
     void testListRlsSingleUser() {
-        assertAll(() -> assertThat(script.executeQuery("RLS_USR_1"), contains( //
-                contains("RLS_USR_1", "Sales"))), //
-                () -> assertThat(script.executeQuery("RLS_USR_2"), contains( //
-                        contains("RLS_USR_2", "Sales"), //
-                        contains("RLS_USR_2", "Development") //
-                )), () -> assertThat(script.executeQuery("RLS_USR_3"), contains( //
-                        contains("RLS_USR_3", "Finance"), //
-                        contains("RLS_USR_3", "Support") //
-                )));
-
+        assertThat(script.executeQuery(), contains( //
+                contains("RLS_USR_1", "Sales"), //
+                contains("RLS_USR_2", "Sales"), //
+                contains("RLS_USR_2", "Development"), //
+                contains("RLS_USR_3", "Finance"), //
+                contains("RLS_USR_3", "Support") //
+        ));
     }
 }

@@ -73,13 +73,11 @@ EXECUTE SCRIPT ADD_RLS_ROLE('Finance', 3);
 
 #### Listing Roles
 
-Example:
+The following statement shows a list of existing roles and their ids.
 
-```sql 
-SELECT * FROM MY_SCHEMA.EXA_ROLES_MAPPING;
+```sql
+EXECUTE SCRIPT LIST_ALL_ROLES();
 ```
-
-The script for this command will be provided in a future release.
 
 #### Assigning Roles to Users
 
@@ -97,15 +95,19 @@ EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_2', ARRAY('Development'));
 
 **Important:** if you assign roles to the same user several times, the script rewrites user roles each time using a new array. That means that at any time a user has the exact set of roles stated in the _last_ assignment command.
 
-#### Getting a List of Users With Assigned Roles
+#### Getting Users With Assigned Roles
 
-Example:
+The following statement shows a list of existing users and their roles:
 
 ```sql 
-SELECT * FROM MY_SCHEMA.EXA_RLS_USERS;
+EXECUTE SCRIPT LIST_USERS_AND_ROLES();
 ```
 
-This script will be added in an upcoming release. 
+If you only want to see one user with assigned roles, use the following statement:
+
+```sql 
+EXECUTE SCRIPT LIST_USER_ROLES('RLS_USR_1');
+```
 
 #### Protecting a Table With Role-based RLS
 
@@ -294,7 +296,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-2.0.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-2.1.0.jar;
 /
 ;
 ```

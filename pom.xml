@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>row-level-security</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <name>Exasol Row Level Security</name>
     <description>This projects provides a plug-in to the Exasol database that adds per-row access control.</description>
     <properties>
@@ -272,6 +272,9 @@
                                 <argument>${source.admin.scripts}/list_all_groups.lua</argument>
                                 <argument>${source.admin.scripts}/list_user_groups.lua</argument>
                                 <argument>${source.admin.scripts}/list_all_roles.lua</argument>
+                                <argument>${source.admin.scripts}/bit_positions.lua</argument>
+                                <argument>${source.admin.scripts}/list_user_roles.lua</argument>
+                                <argument>${source.admin.scripts}/list_users_and_roles.lua</argument>
                             </arguments>
                         </configuration>
                     </execution>
