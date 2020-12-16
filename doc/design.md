@@ -426,7 +426,7 @@ Needs: impl, itest
 #### `LIST_ALL_GROUPS` Lists all Existing RLS Groups
 `dsn~listing-all-groups~1`
 
-`LIST_GROUPS` lists all currently existing groups including the number of members of each group.
+`LIST_ALL_GROUPS` lists all currently existing groups including the number of members of each group.
 
 Covers:
 
@@ -434,14 +434,47 @@ Covers:
 
 Needs: impl, itest
 
+#### `LIST_ALL_ROLES` Lists all Existing RLS Roles
+`dsn~listing-all-roles~1`
+
+`LIST_ALL_ROLES` lists all currently existing roles.
+
+Covers:
+
+* `req~listing-all-roles~1`
+
+Needs: impl, itest
+
 #### `LIST_USER_GROUPS` Lists all Groups a User is a Member of
 `dsn~listing-a-users-groups~1`
 
-`LIST_GROUPS` lists all groups a user is a member of.
+`LIST_USER_GROUPS` lists all groups a user is a member of.
 
 Covers:
 
 * `req~listing-a-users-groups~1`
+
+Needs: impl, itest
+
+#### `LIST_USERS_AND_ROLES` Lists all Users and their Roles
+`dsn~listing-users-and-roles~1`
+
+`LIST_USERS_AND_ROLES` lists all users and their roles.
+
+Covers:
+
+* `req~listing-users-and-roles~1`
+
+Needs: impl, itest
+
+#### `LIST_USER_ROLES` Lists all Roles of the Specified User
+`dsn~listing-user-roles~1`
+
+`LIST_USER_ROLES` lists all roles of the specified user.
+
+Covers:
+
+* `req~listing-users-and-roles~1`
 
 Needs: impl, itest
 

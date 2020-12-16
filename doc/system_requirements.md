@@ -105,6 +105,36 @@ Covers:
 
 Needs: dsn
 
+#### Listing All Roles
+`req~listing-all-roles~1`
+
+Data owners can list all existing roles.
+
+Rationale:
+
+This allows data owners to see if a role already exists.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
+#### Listing Users and their Roles
+`req~listing-users-and-roles~1`
+
+Data owners can list users and the roles assigned to them.
+
+Rationale:
+
+This allows data owners to review existing users and their roles.
+
+Covers:
+
+* [feat~row-level-security~1](#row-level-security)
+
+Needs: dsn
+
 ### Row Level Security with Tenants 
 
 #### Tables With Tenant Restrictions
