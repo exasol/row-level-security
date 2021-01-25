@@ -326,21 +326,18 @@ FROM CHICAGO_TAXI.TRIPS
 ORDER BY EXA_ROW_TENANT;
 ```
 
-| COMPANY                      | EXA_ROW_TENANT |
-|------------------------------|----------------|
-| 4053 - 40193 Adwar H. Nikola | ADWAR_H_NIKOLA |
-| 5074 - 54002 Ahzmi Inc       | AHZMI_INC      |
-| &hellip;                     | &hellip;       |
-| Yellow Cab                   | YELLOW_CAB     |
-| &hellip;                     | &hellip;       |
-| 3141 - 87803 Zip Cab         | ZIP_CAB        |
-| 3141 - Zip Cab               | ZIP_CAB        |
-| &hellip;                     | &hellip;       |
-| 5129 - 87128                 | `NULL`         |
-
-As you can see, the mapping is not perfect. There are two rows that produce the same ID (`ZIP_CAB`) and one that produces a `NULL`.
-
-In a real-world scenario you would spend more effort to disambiguate the ID generation and make sure that `NULL`s don't happen. For the sake of this tutorial though the naive approach will have to suffice.
+| COMPANY                           | EXA_ROW_TENANT                   |
+|-----------------------------------|----------------------------------|
+| Blue Ribbon Taxi Association Inc. | BLUE_RIBBON_TAXI_ASSOCIATION_INC |
+| Chicago Elite Cab Corp.           | CHICAGO_ELITE_CAB_CORP           |
+| Choice Taxi Association           | CHOICE_TAXI_ASSOCIATION          |
+| Dispatch Taxi Affiliation         | DISPATCH_TAXI_AFFILIATION        |
+| 5437 - Great American Cab Co      | GREAT_AMERICAN_CAB_CO            |
+| 6743 - Luhak Corp                 | LUHAK_CORP                       |
+| Northwest Management LLC          | NORTHWEST_MANAGEMENT_LLC         |
+| 2767 - Sayed M Badri              | SAYED_M_BADRI                    |
+| Taxi Affiliation Services         | TAXI_AFFILIATION_SERVICES        |
+| Yellow Cab                        | LUHAK_CORP                       |
 
 ## Protecting the Data with RLS
 
@@ -384,14 +381,14 @@ Note that `IS_LOCAL` is important.
 
 The next step is to create a user account that you will need in order to see the effect RLS has.
 
-One of the taxi companies is called "Zip Cab" and the corresponding entry in the `EXA_ROW_TENANT` column is `ZIP_CAB`.
+One of the taxi companies is called "6743 - Luhak Corp" and the corresponding entry in the `EXA_ROW_TENANT` column is `LUHAK_CORP`.
 
 So please create a user account with that name, allow it to log in and grant the `SELECT` privilege on the RLS Virtual Schema.
 
 ```sql
-CREATE USER ZIP_CAB IDENTIFIED BY "<password>";
-GRANT CREATE SESSION TO ZIP_CAB;
-GRANT SELECT ON RLS_CHICAGO_TAXI_VS TO ZIP_CAB;
+CREATE USER LUHAK_CORP IDENTIFIED BY "<password>";
+GRANT CREATE SESSION TO LUHAK_CORP;
+GRANT SELECT ON RLS_CHICAGO_TAXI_VS TO LUHAK_CORP;
 ```
 
 ### Querying the Data as Non-privileged User
@@ -407,7 +404,7 @@ GROUP BY COMPANY
 ORDER BY COMPANY;
 ```
 
-Now login as `ZIP_CAB` and run this query for comparison:
+Now login as `LUHAK_CORP` and run this query for comparison:
 
 ```sql
 SELECT COMPANY, COUNT(1)
@@ -416,13 +413,13 @@ GROUP BY COMPANY
 ORDER BY COMPANY;
 ```
 
-In the second case you only see the number of trips that Zip Cab made &mdash; and there are no other companies listed.
+In the second case you only see the number of trips that Luhak Corp made &mdash; and there are no other companies listed.
 
 ## Profiling
 
 If you are curious about how queries using RLS perform, you can use [Exasol's profiling feature](https://docs.exasol.com/administration/on-premise/support/profiling_information.htm).
 
-Run the following example as user `ZIP_CAB`. It demonstrates how Exasol executes a query that joins the large fact table and a dimension table. There is a narrow filter on the fact table and we want to see that this filter is applied _before_ the join.
+Run the following example as user `LUHAK_CORP`. It demonstrates how Exasol executes a query that joins the large fact table and a dimension table. There is a narrow filter on the fact table and we want to see that this filter is applied _before_ the join.
 
 Otherwise, an unnecessarily large amount of data would go into the join.
 
