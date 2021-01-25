@@ -9,3 +9,4 @@ Code name: ??
 ## Documentation
 
 * #73: Add missing `Maven Dependency Plugin` dependency in the README.
+* #55: Fixed the example in the tutorial 
