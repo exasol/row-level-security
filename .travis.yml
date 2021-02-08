@@ -19,6 +19,8 @@ addons:
 before_script:
   - mkdir "$HOME"/.docker
   - echo '{}' > "$HOME"/.docker/config.json
+  - echo 'docker.client.strategy=org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy' > "$HOME"/.testcontainers.properties
+  - echo 'testcontainers.reuse.enable=true' >> "$HOME"/.testcontainers.properties
 
 script:
   - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent org.jacoco:jacoco-maven-plugin:prepare-agent-integration
