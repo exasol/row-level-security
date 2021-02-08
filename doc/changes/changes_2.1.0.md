@@ -1,12 +1,35 @@
-# Exasol Row Level Security 2.1.0, released 2020-??-??
+# Exasol Row Level Security 2.1.0, released 2020-02-??
 
-Code name: ??
+Code name: Admin scripts
 
 ## Features
 
 * #31: Added more administration scripts for managing roles.
 
+## Refactoring
+
+* #63: Extracted code coverage from docker-based tests
+
 ## Documentation
 
 * #73: Add missing `Maven Dependency Plugin` dependency in the README.
-* #55: Fixed the example in the tutorial 
+* #55: Fixed the example in the tutorial
+
+### Runtime Dependency Updates
+
+* Updated `com.exasol:exasol-jdbc:7.0.3` to `7.0.4`
+
+### Test Dependency Updates
+
+* Updated `com.exasol:exasol-testcontainers:3.3.1` to `3.4.1`
+* Updated `com.exasol:hamcrest-resultset-matcher:1.2.2` to `1.3.0`
+* Updated `com.exasol:test-db-builder-java:2.0.0` to `3.0.0`
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.5` to `3.5.4`
+* Updated `org.junit.jupiter:junit-jupiter:5.7.0` to `5.7.1`
+* Updated `org.mockito:mockito-junit-jupiter:3,6,28` to `3.7.7`
+* Updated `org.junit.jupiter:junit-jupiter:5.7.0` to `5.7.1`
+* Updated `org.mockito:mockito-junit-jupiter:1.15.0` to `1.15.1`
+
+### Plugin Updates
+
+* Updated `com.exasol:project-keeper-maven-plugin:0.4.0` to `0.4.2`
