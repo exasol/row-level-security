@@ -1,7 +1,9 @@
 package com.exasol.rls.administration.scripts;
 
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
-import static com.exasol.tools.TestsConstants.*;
+import static com.exasol.matcher.TypeMatchMode.NO_JAVA_TYPE_CHECK;
+import static com.exasol.tools.TestsConstants.PATH_TO_ASSIGN_ROLES_TO_USER;
+import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -22,13 +24,13 @@ import com.exasol.containers.ExasolContainer;
 
 // [itest->dsn~assign-roles-to-a-user~1]
 @Tag("integration")
+@Tag("slow")
 @Testcontainers
 class AssignRolesToUserIT extends AbstractAdminScriptIT {
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static final String EXA_RLS_USERS = "EXA_RLS_USERS";
     @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
+    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>().withReuse(true);
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
@@ -62,7 +64,7 @@ class AssignRolesToUserIT extends AbstractAdminScriptIT {
         script.execute("MONICA", rolesToAssign);
         assertThat(query("SELECT EXA_USER_NAME, EXA_ROLE_MASK FROM " + getUserTableName()), table() //
                 .row("MONICA", maskValue) //
-                .matchesFuzzily());
+                .matches(NO_JAVA_TYPE_CHECK));
     }
 
     private static Stream<Arguments> provideValuesForTestAssignRolesToUser() {
@@ -79,7 +81,7 @@ class AssignRolesToUserIT extends AbstractAdminScriptIT {
         script.execute("NORBERT", List.of("Sales"));
         assertThat(query("SELECT EXA_USER_NAME, EXA_ROLE_MASK FROM " + getUserTableName()), table() //
                 .row("NORBERT", 1) //
-                .matchesFuzzily());
+                .matches(NO_JAVA_TYPE_CHECK));
     }
 
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]

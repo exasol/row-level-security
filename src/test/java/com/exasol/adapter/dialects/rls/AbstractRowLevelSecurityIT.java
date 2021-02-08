@@ -2,7 +2,7 @@ package com.exasol.adapter.dialects.rls;
 
 import static com.exasol.dbbuilder.dialects.exasol.ExasolObjectPrivilege.SELECT;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
-import static com.exasol.tools.TestsConstants.EXASOL_DOCKER_IMAGE_REFERENCE;
+import static com.exasol.matcher.TypeMatchMode.NO_JAVA_TYPE_CHECK;
 import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -20,18 +20,21 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
+import com.exasol.containers.HostIpProvider;
 import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.dbbuilder.dialects.User;
 import com.exasol.dbbuilder.dialects.exasol.*;
 import com.exasol.matcher.ResultSetStructureMatcher.Builder;
+import com.exasol.udfdebugging.UdfTestSetup;
 
 @Tag("integration")
 @Tag("virtual-schema")
+@Tag("slow")
 @Testcontainers
 abstract class AbstractRowLevelSecurityIT {
     @Container
-    protected static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
+    protected static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>()
+            .withReuse(true);
     private static AdapterScript adapterScript = null;
     private static ConnectionDefinition connectionDefinition = null;
     protected static ExasolObjectFactory objectFactory = null;
@@ -49,7 +52,10 @@ abstract class AbstractRowLevelSecurityIT {
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
-        objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""));
+        final UdfTestSetup udfTestSetup = new UdfTestSetup(HostIpProvider.getHostIpFromContainer(EXASOL),
+                EXASOL.getDefaultBucket());
+        objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""),
+                ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
         uploadAdapterScript();
         registerAdapterScript();
         createConnectionDefinition();
@@ -204,9 +210,12 @@ abstract class AbstractRowLevelSecurityIT {
         final User userB = objectFactory.createLoginUser("USER_R_B").grant(virtualSchema, SELECT);
         final User userPublic = objectFactory.createLoginUser("USER_R_PUBLIC").grant(virtualSchema, SELECT);
         final String sql = "SELECT ZIP FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY ZIP";
-        assertAll(() -> assertThat(queryForUser(sql, userA), table().row(83301).row(83334).row(93161).matchesFuzzily()),
-                () -> assertThat(queryForUser(sql, userB), table().row(83334).row(90411).row(93161).matchesFuzzily()),
-                () -> assertThat(queryForUser(sql, userPublic), table().row(93161).matchesFuzzily()));
+        assertAll(
+                () -> assertThat(queryForUser(sql, userA),
+                        table().row(83301).row(83334).row(93161).matches(NO_JAVA_TYPE_CHECK)),
+                () -> assertThat(queryForUser(sql, userB),
+                        table().row(83334).row(90411).row(93161).matches(NO_JAVA_TYPE_CHECK)),
+                () -> assertThat(queryForUser(sql, userPublic), table().row(93161).matches(NO_JAVA_TYPE_CHECK)));
     }
 
     // [itest->dsn~query-rewriter-treats-protected-tables-with-roles-and-tenant-restrictions~1]

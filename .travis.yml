@@ -25,6 +25,7 @@ script:
     verify sonar:sonar
     -Dsonar.login=${SONAR_TOKEN}
     -Dcom.exasol.docker.image=${DOCKER_DB_VERSION}
+    -Dtest.coverage="true"
     -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
 
 cache:

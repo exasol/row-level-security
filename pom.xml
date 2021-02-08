@@ -101,11 +101,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <artifactId>org.jacoco.agent</artifactId>
             <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
             <version>0.8.6</version>
             <classifier>runtime</classifier>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.exasol</groupId>
+            <artifactId>udf-debugging-java</artifactId>
+            <version>0.3.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

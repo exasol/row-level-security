@@ -1,6 +1,5 @@
 package com.exasol.rls.administration.scripts;
 
-import static com.exasol.tools.TestsConstants.EXASOL_DOCKER_IMAGE_REFERENCE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -23,11 +22,11 @@ import com.exasol.tools.TestsConstants;
 
 // [itest->dsn~get-a-role-mask~1]
 @Tag("integration")
+@Tag("slow")
 @Testcontainers
 class RolesMaskIT extends AbstractAdminScriptIT {
     @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
+    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>().withReuse(true);
     private static final String EXA_ROLES_MAPPING = "EXA_ROLES_MAPPING";
     private static Table table;
 

@@ -1,6 +1,10 @@
 # Exasol Row Level Security 2.1.0, released 2020-02-??
 
-Code name: Admin scripts
+Code name: Coverage
+
+Release 2.1.0 of Exasol's Row-Level-Security brings a couple of new administration scripts, that make setting up and maintaining RLS-protected Virtual Schemas easier.
+
+We also now extract the the code coverage from the tests that run inside a docker container. This coverage already existed before, but did not contribute to the static code analysis metrics. The new metrics now reflect the actual coverage situation.
 
 ## Features
 
@@ -21,6 +25,7 @@ Code name: Admin scripts
 
 ### Test Dependency Updates
 
+* Added `com.exasol:udf-debugging-java:0.3.0`
 * Updated `com.exasol:exasol-testcontainers:3.3.1` to `3.4.1`
 * Updated `com.exasol:hamcrest-resultset-matcher:1.2.2` to `1.3.0`
 * Updated `com.exasol:test-db-builder-java:2.0.0` to `3.0.0`

@@ -3,7 +3,9 @@ package com.exasol.rls.administration.scripts;
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_RLS_USERS_TABLE_NAME;
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROLES_MAPPING_TABLE_NAME;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
-import static com.exasol.tools.TestsConstants.*;
+import static com.exasol.matcher.TypeMatchMode.NO_JAVA_TYPE_CHECK;
+import static com.exasol.tools.TestsConstants.PATH_TO_DELETE_RLS_ROLE;
+import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -25,11 +27,11 @@ import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 
 // [itest->dsn~delete-a-role~1]
 @Tag("integration")
+@Tag("slow")
 @Testcontainers
 class DeleteRlsRoleIT extends AbstractAdminScriptIT {
     @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
+    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>().withReuse(true);
     private static final String EXA_RLS_USERS = "EXA_RLS_USERS";
     private static Table rolesTable;
     private static Table usersTable;
@@ -72,7 +74,7 @@ class DeleteRlsRoleIT extends AbstractAdminScriptIT {
         createRolesMapping();
         script.execute(roleToDelete);
         assertThat(query("SELECT ROLE_NAME FROM " + getRolesMappingTableName() + " ORDER BY ROLE_NAME"),
-                table().row(remainingRole1).row(remainingRole2).row(remainingRole3).matchesFuzzily());
+                table().row(remainingRole1).row(remainingRole2).row(remainingRole3).matches(NO_JAVA_TYPE_CHECK));
     }
 
     private void createRolesMapping() {
@@ -101,7 +103,7 @@ class DeleteRlsRoleIT extends AbstractAdminScriptIT {
         script.execute(roleToDelete);
         final Builder tableMatcherBuilder = createResultSetMatcher(expectedRows);
         assertThat(query("SELECT EXA_USER_NAME, EXA_ROLE_MASK FROM " + schema.getName() + "." + EXA_RLS_USERS
-                + " ORDER BY EXA_USER_NAME"), tableMatcherBuilder.matchesFuzzily());
+                + " ORDER BY EXA_USER_NAME"), tableMatcherBuilder.matches(NO_JAVA_TYPE_CHECK));
     }
 
     private ResultSetStructureMatcher.Builder createResultSetMatcher(final Object[][] expectedRows) {
@@ -135,7 +137,7 @@ class DeleteRlsRoleIT extends AbstractAdminScriptIT {
             final Builder matcherBuilder = createResultSetMatcher(expectedRows);
             script.execute(roleToDelete);
             assertThat(query("SELECT C1, EXA_ROW_ROLES FROM " + protectedTableName + " ORDER BY C1"),
-                    matcherBuilder.matchesFuzzily());
+                    matcherBuilder.matches(NO_JAVA_TYPE_CHECK));
         } finally {
             execute("DROP TABLE " + protectedTableName);
         }
