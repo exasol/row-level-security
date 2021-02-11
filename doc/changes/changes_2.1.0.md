@@ -20,6 +20,7 @@ We also now extract the the code coverage from the tests that run inside a docke
 * #73: Add missing `Maven Dependency Plugin` dependency in the README.
 * #82: Added explanation about the difference between database roles and RLS roles.
 * #83: Moved section about installing the administration scripts before the section for administering roles.
+* #84: Corrected documentation about group creation.
 
 ### Runtime Dependency Updates
 

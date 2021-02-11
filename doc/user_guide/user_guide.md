@@ -200,13 +200,9 @@ For each row define which tenant it belongs to. The tenant is identical to a use
 
 If you apply group-based security, each row in a protected table can be associated with exactly one group. Users can be members of multiple groups though. This is very similar to the user group concept of a typical unix-style filesystem.
 
-#### Creating Groups
+#### Creating and Deleting Groups
 
-To create a new group `COWORKERS` run the following script:
-
-```sql
-EXECUTE SCRIPT ADD_RLS_GROUP('COWORKERS');
-```
+You don't need to explicitly create or delete a group. A group comes into existence when the first user is assigned to it and ceases to exist, when the last user is removed from it.
 
 #### Listing Groups
 
