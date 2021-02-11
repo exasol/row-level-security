@@ -44,17 +44,17 @@ In this section we will go through the administrative steps required to prepare 
 
 As an example we are going to create a small set of tables and contents in a schema called `SIMPLE_SALES`.
 
-### Role-based security
-
-Role-based security is a way to secure a table by assigning one or more roles to each user and specifying the roles which are allowed to see a row for each row in the table. 
-
-#### Installing the Administration Scripts
+### Installing the Administration Scripts
 
 RLS provides functions that make administration of RLS more user-friendly.
 
 **Important:** all the scripts must be created in the same schema as the tables that you plan to protect with row-level-security.
 
 To install the administration scripts, run the SQL batch file `administration-sql-scripts-<last-version>.sql`.
+
+### Role-based security
+
+Role-based security is a way to secure a table by assigning one or more roles to each user and specifying the roles which are allowed to see a row for each row in the table. 
 
 #### Creating Roles
 

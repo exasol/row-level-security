@@ -16,8 +16,9 @@ We also now extract the the code coverage from the tests that run inside a docke
 
 ## Documentation
 
-* #73: Add missing `Maven Dependency Plugin` dependency in the README.
 * #55: Fixed the example in the tutorial
+* #73: Add missing `Maven Dependency Plugin` dependency in the README.
+* #83: Moved section about installing the administration scripts before the section for administering roles.
 
 ### Runtime Dependency Updates
 
