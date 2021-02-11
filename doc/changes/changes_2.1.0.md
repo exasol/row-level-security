@@ -16,8 +16,9 @@ We also now extract the the code coverage from the tests that run inside a docke
 
 ## Documentation
 
-* #73: Add missing `Maven Dependency Plugin` dependency in the README.
 * #55: Fixed the example in the tutorial
+* #73: Add missing `Maven Dependency Plugin` dependency in the README.
+* #82: Added explanation about the difference between database roles and RLS roles.
 
 ### Runtime Dependency Updates
 
