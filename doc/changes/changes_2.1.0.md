@@ -1,4 +1,4 @@
-# Exasol Row Level Security 2.1.0, released 2020-02-??
+# Exasol Row Level Security 2.1.0, released 2021-02-11
 
 Code name: Coverage
 
@@ -26,7 +26,7 @@ We also now extract the the code coverage from the tests that run inside a docke
 ### Test Dependency Updates
 
 * Added `com.exasol:udf-debugging-java:0.3.0`
-* Updated `com.exasol:exasol-testcontainers:3.3.1` to `3.4.1`
+* Updated `com.exasol:exasol-testcontainers:3.3.1` to `3.5.0`
 * Updated `com.exasol:hamcrest-resultset-matcher:1.2.2` to `1.3.0`
 * Updated `com.exasol:test-db-builder-java:2.0.0` to `3.0.0`
 * Updated `nl.jqno.equalsverifier:equalsverifier:3.5` to `3.5.4`

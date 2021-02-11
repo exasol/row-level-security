@@ -20,7 +20,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
-import com.exasol.containers.HostIpProvider;
 import com.exasol.dbbuilder.dialects.exasol.*;
 import com.exasol.udfdebugging.UdfTestSetup;
 
@@ -36,8 +35,7 @@ class QueryRuntimeIT {
 
     @BeforeAll
     static void beforeAll() throws Exception {
-        final UdfTestSetup udfTestSetup = new UdfTestSetup(HostIpProvider.getHostIpFromContainer(EXASOL),
-                EXASOL.getDefaultBucket());
+        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket());
         objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""),
                 ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
         final ExasolSchema sourceSchema = createSourceSchema();

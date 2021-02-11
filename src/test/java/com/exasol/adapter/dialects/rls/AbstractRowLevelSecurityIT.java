@@ -20,7 +20,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
-import com.exasol.containers.HostIpProvider;
 import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.dbbuilder.dialects.User;
 import com.exasol.dbbuilder.dialects.exasol.*;
@@ -52,8 +51,7 @@ abstract class AbstractRowLevelSecurityIT {
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
-        final UdfTestSetup udfTestSetup = new UdfTestSetup(HostIpProvider.getHostIpFromContainer(EXASOL),
-                EXASOL.getDefaultBucket());
+        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket());
         objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""),
                 ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
         uploadAdapterScript();
