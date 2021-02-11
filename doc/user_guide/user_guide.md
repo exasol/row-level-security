@@ -24,6 +24,10 @@ The main difference between the three variants is the use case behind them.
 
 In a *role-based* scenario you want multiple people to be able to access the same rows &mdash; based on roles that are assigned to those users. The number of roles in this scenario is small.
 
+Note that when we talk about "roles" in this document, we mean RLS roles, not database roles. [Database roles](https://docs.exasol.com/sql/create_role.htm) are a completely disparate concept. While database roles control permissions on database objects like tables, they must be managed by a database administrator. RLS roles on the other hand are on a higher level and can be managed without database administrator privileges by the owner of the schema that needs to be protected.
+
+This is an important distinction since it allows for separation of concerns. Database administrators are in this scenario responsible for the security of the database as a whole. Schema owners get to decide who sees what in their schema.
+
 *Tenant* security on the other hand assumes that data belongs to a tenant and that other tenants are not allowed see that data.
 
 *Group-based* also allows multiple users to access one row. Users can be members of multiple groups, but each row can belong to only one group.
