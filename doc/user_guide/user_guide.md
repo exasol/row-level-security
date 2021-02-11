@@ -24,6 +24,10 @@ The main difference between the three variants is the use case behind them.
 
 In a *role-based* scenario you want multiple people to be able to access the same rows &mdash; based on roles that are assigned to those users. The number of roles in this scenario is small.
 
+Note that when we talk about "roles" in this document, we mean RLS roles, not database roles. [Database roles](https://docs.exasol.com/sql/create_role.htm) are a completely disparate concept. While database roles control permissions on database objects like tables, they must be managed by a database administrator. RLS roles on the other hand are on a higher level and can be managed without database administrator privileges by the owner of the schema that needs to be protected.
+
+This is an important distinction since it allows for separation of concerns. Database administrators are in this scenario responsible for the security of the database as a whole. Schema owners get to decide who sees what in their schema.
+
 *Tenant* security on the other hand assumes that data belongs to a tenant and that other tenants are not allowed see that data.
 
 *Group-based* also allows multiple users to access one row. Users can be members of multiple groups, but each row can belong to only one group.
@@ -44,17 +48,17 @@ In this section we will go through the administrative steps required to prepare 
 
 As an example we are going to create a small set of tables and contents in a schema called `SIMPLE_SALES`.
 
-### Role-based security
-
-Role-based security is a way to secure a table by assigning one or more roles to each user and specifying the roles which are allowed to see a row for each row in the table. 
-
-#### Installing the Administration Scripts
+### Installing the Administration Scripts
 
 RLS provides functions that make administration of RLS more user-friendly.
 
 **Important:** all the scripts must be created in the same schema as the tables that you plan to protect with row-level-security.
 
 To install the administration scripts, run the SQL batch file `administration-sql-scripts-<last-version>.sql`.
+
+### Role-based security
+
+Role-based security is a way to secure a table by assigning one or more roles to each user and specifying the roles which are allowed to see a row for each row in the table. 
 
 #### Creating Roles
 
