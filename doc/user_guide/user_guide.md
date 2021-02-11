@@ -159,7 +159,7 @@ SET EXA_ROW_ROLES = (SELECT MY_SCHEMA.ROLES_MASK(ROLE_ID) FROM MY_SCHEMA.EXA_ROL
 WHERE customer IN ('John Smith', 'Jane Doe');
 ```
 
-`Null` values in the `EXA_ROW_ROLES` are treated like a role mask with all roles unset, making the row effectively inaccessible.
+`NULL` values in the `EXA_ROW_ROLES` column are treated like a role mask with all roles unset, making the row effectively inaccessible.
 
 #### Deleting Roles
 
@@ -198,7 +198,7 @@ CREATE OR REPLACE TABLE SIMPLE_SALES.ORDER_ITEM_WITH_TENANT
 
 For each row define which tenant it belongs to. The tenant is identical to a username in Exasol.
 
-`Null` or an empty value in the EXA_ROW tenant make the row inaccessible.
+`NULL` or an empty value in the `EXA_ROW_TENANT` column make the row inaccessible.
 
 ### Group-based security
 
