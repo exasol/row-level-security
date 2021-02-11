@@ -18,6 +18,7 @@ We also now extract the the code coverage from the tests that run inside a docke
 
 * #73: Add missing `Maven Dependency Plugin` dependency in the README.
 * #55: Fixed the example in the tutorial
+* #84: Corrected documentation about group creation.
 
 ### Runtime Dependency Updates
 
