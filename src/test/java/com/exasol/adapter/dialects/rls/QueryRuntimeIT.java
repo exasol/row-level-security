@@ -20,29 +20,31 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
-import com.exasol.containers.ExasolContainerConstants;
 import com.exasol.dbbuilder.dialects.exasol.*;
+import com.exasol.udfdebugging.UdfTestSetup;
 
 @Tag("integration")
 @Tag("virtual-schema")
+@Tag("slow")
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true") // CI is usually to slow for a realistic result
 @Testcontainers
 class QueryRuntimeIT {
     @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> container = new ExasolContainer<>(
-            ExasolContainerConstants.EXASOL_DOCKER_IMAGE_REFERENCE);
-    private static ExasolObjectFactory factory;
+    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>().withReuse(true);
+    private static ExasolObjectFactory objectFactory;
 
     @BeforeAll
     static void beforeAll() throws Exception {
-        factory = new ExasolObjectFactory(container.createConnection(""));
+        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket());
+        objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""),
+                ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
         final ExasolSchema sourceSchema = createSourceSchema();
         uploadRlsAdapter();
         createRowLevelSecuritySchema(sourceSchema);
     }
 
     private static ExasolSchema createSourceSchema() throws NoDriverFoundException, SQLException {
-        final ExasolSchema sourceSchema = factory.createSchema("SIMPLE_SALES");
+        final ExasolSchema sourceSchema = objectFactory.createSchema("SIMPLE_SALES");
         sourceSchema.createTableBuilder("ORDER_ITEM") //
                 .column("ORDER_ID", "DECIMAL(18,0)") //
                 .column("CUSTOMER", "VARCHAR(50)") //
@@ -64,20 +66,20 @@ class QueryRuntimeIT {
 
     private static void uploadRlsAdapter() throws InterruptedException, BucketAccessException, TimeoutException {
         final Path localAdapterPath = Path.of("target", ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION).toAbsolutePath();
-        container.getDefaultBucket().uploadFile(localAdapterPath, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
+        EXASOL.getDefaultBucket().uploadFile(localAdapterPath, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
     }
 
     private static void createRowLevelSecuritySchema(final ExasolSchema sourceSchema) throws SQLException {
-        final Bucket bucket = container.getDefaultBucket();
-        final ExasolSchema rlsSchema = factory.createSchema("RLS_SCHEMA");
+        final Bucket bucket = EXASOL.getDefaultBucket();
+        final ExasolSchema rlsSchema = objectFactory.createSchema("RLS_SCHEMA");
         final String scriptContent = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
                 + "%jar /buckets/" + bucket.getBucketFsName() + "/" + bucket.getBucketName() //
                 + "/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";";
         final AdapterScript adapterScript = rlsSchema.createAdapterScript("RLS_VS_ADAPTER", JAVA, scriptContent);
-        final ConnectionDefinition connectionDefinition = factory.createConnectionDefinition("EXASOL_JDBC_CONNECTION",
-                "jdbc:exa:localhost:" + container.getExposedPorts().get(0), container.getUsername(),
-                container.getPassword());
-        factory.createVirtualSchemaBuilder("RLS_VS") //
+        final ConnectionDefinition connectionDefinition = objectFactory.createConnectionDefinition(
+                "EXASOL_JDBC_CONNECTION", "jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0), EXASOL.getUsername(),
+                EXASOL.getPassword());
+        objectFactory.createVirtualSchemaBuilder("RLS_VS") //
                 .adapterScript(adapterScript) //
                 .dialectName("EXASOL_RLS") //
                 .connectionDefinition(connectionDefinition) //
@@ -89,7 +91,7 @@ class QueryRuntimeIT {
     // [itest->qs~total-runtime-of-secured-simple-query~1]
     @Test
     void testSimpleQueryRuntime() throws NoDriverFoundException, SQLException {
-        final Connection connection = container.createConnection("");
+        final Connection connection = EXASOL.createConnection("");
         final long originalRuntime = executeTimedQuery(connection, "SELECT * FROM SIMPLE_SALES.ORDER_ITEM");
         final long rlsRuntime = executeTimedQuery(connection, "SELECT * FROM RLS_VS.ORDER_ITEM");
         final long maxRelativeMillis = Math.round(originalRuntime * 1.1);

@@ -2,7 +2,8 @@ package com.exasol.rls.administration.scripts;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROLES_MAPPING_TABLE_NAME;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
-import static com.exasol.tools.TestsConstants.*;
+import static com.exasol.tools.TestsConstants.PATH_TO_ADD_RLS_ROLE;
+import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -20,11 +21,11 @@ import com.exasol.containers.ExasolContainer;
 
 // [itest->dsn~add-a-new-role~1]
 @Tag("integration")
+@Tag("slow")
 @Testcontainers
 class AddRlsRoleIT extends AbstractAdminScriptIT {
     @Container
-    static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
+    static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>().withReuse(true);
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {

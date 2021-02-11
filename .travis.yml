@@ -8,8 +8,8 @@ jdk:
   - openjdk11
 
 env:
-  - DOCKER_DB_VERSION=7.0.2
-  - DOCKER_DB_VERSION=6.2.12
+  - DOCKER_DB_VERSION=7.0.6
+  - DOCKER_DB_VERSION=6.2.13
 
 addons:
   sonarcloud:
@@ -19,12 +19,15 @@ addons:
 before_script:
   - mkdir "$HOME"/.docker
   - echo '{}' > "$HOME"/.docker/config.json
+  - echo 'docker.client.strategy=org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy' > "$HOME"/.testcontainers.properties
+  - echo 'testcontainers.reuse.enable=true' >> "$HOME"/.testcontainers.properties
 
 script:
   - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent org.jacoco:jacoco-maven-plugin:prepare-agent-integration
     verify sonar:sonar
     -Dsonar.login=${SONAR_TOKEN}
-    -Dcom.exasol.docker.image=${DOCKER_DB_VERSION}
+    -Dcom.exasol.dockerdb.image=${DOCKER_DB_VERSION}
+    -Dtest.coverage="true"
     -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
 
 cache:

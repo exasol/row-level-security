@@ -2,7 +2,8 @@ package com.exasol.rls.administration.scripts;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_GROUP_MEMBERS_TABLE_NAME;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
-import static com.exasol.tools.TestsConstants.*;
+import static com.exasol.tools.TestsConstants.PATH_TO_ADD_USER_TO_GROUP;
+import static com.exasol.tools.TestsConstants.PATH_TO_EXA_IDENTIFIER;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -22,10 +23,10 @@ import com.exasol.containers.ExasolContainer;
 
 @Testcontainers
 @Tag("integration")
+@Tag("slow")
 class AddUserToGroupIT extends AbstractAdminScriptIT {
     @Container
-    static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
+    static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>().withReuse(true);
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {

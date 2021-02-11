@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Tag;
 
 @Tag("integration")
 @Tag("virtual-schema")
+@Tag("slow")
 class RowLevelSecurityJdbcIT extends AbstractRowLevelSecurityIT {
     @Override
     protected Map<String, String> getConnectionSpecificVirtualSchemaProperties() {

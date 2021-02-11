@@ -1,8 +1,7 @@
 package com.exasol.rls.administration.scripts;
 
-import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_GROUP_MEMBERS_TABLE_NAME;
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_ROLES_MAPPING_TABLE_NAME;
-import static com.exasol.tools.TestsConstants.*;
+import static com.exasol.tools.TestsConstants.PATH_TO_LIST_ALL_ROLES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
@@ -15,15 +14,13 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
-import com.exasol.dbbuilder.dialects.Table;
-import com.exasol.tools.TestsConstants;
 
 @Tag("integration")
+@Tag("slow")
 @Testcontainers
 class ListAllRolesIT extends AbstractAdminScriptIT {
     @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
+    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>().withReuse(true);
 
     @BeforeAll
     static void beforeAll() throws SQLException {

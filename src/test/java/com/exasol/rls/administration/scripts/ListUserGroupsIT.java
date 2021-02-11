@@ -1,7 +1,6 @@
 package com.exasol.rls.administration.scripts;
 
 import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.EXA_GROUP_MEMBERS_TABLE_NAME;
-import static com.exasol.tools.TestsConstants.EXASOL_DOCKER_IMAGE_REFERENCE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
@@ -19,11 +18,11 @@ import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.tools.TestsConstants;
 
 @Tag("integration")
+@Tag("slow")
 @Testcontainers
 class ListUserGroupsIT extends AbstractAdminScriptIT {
     @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
+    private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>().withReuse(true);
     private static Table memberTable;
 
     @BeforeAll
