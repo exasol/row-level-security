@@ -1,4 +1,4 @@
-# Exasol Row Level Security 2.1.0, released 2021-02-11
+# Exasol Row Level Security 2.1.0, released 2021-02-12
 
 Code name: Coverage
 
