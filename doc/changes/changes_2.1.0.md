@@ -24,6 +24,7 @@ This release also contains a fix for a security issue in an administration scrip
 
 * #55: Fixed the example in the tutorial
 * #73: Add missing `Maven Dependency Plugin` dependency in the README.
+* #79: Improved documentation of public role.
 * #81: Explained the effect of `NULL` or empty value in tenant or role column.
 * #82: Added explanation about the difference between database roles and RLS roles.
 * #83: Moved section about installing the administration scripts before the section for administering roles.
