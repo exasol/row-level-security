@@ -62,11 +62,11 @@ Role-based security is a way to secure a table by assigning one or more roles to
 
 #### Roles
 
-A role in the real world is responsibility that comes with certain privileges. In a soccer team for example you have the role of a goal keeper, defenders or a coach. All have different responsibilities and different things they are allowed to do. The goal keeper for example is the only player in the game allowed to touch the ball with the hands.
+A role in the real world is a responsibility that comes with certain privileges. In a soccer team for example you have the role of a goalkeeper, defenders or a coach. All have different responsibilities and different things they are allowed to do. The goalkeeper for example is the only player in the game allowed to touch the ball with the hands.
 
 Don't confuse roles with groups. In our example the football team would be a group. We will talk about [groups in a later section](#group-based-security).
 
-RLS supports up to 63 general purpose roles. Those can be freely named by you.
+RLS supports up to 63 general-purpose roles. Those can be freely named by you.
 
 You assign roles to users and data rows and RLS matches the assigned roles to determine if a user is allowed to access a row or not.
 
