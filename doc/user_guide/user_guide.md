@@ -58,7 +58,23 @@ To install the administration scripts, run the SQL batch file `administration-sq
 
 ### Role-based security
 
-Role-based security is a way to secure a table by assigning one or more roles to each user and specifying the roles which are allowed to see a row for each row in the table. 
+Role-based security is a way to secure a table by assigning one or more roles to each user and specifying the roles which are allowed to see a row for each row in the table.
+
+#### Roles
+
+A role in the real world is responsibility that comes with certain privileges. In a soccer team for example you have the role of a goal keeper, defenders or a coach. All have different responsibilities and different things they are allowed to do. The goal keeper for example is the only player in the game allowed to touch the ball with the hands.
+
+Don't confuse roles with groups. In our example the football team would be a group. We will talk about [groups in a later section](#group-based-security).
+
+RLS supports up to 63 general purpose roles. Those can be freely named by you.
+
+You assign roles to users and data rows and RLS matches the assigned roles to determine if a user is allowed to access a row or not.
+
+There is one additional reserved role that always exists. The *public role*. If you assign this role to a row in RLS, every user with access to the schema can see this row, independently of that user's own roles. So even if a user has no roles assigned at all, that user can still see all rows that have the public role set.
+
+Note also that if a row has the public role set, other roles have no effect on that row. After all it can't be more accessible than being public.
+
+Assigning the public role to a user has no effect since implicitly all users have that role anyway.
 
 #### Creating Roles
 
