@@ -7,10 +7,12 @@ import static com.exasol.matcher.TypeMatchMode.NO_JAVA_TYPE_CHECK;
 import static com.exasol.tools.TestsConstants.PATH_TO_DELETE_RLS_ROLE;
 import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.BitSet;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
@@ -150,5 +152,34 @@ class DeleteRlsRoleIT extends AbstractAdminScriptIT {
                         new Object[][] { { "Row1", 1 }, { "Row2", 4 }, { "Row3", 9 }, { "Row4", 13 } }), //
                 Arguments.of("Finance", new Object[][] { { "Row1", 1 }, { "Row2", 2 }, { "Row3", 9 }, { "Row4", 11 } }), //
                 Arguments.of("Support", new Object[][] { { "Row1", 1 }, { "Row2", 6 }, { "Row3", 1 }, { "Row4", 7 } }));
+    }
+
+    // Regression test for https://github.com/exasol/row-level-security/issues/95
+    @Test
+    void testNoBitMaskSideEffects() throws SQLException {
+        final BitSet expectedMask = new BitSet(64);
+        final int[] roleIds = { 1, 2, 32, 33, 53 };
+        for (final int roleId : roleIds) {
+            rolesTable.insert("role_" + roleId, roleId);
+            expectedMask.set(roleId - 1);
+        }
+        usersTable.insert("RLS_USR_1", 2);
+        final String protetectedTableName = "ISSUE95";
+        final Table protectedTable = schema
+                .createTable(protetectedTableName, "A", "INTEGER", "EXA_ROW_ROLES", "DECIMAL(20, 0)")
+                .insert(123, bitMaskToLong(expectedMask));
+        script.execute("role_33");
+        expectedMask.set(33 - 1, false);
+        assertAll(
+                () -> assertThat("User role remains unchanged",
+                        query("SELECT EXA_USER_NAME, EXA_ROLE_MASK FROM " + usersTable.getFullyQualifiedName()),
+                        table().row("RLS_USR_1", 2).matches(NO_JAVA_TYPE_CHECK)),
+                () -> assertThat("Role bit removed from payload table",
+                        query("SELECT A, EXA_ROW_ROLES FROM " + protectedTable.getFullyQualifiedName()),
+                        table().row(123, bitMaskToLong(expectedMask)).matches(NO_JAVA_TYPE_CHECK)));
+    }
+
+    private long bitMaskToLong(final BitSet expectedMask) {
+        return expectedMask.toLongArray()[0];
     }
 }

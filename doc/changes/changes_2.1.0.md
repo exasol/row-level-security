@@ -6,6 +6,8 @@ Release 2.1.0 of Exasol's Row-Level-Security brings a couple of new administrati
 
 We also now extract the the code coverage from the tests that run inside a docker container. This coverage already existed before, but did not contribute to the static code analysis metrics. The new metrics now reflect the actual coverage situation.
 
+This release also contains a fix for a security issue in an administration script. Users are kindly asked to update as soon as possible.
+
 ## Features
 
 * #31: Added more administration scripts for managing roles.
@@ -13,6 +15,10 @@ We also now extract the the code coverage from the tests that run inside a docke
 ## Refactoring
 
 * #63: Extracted code coverage from docker-based tests
+
+## Bugfixes
+
+* #95: Fixed vulnerability in administration script.
 
 ## Documentation
 
