@@ -2,8 +2,7 @@ package com.exasol.rls.administration.scripts;
 
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static com.exasol.matcher.TypeMatchMode.NO_JAVA_TYPE_CHECK;
-import static com.exasol.tools.TestsConstants.PATH_TO_ASSIGN_ROLES_TO_USER;
-import static com.exasol.tools.TestsConstants.PATH_TO_EXA_RLS_BASE;
+import static com.exasol.tools.TestsConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -14,8 +13,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.*;
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -34,12 +32,15 @@ class AssignRolesToUserIT extends AbstractAdminScriptIT {
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        initialize(EXASOL, "ASSIGN_ROLES_TO_USER", PATH_TO_EXA_RLS_BASE, PATH_TO_ASSIGN_ROLES_TO_USER);
+        initialize(EXASOL, "ASSIGN_ROLES_TO_USER", PATH_TO_EXA_RLS_BASE, PATH_TO_EXA_IDENTIFIER,
+                PATH_TO_ASSIGN_ROLES_TO_USER);
         schema.createTable(EXA_ROLES_MAPPING, "ROLE_NAME", "VARCHAR(128)", "ROLE_ID", "DECIMAL(2,0)") //
-                .insert("Sales", 1) //
-                .insert("Development", 2) //
-                .insert("Finance", 3) //
-                .insert("Support", 4);
+                .insert("role_1", 1) //
+                .insert("role_2", 2) //
+                .insert("role_3", 3) //
+                .insert("role_4", 4) //
+                .insert("role_53", 53) //
+                .insert("role_63", 63);
     }
 
     @AfterEach
@@ -60,7 +61,7 @@ class AssignRolesToUserIT extends AbstractAdminScriptIT {
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]
     @ParameterizedTest
     @MethodSource("provideValuesForTestAssignRolesToUser")
-    void testAssignRolesToUser(final List<String> rolesToAssign, final int maskValue) throws SQLException {
+    void testAssignRolesToUser(final List<String> rolesToAssign, final long maskValue) throws SQLException {
         script.execute("MONICA", rolesToAssign);
         assertThat(query("SELECT EXA_USER_NAME, EXA_ROLE_MASK FROM " + getUserTableName()), table() //
                 .row("MONICA", maskValue) //
@@ -68,17 +69,19 @@ class AssignRolesToUserIT extends AbstractAdminScriptIT {
     }
 
     private static Stream<Arguments> provideValuesForTestAssignRolesToUser() {
-        return Stream.of(Arguments.of(List.of("Sales"), 1), //
-                Arguments.of(List.of("Sales", "Development"), 3), //
-                Arguments.of(List.of("Sales", "Support"), 9), //
-                Arguments.of(List.of("Sales", "Development", "Finance", "Support"), 15));
+        return Stream.of(Arguments.of(List.of("role_1"), 1), //
+                Arguments.of(List.of("role_1", "role_2"), 3), //
+                Arguments.of(List.of("role_1", "role_4"), 9), //
+                Arguments.of(List.of("role_1", "role_2", "role_3", "role_4"), 15), //
+                Arguments.of(List.of("role_2", "role_3", "role_53", "role_63"),
+                        BitField64.ofIndices(1, 2, 52, 62).toLong()));
     }
 
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]
     @Test
     void testAssignRolesToUserUpdatesUserRoles() throws SQLException {
-        script.execute("NORBERT", List.of("Sales", "Development"));
-        script.execute("NORBERT", List.of("Sales"));
+        script.execute("NORBERT", List.of("role_1", "role_2"));
+        script.execute("NORBERT", List.of("role_1"));
         assertThat(query("SELECT EXA_USER_NAME, EXA_ROLE_MASK FROM " + getUserTableName()), table() //
                 .row("NORBERT", 1) //
                 .matches(NO_JAVA_TYPE_CHECK));
@@ -86,16 +89,23 @@ class AssignRolesToUserIT extends AbstractAdminScriptIT {
 
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]
     @ParameterizedTest
-    @MethodSource("provideValuesForTestAssignUnknownRoleToUserThrowsRoleNotFoundException")
-    void testAssignUnknownRoleToUserThrowsRoleNotFoundException(final List<String> allRoles,
-            final List<String> unknownRoles) {
-        assertScriptThrows("The following roles were not found: " + String.join(", ", unknownRoles), "THE_USER",
-                allRoles);
+    @MethodSource("provideValuesForTestAssignIllegalRoleToUserThrowsException")
+    void testAssignIllegalRoleToUserThrowsException(final List<String> allRoles, final List<String> unknownRoles) {
+        assertScriptThrows("Roles found that are not valid identifiers (numbers, letters and underscores only): \""
+                + String.join("\", \"", unknownRoles) + "\"", "THE_USER", allRoles);
     }
 
-    private static Stream<Arguments> provideValuesForTestAssignUnknownRoleToUserThrowsRoleNotFoundException() {
-        return Stream.of(Arguments.of(List.of("Cats"), List.of("Cats")), //
-                Arguments.of(List.of("Cats", "Sales"), List.of("Cats")), //
-                Arguments.of(List.of("Sales", "Cats", "Dogs"), List.of("Dogs", "Cats")));
+    private static Stream<Arguments> provideValuesForTestAssignIllegalRoleToUserThrowsException() {
+        return Stream.of(Arguments.of(List.of("/Cats"), List.of("/Cats")), //
+                Arguments.of(List.of("Cats%", "role_1"), List.of("Cats%")), //
+                Arguments.of(List.of("role_1", "Cat&&s", "Dog§§s", "Mi ce"), List.of("Cat&&s", "Dog§§s", "Mi ce")));
+    }
+
+    @ValueSource(strings = { "Rabb!it", "K@ng@roo", "El ephant" })
+    @ParameterizedTest
+    void testAssingingToIllegalUserThrowsException(final String userName) {
+        assertScriptThrows(
+                "The user name is not a valid identifier (numbers, letters and underscores only): \"" + userName + "\"",
+                userName, "role_1");
     }
 }

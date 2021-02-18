@@ -6,7 +6,17 @@ Release 2.1.0 of Exasol's Row-Level-Security brings a couple of new administrati
 
 We also now extract the the code coverage from the tests that run inside a docker container. This coverage already existed before, but did not contribute to the static code analysis metrics. The new metrics now reflect the actual coverage situation.
 
-This release also contains a fix for a security issue in an administration script. Users are kindly asked to update as soon as possible.
+This release also contains a fix for a security issue, classification "medium" in an administration script. The issue can lead to giving unintended row access to users.
+
+You are likely affected if:
+
+* you are using role-based row protection and
+* deleted one or more existing role via an administration script
+
+What can you do to resolve the situation:
+
+* Validate all role masks (column "EXA_ROW_ROLES") on all role-protected tables.
+* Set them again if the roles on that row don't match
 
 ## Features
 
