@@ -99,7 +99,7 @@ EXECUTE SCRIPT ADD_RLS_ROLE('Finance', 3);
 
 #### Listing Roles
 
-The following statement shows a list of existing roles and their ids.
+The following statement shows a list of existing roles and their IDs.
 
 ```sql
 EXECUTE SCRIPT LIST_ALL_ROLES();
@@ -136,7 +136,7 @@ The following statement shows a list of existing users and their roles:
 EXECUTE SCRIPT LIST_USERS_AND_ROLES();
 ```
 
-If you only want to see one user with assigned roles, use the following statement:
+If you only want to see list all roles assigned to a single user, use the following statement:
 
 ```sql 
 EXECUTE SCRIPT LIST_USER_ROLES('RLS_USR_1');

@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>3.5.0</version>
+            <version>3.5.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -283,7 +283,7 @@
                                 <argument>${source.admin.scripts}/list_user_roles.lua</argument>
                                 <argument>${source.admin.scripts}/list_users_and_roles.lua</argument>
                                 <!-- SQL scripts -->
-                                <argument>${source.sql.scripts}/role_mask.lua</argument>
+                                <argument>${source.sql.scripts}/role_mask.sql</argument>
                             </arguments>
                         </configuration>
                     </execution>

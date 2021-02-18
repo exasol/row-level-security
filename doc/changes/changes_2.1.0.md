@@ -47,7 +47,7 @@ What can you do to resolve the situation:
 ### Test Dependency Updates
 
 * Added `com.exasol:udf-debugging-java:0.3.0`
-* Updated `com.exasol:exasol-testcontainers:3.3.1` to `3.5.0`
+* Updated `com.exasol:exasol-testcontainers:3.3.1` to `3.5.1`
 * Updated `com.exasol:hamcrest-resultset-matcher:1.2.2` to `1.3.0`
 * Updated `com.exasol:test-db-builder-java:2.0.0` to `3.0.0`
 * Updated `nl.jqno.equalsverifier:equalsverifier:3.5` to `3.5.4`

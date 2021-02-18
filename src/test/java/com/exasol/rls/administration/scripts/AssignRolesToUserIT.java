@@ -91,8 +91,9 @@ class AssignRolesToUserIT extends AbstractAdminScriptIT {
     @ParameterizedTest
     @MethodSource("provideValuesForTestAssignIllegalRoleToUserThrowsException")
     void testAssignIllegalRoleToUserThrowsException(final List<String> allRoles, final List<String> unknownRoles) {
-        assertScriptThrows("Roles found that are not valid identifiers (numbers, letters and underscores only): \""
-                + String.join("\", \"", unknownRoles) + "\"", "THE_USER", allRoles);
+        assertScriptThrows("The following role names are not valid identifiers: \""
+                + String.join("\", \"", unknownRoles) + "\". Use numbers, letters and underscores only.", "THE_USER",
+                allRoles);
     }
 
     private static Stream<Arguments> provideValuesForTestAssignIllegalRoleToUserThrowsException() {
@@ -105,7 +106,8 @@ class AssignRolesToUserIT extends AbstractAdminScriptIT {
     @ParameterizedTest
     void testAssingingToIllegalUserThrowsException(final String userName) {
         assertScriptThrows(
-                "The user name is not a valid identifier (numbers, letters and underscores only): \"" + userName + "\"",
-                userName, "role_1");
+                "The user name \"" + userName
+                        + "\" is not a valid identifier. Use numbers, letters and underscores only.",
+                userName, List.of("role_1"));
     }
 }

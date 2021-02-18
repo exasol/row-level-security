@@ -20,7 +20,7 @@ function assign_roles_to_user()
     query(sql, { s = exa.meta.script_schema, r = roles, u = user_name })
 end
 
-identifier.assert_user(user)
+identifier.assert_user_name(user_name)
 identifier.assert_roles(roles)
 assign_roles_to_user()
 --[[

@@ -39,7 +39,7 @@ end
 --
 function assert_user_name(user_name)
     assert(validate(user_name),
-        string.format("Invalid username %s. Must be a valid identifier (numbers, letters and underscores only).",
+        string.format("The user name %s is not a valid identifier. Use numbers, letters and underscores only.",
             quote(user_name)))
 end
 
@@ -60,13 +60,13 @@ end
 --
 function assert_groups(user_groups)
     local invalid_groups = {}
-    for _, user_group in user_groups do
+    for _, user_group in ipairs(user_groups) do
         if not validate(user_group) then
             invalid_groups[#invalid_groups + 1] = quote(user_group)
         end
     end
     assert(next(invalid_groups) == nil,
-        string.format("Groups found that are not valid identifiers (numbers, letters and underscores only): %s",
+        string.format("The following group names are not valid identifiers: %s. Use numbers, letters and underscores only.",
             list_items(invalid_groups)))
 end
 
@@ -88,7 +88,7 @@ function assert_roles(role_names)
         end
     end
     assert(next(invalid_roles) == nil,
-        string.format("Roles found that are not valid identifiers (numbers, letters and underscores only): %s",
+        string.format("The following role names are not valid identifiers: %s. Use numbers, letters and underscores only.",
             list_items(invalid_roles)))
 end
 --[[

@@ -65,6 +65,6 @@ class RoleMaskIT extends AbstractAdminScriptIT {
                 Arguments.of("'role_1', 'role_2'", 3), //
                 Arguments.of("'role_1', 'role_4'", 9), //
                 Arguments.of("'role_1', 'role_2', 'role_3', 'role_4'", 15), //
-                Arguments.of("'role_3', 'role_31', 'role_63'", 4611686019501129732L));
+                Arguments.of("'role_3', 'role_31', 'role_63'", BitField64.ofIndices(2, 30, 62).toLong()));
     }
 }

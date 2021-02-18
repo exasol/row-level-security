@@ -85,8 +85,8 @@ class RemoveUserFromGroupIT extends AbstractAdminScriptIT {
     @ParameterizedTest
     void testRemoveUserFromGroupValidatesUserName(final String identifier, final String mangledIdentifier) {
         assertScriptThrows(
-                "Invalid username " + mangledIdentifier
-                        + ". Must be a valid identifier (numbers, letters and underscores only).",
+                "The user name " + mangledIdentifier
+                        + " is not a valid identifier. Use numbers, letters and underscores only.",
                 identifier, List.of("IRRELEVANT"));
     }
 
@@ -100,7 +100,9 @@ class RemoveUserFromGroupIT extends AbstractAdminScriptIT {
             "'$STARTS_WITH_SPECIAL_CHAR','\"$STARTS_WITH_SPECIAL_CHAR\"'" })
     @ParameterizedTest
     void testRemoveUserFromGroupValidatesGroups(final String identifier, final String mangledIdentifier) {
-        assertScriptThrows("Groups found that are not valid identifiers (numbers, letters and underscores only): "
-                + mangledIdentifier, "THE_USER", List.of("GROUP_A", identifier, "GROUP_C"));
+        assertScriptThrows(
+                "The following group names are not valid identifiers: " + mangledIdentifier
+                        + ". Use numbers, letters and underscores only.",
+                "THE_USER", List.of("GROUP_A", identifier, "GROUP_C"));
     }
 }
