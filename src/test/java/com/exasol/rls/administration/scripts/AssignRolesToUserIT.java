@@ -13,7 +13,8 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.*;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -88,26 +89,19 @@ class AssignRolesToUserIT extends AbstractAdminScriptIT {
     }
 
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]
+    @MethodSource("produceInvalidIdentifiers")
     @ParameterizedTest
-    @MethodSource("provideValuesForTestAssignIllegalRoleToUserThrowsException")
-    void testAssignIllegalRoleToUserThrowsException(final List<String> allRoles, final List<String> unknownRoles) {
-        assertScriptThrows("The following role names are not valid identifiers: \""
-                + String.join("\", \"", unknownRoles) + "\". Use numbers, letters and underscores only.", "THE_USER",
-                allRoles);
-    }
-
-    private static Stream<Arguments> provideValuesForTestAssignIllegalRoleToUserThrowsException() {
-        return Stream.of(Arguments.of(List.of("/Cats"), List.of("/Cats")), //
-                Arguments.of(List.of("Cats%", "role_1"), List.of("Cats%")), //
-                Arguments.of(List.of("role_1", "Cat&&s", "Dog§§s", "Mi ce"), List.of("Cat&&s", "Dog§§s", "Mi ce")));
-    }
-
-    @ValueSource(strings = { "Rabb!it", "K@ng@roo", "El ephant" })
-    @ParameterizedTest
-    void testAssingingToIllegalUserThrowsException(final String userName) {
-        assertScriptThrows(
-                "The user name \"" + userName
-                        + "\" is not a valid identifier. Use numbers, letters and underscores only.",
+    void testAssingingToIllegalUserThrowsException(final String userName, final String quotedUserName) {
+        assertScriptThrows("The user name " + quotedUserName + " is invalid. " + ALLOWED_IDENTIFIER_EXPLAINATION,
                 userName, List.of("role_1"));
+    }
+
+    // [itest->dsn~assign-roles-to-user-creates-a-role~1]
+    @MethodSource("produceInvalidIdentifiersInList")
+    @ParameterizedTest
+    void testAssignIllegalRoleToUserThrowsException(final List<String> invalidRoleNames, final String quotedRoleNames) {
+        assertScriptThrows(
+                "The following role names are invalid: " + quotedRoleNames + ". " + ALLOWED_IDENTIFIER_EXPLAINATION,
+                "USER_1", invalidRoleNames);
     }
 }

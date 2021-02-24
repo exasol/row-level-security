@@ -1,5 +1,5 @@
 ---
--- Get the role maks for a single role ID.
+-- Get the role mask for a single role ID.
 --
 -- @param role_id ID of the role for which the mask should be calculated
 --

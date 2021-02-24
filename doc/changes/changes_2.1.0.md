@@ -1,6 +1,6 @@
-# Exasol Row Level Security 2.1.0, released 2021-02-12
+# Exasol Row Level Security 2.1.0, released 2021-02-25
 
-Code name: Coverage
+Code name: Role-security administration scripts security update
 
 Release 2.1.0 of Exasol's Row-Level-Security brings a couple of new administration scripts, that make setting up and maintaining RLS-protected Virtual Schemas easier.
 
@@ -11,12 +11,21 @@ This release also contains a fix for a security issue, classification "medium" i
 You are likely affected if:
 
 * you are using role-based row protection and
-* deleted one or more existing role via an administration script
+* deleted a role via an administration script
 
 What can you do to resolve the situation:
 
 * Validate all role masks (column "EXA_ROW_ROLES") on all role-protected tables.
 * Set them again if the roles on that row don't match
+
+Other changes:
+
+* `ASSIGN_ROLES_TO_USER` now ignores non-existenent roles in oder to be efficient in batch updates.
+* All columns in `EXA_ROLES_MAPPING` and `EXA_RLS_USERS` are now generated with `NOT NULL` constraints.
+* `ROLE_ID` is now a primary key on `EXA_RLS_USERS` to enforce uniqueness.
+* Identifiers (user names, group names and role names) are checked much stricter in administration scripts now.
+
+Please alter existing tables accordingly.
 
 ## Features
 
@@ -42,19 +51,19 @@ What can you do to resolve the situation:
 
 ### Runtime Dependency Updates
 
-* Updated `com.exasol:exasol-jdbc:7.0.3` to `7.0.4`
+* Updated `com.exasol:exasol-jdbc:7.0.3` to `7.0.7`
 
 ### Test Dependency Updates
 
 * Added `com.exasol:udf-debugging-java:0.3.0`
 * Updated `com.exasol:exasol-testcontainers:3.3.1` to `3.5.1`
-* Updated `com.exasol:hamcrest-resultset-matcher:1.2.2` to `1.3.0`
-* Updated `com.exasol:test-db-builder-java:2.0.0` to `3.0.0`
+* Updated `com.exasol:hamcrest-resultset-matcher:1.2.2` to `1.4.0`
+* Updated `com.exasol:test-db-builder-java:2.0.0` to `3.1.0`
 * Updated `nl.jqno.equalsverifier:equalsverifier:3.5` to `3.5.4`
 * Updated `org.junit.jupiter:junit-jupiter:5.7.0` to `5.7.1`
-* Updated `org.mockito:mockito-junit-jupiter:3,6,28` to `3.7.7`
+* Updated `org.mockito:mockito-junit-jupiter:3,6,28` to `3.8.0`
 * Updated `org.junit.jupiter:junit-jupiter:5.7.0` to `5.7.1`
-* Updated `org.mockito:mockito-junit-jupiter:1.15.0` to `1.15.1`
+* Updated `org.mockito:mockito-junit-jupiter:1.15.0` to `1.15.2`
 
 ### Plugin Updates
 

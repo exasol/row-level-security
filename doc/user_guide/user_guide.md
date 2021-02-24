@@ -122,9 +122,10 @@ EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_2', ARRAY('Development'));
 **Important:** if you assign roles to the same user several times, the script rewrites user roles each time using a new array. That means that at any time a user has the exact set of roles stated in the _last_ assignment command.
 
 This script checks that the user name and the role names that are given are valid identifiers, to prevent SQL injection.
-What is does not check is whether the user or roles exist. The reason is that this script is likely to be used in batch jobs and a check with every call would be too expensive.
 
-If you try to assign a role to a user that does not exist, that non-existent role is ignored. That means that you could by accident assign to few roles, but never too many.
+What it does not check is whether the user or roles exist. The reason is that this script is likely to be used in batch jobs and a check with every call would be too expensive.
+
+If you try to assign a role that does not exist to a user, that non-existent role is ignored. That means that you could by accident assign too few roles, but never too many.
 
 If you want to make sure check that the roles exist before calling this script.
 
@@ -132,13 +133,13 @@ If you want to make sure check that the roles exist before calling this script.
 
 The following statement shows a list of existing users and their roles:
 
-```sql 
+```sql
 EXECUTE SCRIPT LIST_USERS_AND_ROLES();
 ```
 
-If you only want to see list all roles assigned to a single user, use the following statement:
+If you only want to see the list of all roles assigned to a single user, use the following statement:
 
-```sql 
+```sql
 EXECUTE SCRIPT LIST_USER_ROLES('RLS_USR_1');
 ```
 
@@ -159,10 +160,10 @@ CREATE OR REPLACE TABLE MY_SCHEMA.ORDER_ITEM
 );
 ```
 
-Assigning the right role to row requires calculating the role bit mask. Here is an example that shows how to calculate that mask from a list of role names.
+Assigning the right role to a row requires calculating the role bit mask. Here is an example that shows how to calculate that mask from a list of role names.
 
 ```sql
-SELECT SUM(ROLE_MASK(ROLE_ID)) FROM RLS_SOURCE.EXA_ROLES_MAPPING WHERE ROLE_NAME IN ('ACCOUNTING', 'HR', 'SALES'");
+SELECT SUM(DISTINCT ROLE_MASK(ROLE_ID)) FROM RLS_SOURCE.EXA_ROLES_MAPPING WHERE ROLE_NAME IN ('ACCOUNTING', 'HR', 'SALES'");
 ```
 
 What that code does is creating one individual bit mask per given role and then merging them into one &mdash; simply by summing them up.

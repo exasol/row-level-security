@@ -10,7 +10,7 @@ function assign_roles_to_user()
     local comma_separated_role_list = "'" .. table.concat(roles, "', '") .. "'"
     local sql = [[MERGE INTO ::s.EXA_RLS_USERS U
                   USING (SELECT :u AS EXA_USER_NAME,
-                  (SELECT SUM(BIT_SET(0, ROLE_ID - 1))
+                  (SELECT SUM(DISTINCT BIT_SET(0, (ROLE_ID) - 1))
                           FROM ::s.EXA_ROLES_MAPPING
                           WHERE ROLE_NAME IN (]] .. comma_separated_role_list .. [[)
                   ) AS EXA_ROLE_MASK) N

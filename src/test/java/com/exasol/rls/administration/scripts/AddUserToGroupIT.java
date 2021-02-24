@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -70,27 +70,19 @@ class AddUserToGroupIT extends AbstractAdminScriptIT {
     }
 
     // [itest->dsn~add-user-to-group-validates-user-name~1]
-    @CsvSource({ "'',<null>", "'   ','\"   \"'", "' LEADING_SPACE','\" LEADING_SPACE\"'",
-            "'TRAILING_SPACE ', '\"TRAILING_SPACE \"'", "'CONTAINS SPACE','\"CONTAINS SPACE\"'",
-            "'CONTAINS-DASH','\"CONTAINS-DASH\"'", "'$STARTS_WITH_SPECIAL_CHAR','\"$STARTS_WITH_SPECIAL_CHAR\"'",
-            ",'<null>'" })
+    @MethodSource("produceInvalidIdentifiers")
     @ParameterizedTest
-    void testAddUserToGroupValidatesUserName(final String identifier, final String mangledIdentifier) {
-        assertScriptThrows(
-                "The user name " + mangledIdentifier
-                        + " is not a valid identifier. Use numbers, letters and underscores only.",
+    void testAddUserToGroupValidatesUserName(final String identifier, final String quotedIdentifier) {
+        assertScriptThrows("The user name " + quotedIdentifier + " is invalid. " + ALLOWED_IDENTIFIER_EXPLAINATION,
                 identifier, List.of("IRRELEVANT"));
     }
 
     // [itest->dsn~add-user-to-group-validates-group-names~1]
-    @CsvSource({ "'',<null>", "'   ','\"   \"'", "' LEADING_SPACE','\" LEADING_SPACE\"'",
-            "'TRAILING_SPACE ', '\"TRAILING_SPACE \"'", "'CONTAINS SPACE','\"CONTAINS SPACE\"'",
-            "'CONTAINS-DASH','\"CONTAINS-DASH\"'", "'$STARTS_WITH_SPECIAL_CHAR','\"$STARTS_WITH_SPECIAL_CHAR\"'" })
+    @MethodSource("produceInvalidIdentifiersInList")
     @ParameterizedTest
-    void testAddUserToGroupValidatesGroups(final String identifier, final String mangledIdentifier) {
+    void testAddUserToGroupValidatesGroups(final List<String> invalidGroupNames, final String quotedGroupNames) {
         assertScriptThrows(
-                "The following group names are not valid identifiers: " + mangledIdentifier
-                        + ". Use numbers, letters and underscores only.",
-                "THE_USER", List.of("GROUP_A", identifier, "GROUP_C"));
+                "The following group names are invalid: " + quotedGroupNames + ". " + ALLOWED_IDENTIFIER_EXPLAINATION,
+                "THE_USER", invalidGroupNames);
     }
 }

@@ -4,15 +4,21 @@
 --[[
 CREATE OR REPLACE SCRIPT EXA_RLS_BASE AS
 --]]
-query([[CREATE TABLE IF NOT EXISTS ::s.EXA_ROLES_MAPPING(ROLE_NAME VARCHAR(128), ROLE_ID DECIMAL(2,0))]],
+query([[CREATE TABLE IF NOT EXISTS ::s.EXA_ROLES_MAPPING
+(ROLE_NAME VARCHAR(128) NOT NULL,
+ ROLE_ID DECIMAL(2,0) NOT NULL PRIMARY KEY
+)]],
     { s = exa.meta.script_schema })
-query([[CREATE TABLE IF NOT EXISTS ::s.EXA_RLS_USERS(EXA_USER_NAME VARCHAR(128), EXA_ROLE_MASK DECIMAL(20,0))]],
+query([[CREATE TABLE IF NOT EXISTS ::s.EXA_RLS_USERS
+(EXA_USER_NAME VARCHAR(128) NOT NULL,
+ EXA_ROLE_MASK DECIMAL(20,0) NOT NULL
+)]],
     { s = exa.meta.script_schema })
 
 ---
 -- Check if a role ID is valid.
 -- <p>
--- Roles can be between 1 and 63. 64 is reserved for the public role.
+-- Role IDs can be between 1 and 63. 64 is reserved for the public role.
 -- </p>
 --
 -- @param role_id role ID to be checked
