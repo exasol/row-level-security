@@ -81,7 +81,7 @@ class AssignRolesToUserIT extends AbstractAdminScriptIT {
     // [itest->dsn~assign-roles-to-user-creates-a-role~1]
     @Test
     void testAssignRolesToUserUpdatesUserRoles() throws SQLException {
-        script.execute("NORBERT", List.of("role_1", "role_2"));
+        script.execute("NORBERT", List.of("role_1", "role_2", "role_63"));
         script.execute("NORBERT", List.of("role_1"));
         assertThat(query("SELECT EXA_USER_NAME, EXA_ROLE_MASK FROM " + getUserTableName()), table() //
                 .row("NORBERT", 1) //

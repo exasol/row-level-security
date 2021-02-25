@@ -156,16 +156,16 @@ class DeleteRlsRoleIT extends AbstractAdminScriptIT {
     // Regression test for https://github.com/exasol/row-level-security/issues/95
     @Test
     void testNoBitMaskSideEffects() throws SQLException {
-        final int[] roleIds = { 1, 2, 32, 33, 53 };
+        final int[] roleIds = { 1, 32, 33, 53 };
         final BitField64 expectedMask = BitField64.empty();
         for (final int roleId : roleIds) {
             rolesTable.insert("role_" + roleId, roleId);
             expectedMask.set(roleId - 1);
         }
         usersTable.insert("RLS_USR_1", 2);
-        final String protetectedTableName = "ISSUE95";
+        final String protectedTableName = "ISSUE95";
         final Table protectedTable = schema
-                .createTable(protetectedTableName, "A", "INTEGER", "EXA_ROW_ROLES", "DECIMAL(20, 0)")
+                .createTable(protectedTableName, "A", "INTEGER", "EXA_ROW_ROLES", "DECIMAL(20, 0)")
                 .insert(123, expectedMask.toLong());
         script.execute("role_33");
         expectedMask.clear(33 - 1);

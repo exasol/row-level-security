@@ -29,10 +29,14 @@ public class BitField64 {
 
     private BitField64(final int... bitIndices) {
         for (final int bitIndex : bitIndices) {
-            if (bitIndex > 63) {
-                throw new IllegalArgumentException("Setting bit " + bitIndex + " not allowed in 64 bit bit field.");
-            }
+            validateBitIndex(bitIndex);
             this.bitField.set(bitIndex);
+        }
+    }
+
+    private void validateBitIndex(final int bitIndex) {
+        if ((bitIndex < 0) || (bitIndex > 63)) {
+            throw new IllegalArgumentException("Setting bit " + bitIndex + " not allowed in 64 bit bit field.");
         }
     }
 
@@ -42,6 +46,7 @@ public class BitField64 {
      * @param bitIndex index of the bit to be set.
      */
     public void set(final int bitIndex) {
+        validateBitIndex(bitIndex);
         this.bitField.set(bitIndex);
     }
 
@@ -51,6 +56,7 @@ public class BitField64 {
      * @param bitIndex index of the bit to be cleared.
      */
     public void clear(final int bitIndex) {
+        validateBitIndex(bitIndex);
         this.bitField.set(bitIndex, false);
     }
 
@@ -61,5 +67,18 @@ public class BitField64 {
      */
     public long toLong() {
         return this.bitField.toLongArray()[0];
+    }
+
+    /***
+     * Get the long representation of a bit field.
+     * <p>
+     * This is a convenience method. Equivalent to: <code>BitField64.ofIndices(bitIndices).toLong()</code>
+     * </p>
+     *
+     * @param bitIndices numbers of the bits to set (starting at zero)
+     * @return {@code long} value representing the bit field
+     */
+    public static long bitsToLong(final int... bitIndices) {
+        return BitField64.ofIndices(bitIndices).toLong();
     }
 }

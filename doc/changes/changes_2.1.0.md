@@ -2,30 +2,26 @@
 
 Code name: Role-security administration scripts security update
 
-Release 2.1.0 of Exasol's Row-Level-Security brings a couple of new administration scripts, that make setting up and maintaining RLS-protected Virtual Schemas easier.
-
-We also now extract the the code coverage from the tests that run inside a docker container. This coverage already existed before, but did not contribute to the static code analysis metrics. The new metrics now reflect the actual coverage situation.
-
-This release also contains a fix for a security issue, classification "medium" in an administration script. The issue can lead to giving unintended row access to users.
+Release 2.1.0 of Exasol's Row-Level-Security contains a fix for a security issue, classification "medium" in an administration script. The issue can lead to giving unintended row access to users.
 
 You are likely affected if:
 
 * you are using role-based row protection and
-* deleted a role via an administration script
+* modified a role via an administration script
 
 What can you do to resolve the situation:
 
-* Validate all role masks (column "EXA_ROW_ROLES") on all role-protected tables.
+* Validate all role masks (column "EXA_ROW_ROLES") on all role-protected tables
 * Set them again if the roles on that row don't match
 
 Other changes:
 
+* A couple of new administration scripts, that make setting up and maintaining RLS-protected Virtual Schemas easier.
 * `ASSIGN_ROLES_TO_USER` now ignores non-existenent roles in oder to be efficient in batch updates.
 * All columns in `EXA_ROLES_MAPPING` and `EXA_RLS_USERS` are now generated with `NOT NULL` constraints.
 * `ROLE_ID` is now a primary key on `EXA_RLS_USERS` to enforce uniqueness.
 * Identifiers (user names, group names and role names) are checked much stricter in administration scripts now.
-
-Please alter existing tables accordingly.
+* We now extract the the code coverage from the tests that run inside a docker container. This coverage already existed before, but did not contribute to the static code analysis metrics. The new metrics now reflect the actual coverage situation.
 
 ## Features
 
