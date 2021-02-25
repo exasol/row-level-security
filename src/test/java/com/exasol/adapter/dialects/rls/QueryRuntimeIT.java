@@ -95,7 +95,7 @@ class QueryRuntimeIT {
         final long originalRuntime = executeTimedQuery(connection, "SELECT * FROM SIMPLE_SALES.ORDER_ITEM");
         final long rlsRuntime = executeTimedQuery(connection, "SELECT * FROM RLS_VS.ORDER_ITEM");
         final long maxRelativeMillis = Math.round(originalRuntime * 1.1);
-        final long maxAbsoluteMillis = originalRuntime + 2500;
+        final long maxAbsoluteMillis = originalRuntime + 3500;
         assertThat(rlsRuntime, either(lessThanOrEqualTo(maxRelativeMillis)).or(lessThanOrEqualTo(maxAbsoluteMillis)));
     }
 
