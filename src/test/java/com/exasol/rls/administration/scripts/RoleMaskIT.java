@@ -2,6 +2,7 @@ package com.exasol.rls.administration.scripts;
 
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static com.exasol.matcher.TypeMatchMode.NO_JAVA_TYPE_CHECK;
+import static com.exasol.rls.administration.scripts.BitField64.bitsToLong;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
@@ -52,19 +53,38 @@ class RoleMaskIT extends AbstractAdminScriptIT {
     }
 
     // [itest->dsn~get-a-role-mask~1]
+    @MethodSource("produceValuesForTestRoleMask")
     @ParameterizedTest
-    @MethodSource("provideValuesForTestRolesMask")
-    void testRolesMask(final String roles, final long maskValue) throws SQLException {
-        final String sql = "SELECT SUM(" + schema.getName() + ".ROLE_MASK(ROLE_ID)) from "
+    void testRoleMask(final int roleId, final Long expectedMask) throws SQLException {
+        final String sql = "SELECT " + schema.getName() + ".ROLE_MASK(" + roleId + ")";
+        assertThat(query(sql), table().row(expectedMask).matches(NO_JAVA_TYPE_CHECK));
+    }
+
+    private static Stream<Arguments> produceValuesForTestRoleMask() {
+        return Stream.of(Arguments.of(-1, null), //
+                Arguments.of(0, null), //
+                Arguments.of(1, bitsToLong(0)), //
+                Arguments.of(2, bitsToLong(1)), //
+                Arguments.of(63, bitsToLong(62)), //
+                // note that in this case resolving the public role is allowed!
+                // Since Java has no unsigned long, we cannot check this value porperly.
+                Arguments.of(65, null));
+    }
+
+    // [itest->dsn~get-a-role-mask~1]
+    @ParameterizedTest
+    @MethodSource("produceValuesForTestSumRolesMask")
+    void testSumRolesMask(final String roles, final long maskValue) throws SQLException {
+        final String sql = "SELECT SUM(DISTINCT " + schema.getName() + ".ROLE_MASK(ROLE_ID)) from "
                 + table.getFullyQualifiedName() + " WHERE ROLE_NAME IN (" + roles + ")";
         assertThat(query(sql), table().row(maskValue).matches(NO_JAVA_TYPE_CHECK));
     }
 
-    private static Stream<Arguments> provideValuesForTestRolesMask() {
-        return Stream.of(Arguments.of("'role_1'", 1), //
-                Arguments.of("'role_1', 'role_2'", 3), //
-                Arguments.of("'role_1', 'role_4'", 9), //
-                Arguments.of("'role_1', 'role_2', 'role_3', 'role_4'", 15), //
-                Arguments.of("'role_3', 'role_31', 'role_63'", BitField64.ofIndices(2, 30, 62).toLong()));
+    private static Stream<Arguments> produceValuesForTestSumRolesMask() {
+        return Stream.of(Arguments.of("'role_1'", bitsToLong(0)), //
+                Arguments.of("'role_1', 'role_2'", bitsToLong(0, 1)), //
+                Arguments.of("'role_1', 'role_4'", bitsToLong(0, 3)), //
+                Arguments.of("'role_1', 'role_2', 'role_3', 'role_4'", bitsToLong(0, 1, 2, 3)), //
+                Arguments.of("'role_3', 'role_31', 'role_63'", bitsToLong(2, 30, 62)));
     }
 }
