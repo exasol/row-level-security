@@ -35,6 +35,7 @@ Other changes:
 ## Bugfixes
 
 * #95: Fixed vulnerability in administration script
+* #85: Proper name for count column in `LIST_ALL_GROUPS`
 
 ## Documentation
 
