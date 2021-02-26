@@ -8,7 +8,11 @@ CREATE OR REPLACE SCRIPT ADD_USER_TO_GROUP(user_name, array user_groups) AS
 import(exa.meta.script_schema .. '.EXA_IDENTIFIER', 'identifier')
 
 function create_temporary_member_table()
-    query("CREATE OR REPLACE TABLE ::s.EXA_NEW_GROUP_MEMBERS (EXA_USER_NAME VARCHAR(128), EXA_GROUP VARCHAR(128))",
+    query([[CREATE OR REPLACE TABLE ::s.EXA_NEW_GROUP_MEMBERS
+(EXA_USER_NAME VARCHAR(128) NOT NULL,
+ EXA_GROUP VARCHAR(128) NOT NULL,
+ CONSTRAINT UNIQUE_GROUP_MEMBERSHIP PRIMARY KEY (EXA_USER_NAME, EXA_GROUP) ENABLE
+)]],
         { s = exa.meta.script_schema })
 end
 
@@ -20,7 +24,11 @@ function populate_temporary_member_table()
 end
 
 function create_member_table_if_not_exists()
-    query("CREATE TABLE IF NOT EXISTS ::s.EXA_GROUP_MEMBERS (EXA_USER_NAME VARCHAR(128), EXA_GROUP VARCHAR(128))",
+    query([[CREATE TABLE IF NOT EXISTS ::s.EXA_GROUP_MEMBERS
+(EXA_USER_NAME VARCHAR(128) NOT NULL,
+ EXA_GROUP VARCHAR(128) NOT NULL,
+ CONSTRAINT UNIQUE_GROUP_MEMBERSHIP PRIMARY KEY (EXA_USER_NAME, EXA_GROUP) ENABLE
+)]],
         { s = exa.meta.script_schema })
 end
 

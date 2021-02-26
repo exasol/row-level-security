@@ -62,7 +62,7 @@ Role-based security is a way to secure a table by assigning one or more roles to
 
 #### Roles
 
-A role in the real world is a responsibility that comes with certain privileges. In a soccer team for example you have the role of a goalkeeper, defenders or a coach. All have different responsibilities and different things they are allowed to do. The goalkeeper for example is the only player in the game allowed to touch the ball with the hands.
+A role in the real world is a responsibility that comes with certain privileges. In a soccer team for example you have the role of a goal keeper, defenders or a coach. All have different responsibilities and different things they are allowed to do. The goal keeper for example is the only player in the game allowed to touch the ball with the hands.
 
 Don't confuse roles with groups. In our example the football team would be a group. We will talk about [groups in a later section](#group-based-security).
 
@@ -75,6 +75,12 @@ There is one additional reserved role that always exists. The *public role*. If 
 Note also that if a row has the public role set, other roles have no effect on that row. After all it can't be more accessible than being public.
 
 Assigning the public role to a user has no effect since implicitly all users have that role anyway.
+
+### Role Masks
+
+For performance reasons, RLS internally translates assigned roles into bit masks. Both for roles assigned to users and to rows.
+
+The function `ROLE_MASK` returns the bit mask for an individual role ID.
 
 #### Creating Roles
 
@@ -93,7 +99,7 @@ EXECUTE SCRIPT ADD_RLS_ROLE('Finance', 3);
 
 #### Listing Roles
 
-The following statement shows a list of existing roles and their ids.
+The following statement shows a list of existing roles and their IDs.
 
 ```sql
 EXECUTE SCRIPT LIST_ALL_ROLES();
@@ -115,17 +121,25 @@ EXECUTE SCRIPT ASSIGN_ROLES_TO_USER('RLS_USR_2', ARRAY('Development'));
 
 **Important:** if you assign roles to the same user several times, the script rewrites user roles each time using a new array. That means that at any time a user has the exact set of roles stated in the _last_ assignment command.
 
+This script checks that the user name and the role names that are given are valid identifiers, to prevent SQL injection.
+
+What it does not check is whether the user or roles exist. The reason is that this script is likely to be used in batch jobs and a check with every call would be too expensive.
+
+If you try to assign a role that does not exist to a user, that non-existent role is ignored. That means that you could by accident assign too few roles, but never too many.
+
+If you want to make sure check that the roles exist before calling this script.
+
 #### Getting Users With Assigned Roles
 
 The following statement shows a list of existing users and their roles:
 
-```sql 
+```sql
 EXECUTE SCRIPT LIST_USERS_AND_ROLES();
 ```
 
-If you only want to see one user with assigned roles, use the following statement:
+If you only want to see the list of all roles assigned to a single user, use the following statement:
 
-```sql 
+```sql
 EXECUTE SCRIPT LIST_USER_ROLES('RLS_USR_1');
 ```
 
@@ -146,13 +160,13 @@ CREATE OR REPLACE TABLE MY_SCHEMA.ORDER_ITEM
 );
 ```
 
-Use `ROLES_MASK`function to generate roles mask for tables or for updating the tables with the masks.
+Assigning the right role to a row requires calculating the role bit mask. Here is an example that shows how to calculate that mask from a list of role names.
 
-An example of generating a role mask which can be later manually inserted into the `EXA_ROW_ROLES` columns:
-
-```sql 
-SELECT MY_SCHEMA.ROLES_MASK(ROLE_ID) from MY_SCHEMA.EXA_ROLES_MAPPING WHERE ROLE_NAME IN ('Sales', 'Development')
+```sql
+SELECT SUM(DISTINCT ROLE_MASK(ROLE_ID)) FROM RLS_SOURCE.EXA_ROLES_MAPPING WHERE ROLE_NAME IN ('ACCOUNTING', 'HR', 'SALES'");
 ```
+
+What that code does is creating one individual bit mask per given role and then merging them into one &mdash; simply by summing them up.
 
 **Important:** Role names are **case-sensitive**.
 

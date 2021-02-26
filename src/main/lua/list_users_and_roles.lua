@@ -2,13 +2,24 @@
 CREATE OR REPLACE SCRIPT LIST_USERS_AND_ROLES() RETURNS TABLE AS
 --]]
 -- [impl->dsn~listing-users-and-roles~1]
-exit(query([[
-WITH USER_ROLES(USER_NAME, ROLE_ID) AS
-(SELECT EXA_USER_NAME, BIT_POSITIONS(EXA_ROLE_MASK)
- FROM ::s.EXA_RLS_USERS)
-SELECT u.user_name, r.ROLE_NAME FROM USER_ROLES u LEFT OUTER JOIN ::s.EXA_ROLES_MAPPING r ON CAST(u.ROLE_ID AS DECIMAL(20,0)) = r.ROLE_ID
-]],
-    { s = exa.meta.script_schema }))
+exit(query([[SELECT *
+    FROM (
+    (
+        SELECT u.EXA_USER_NAME, '<has unmapped role(s)>' AS ROLE_NAME
+        FROM ::schema.EXA_RLS_USERS u
+        WHERE BIT_AND(u.EXA_ROLE_MASK, BIT_NOT(
+                     SELECT SUM(DISTINCT(BIT_SET(0, rm.ROLE_ID - 1))) FROM ::schema.EXA_ROLES_MAPPING rm
+                 )) > 0
+    )
+    UNION ALL
+    (
+        SELECT u.EXA_USER_NAME, rm.ROLE_NAME
+        FROM ::schema.EXA_RLS_USERS u
+        INNER JOIN ::schema.EXA_ROLES_MAPPING rm ON BIT_CHECK(u.EXA_ROLE_MASK, rm.ROLE_ID - 1)
+    )
+)
+ORDER BY EXA_USER_NAME, ROLE_NAME]],
+    { schema = exa.meta.script_schema }))
 --[[
 /
 --]]

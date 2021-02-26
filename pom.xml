@@ -13,6 +13,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <source.admin.scripts>${basedir}/src/main/lua</source.admin.scripts>
+        <source.sql.scripts>${basedir}/src/main/sql</source.sql.scripts>
     </properties>
     <repositories>
         <repository>
@@ -44,18 +45,18 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-jdbc</artifactId>
-            <version>7.0.4</version>
+            <version>7.0.7</version>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>3.5.0</version>
+            <version>3.5.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.15.1</version>
+            <version>1.15.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -67,7 +68,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>hamcrest-resultset-matcher</artifactId>
-            <version>1.3.0</version>
+            <version>1.4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -79,7 +80,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.7.7</version>
+            <version>3.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -91,7 +92,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>3.0.0</version>
+            <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -267,12 +268,12 @@
                             <useMavenLogger>true</useMavenLogger>
                             <arguments>
                                 <argument>target/administration-sql-scripts-${project.version}.sql</argument>
+                                <!-- Administration scripts: -->
                                 <argument>${source.admin.scripts}/exa_rls_base.lua</argument>
                                 <argument>${source.admin.scripts}/exa_identifier.lua</argument>
                                 <argument>${source.admin.scripts}/add_rls_role.lua</argument>
                                 <argument>${source.admin.scripts}/assign_roles_to_user.lua</argument>
                                 <argument>${source.admin.scripts}/delete_rls_role.lua</argument>
-                                <argument>${source.admin.scripts}/roles_mask.lua</argument>
                                 <argument>${source.admin.scripts}/add_user_to_group.lua</argument>
                                 <argument>${source.admin.scripts}/remove_user_from_group.lua</argument>
                                 <argument>${source.admin.scripts}/list_all_groups.lua</argument>
@@ -281,6 +282,8 @@
                                 <argument>${source.admin.scripts}/bit_positions.lua</argument>
                                 <argument>${source.admin.scripts}/list_user_roles.lua</argument>
                                 <argument>${source.admin.scripts}/list_users_and_roles.lua</argument>
+                                <!-- SQL scripts -->
+                                <argument>${source.sql.scripts}/role_mask.sql</argument>
                             </arguments>
                         </configuration>
                     </execution>
