@@ -1,6 +1,6 @@
 # Exasol Row Level Security 2.1.0, released 2021-02-25
 
-Code name: Role-security administration scripts security update
+Code name: Role-security administration scripts security improvements
 
 Release 2.1.0 of Exasol's Row-Level-Security contains a fix for a security issue, classification "medium" in an administration script. The issue can lead to giving unintended row access to users.
 
@@ -25,15 +25,16 @@ Other changes:
 
 ## Features
 
-* #31: Added more administration scripts for managing roles.
+* #31: Added more administration scripts for managing roles
 
 ## Refactoring
 
 * #63: Extracted code coverage from docker-based tests
+* #92: Added constraints to RLS tables
 
 ## Bugfixes
 
-* #95: Fixed vulnerability in administration script.
+* #95: Fixed vulnerability in administration script
 
 ## Documentation
 
