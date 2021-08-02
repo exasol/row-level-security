@@ -5,6 +5,10 @@ on:
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        docker_db_version: [ 7.0.10, 6.2.14 ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
@@ -22,8 +26,13 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: Configure Testcontainers
+        run: |
+          echo '{}' > "$HOME"/.docker/config.json
+          echo 'docker.client.strategy=org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy' > "$HOME"/.testcontainers.properties
+          echo 'testcontainers.reuse.enable=true' >> "$HOME"/.testcontainers.properties
       - name: Run tests and build with Maven
-        run: mvn --batch-mode --update-snapshots clean verify sonar:sonar --file pom.xml -DtrimStackTrace=false -Dsonar.organization=exasol -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
+        run: mvn --batch-mode --update-snapshots clean verify sonar:sonar --file pom.xml -DtrimStackTrace=false -Dsonar.organization=exasol -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN -Dcom.exasol.dockerdb.image=${{ matrix.docker_db_version }}
         env:
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
