@@ -17,3 +17,4 @@ dependency-reduced-pom.xml
 Scripts
 .dbeaver*
 **/*.log
+pom.xml.versionsBackup

@@ -1,0 +1,11 @@
+release-platforms:
+  - GitHub
+  - Community
+  - Maven
+  - Jira
+community-tags:
+  - Row Level Security
+  - Security
+community-project-name: Row Level Security
+community-project-description: |
+  This projecr allows you to protect access to database tables on a per-row level based on roles and / or tenants.

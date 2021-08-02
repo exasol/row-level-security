@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
@@ -65,7 +66,7 @@ abstract class AbstractRowLevelSecurityIT {
             final Bucket bucket = EXASOL.getDefaultBucket();
             final Path pathToRls = Path.of(adapterScriptPath);
             bucket.uploadFile(pathToRls, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
-        } catch (final InterruptedException | BucketAccessException | TimeoutException exception) {
+        } catch (final BucketAccessException | TimeoutException | FileNotFoundException exception) {
             throw new AssertionError(
                     "Unable to prepare test: upload of adapter script \"" + adapterScriptPath + " failed.", exception);
         }
