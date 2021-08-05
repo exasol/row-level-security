@@ -141,6 +141,9 @@
                             LICENSE-exasol-jdbc.txt|https://docs.exasol.com/connect_exasol/drivers/jdbc.htm
                         </linkReplacement>
                     </linkReplacements>
+                    <excludedFiles>
+                        <excludedFile>.github/workflows/release_droid_upload_github_release_assets.yml</excludedFile>
+                    </excludedFiles>
                 </configuration>
             </plugin>
             <plugin>
