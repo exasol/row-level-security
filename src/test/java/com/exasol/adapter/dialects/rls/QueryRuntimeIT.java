@@ -82,7 +82,6 @@ class QueryRuntimeIT {
                 EXASOL.getPassword());
         objectFactory.createVirtualSchemaBuilder("RLS_VS") //
                 .adapterScript(adapterScript) //
-                .dialectName("EXASOL_RLS") //
                 .connectionDefinition(connectionDefinition) //
                 .sourceSchema(sourceSchema) //
                 .properties(Map.of("IS_LOCAL", "true")) //

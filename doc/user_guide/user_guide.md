@@ -330,7 +330,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-2.1.1.jar;
+    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-3.0.0.jar;
 /
 ;
 ```
@@ -358,7 +358,6 @@ Recommended for all RLS scenarios where RLS and the protected data share the sam
 CREATE VIRTUAL SCHEMA <virtual schema name> 
     USING RLS_SCHEMA.RLS_VS_ADAPTER
     WITH
-    SQL_DIALECT     = 'EXASOL_RLS'
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
     SCHEMA_NAME     = '<schema name>'
     IS_LOCAL = 'true'
@@ -379,7 +378,6 @@ PASSWORD '<password>'
 CREATE VIRTUAL SCHEMA <virtual schema name> 
     USING RLS_SCHEMA.RLS_VS_ADAPTER
     WITH
-    SQL_DIALECT     = 'EXASOL_RLS'
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
     SCHEMA_NAME     = '<schema name>'
     IMPORT_FROM_EXA = 'true'
@@ -394,7 +392,6 @@ This option is here for completeness, we recommend that you use [IMPORT FROM EXA
 CREATE VIRTUAL SCHEMA <virtual schema name> 
     USING RLS_SCHEMA.RLS_VS_ADAPTER
     WITH
-    SQL_DIALECT     = 'EXASOL_RLS'
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
     SCHEMA_NAME     = '<schema name>';
 ```

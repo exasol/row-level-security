@@ -112,7 +112,6 @@ abstract class AbstractRowLevelSecurityIT {
     private VirtualSchema installVirtualSchema(final String name, final ExasolSchema sourceSchema) {
         return objectFactory.createVirtualSchemaBuilder(name) //
                 .adapterScript(adapterScript) //
-                .dialectName("EXASOL_RLS") //
                 .connectionDefinition(connectionDefinition) //
                 .properties(getConnectionSpecificVirtualSchemaProperties()) //
                 .sourceSchema(sourceSchema) //

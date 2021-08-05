@@ -1,8 +1,10 @@
-# Exasol Row Level Security 2.1.1, released 2021-08-02
+# Exasol Row Level Security 3.0.0, released 2021-08-06
 
-Code name: Dependency Updates
+Code name: Removed `SQL_DIALECT` property
 
 ## Summary
+
+The SQL_DIALECT property used when executing a CREATE VIRTUAL SCHEMA from the Exasol database is obsolete from this version. Please, do not provide this property anymore.
 
 In this release we updated the dependencies. By that we fixed transitive CVE-2021-36090.
 

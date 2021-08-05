@@ -59,11 +59,11 @@
 
 [26]: https://www.eclemma.org/jacoco/index.html
 [28]: https://github.com/exasol/project-keeper-maven-plugin
-[5]: LICENSE-exasol-jdbc.txt
 [0]: https://github.com/exasol/db-fundamentals-java
 [23]: http://www.apache.org/licenses/LICENSE-2.0.txt
 [30]: https://maven.apache.org/surefire/maven-surefire-plugin/
 [62]: http://maven.apache.org/plugins/maven-clean-plugin/
+[5]: https://docs.exasol.com/connect_exasol/drivers/jdbc.htm
 [1]: https://opensource.org/licenses/MIT
 [16]: https://github.com/mockito/mockito
 [38]: https://maven.apache.org/surefire/maven-failsafe-plugin/
