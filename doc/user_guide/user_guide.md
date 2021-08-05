@@ -315,7 +315,7 @@ We prepared the schema and tables we want to protect with RLS in section ["Admin
 
 Upload the latest available release of [Row Level Security](https://github.com/exasol/row-level-security/releases) to BucketFS.
 
-Check out our [Virtual Schema user guide](https://github.com/exasol/virtual-schemas/blob/master/doc/user-guide/user_guide.md#install-the-adapter-script) for general information about adapter script installation.
+Check out our [Virtual Schema user guide](https://docs.exasol.com/database_concepts/virtual_schemas.htm) for general information about adapter script installation.
 
 ### Creating the Virtual Schema Adapter Script
 
@@ -418,7 +418,7 @@ Here is an example for allowing `SELECT` statements to a user.
 GRANT SELECT ON SCHEMA <virtual schema name> TO <user>;
 ```
 
-Please refer the the documentation of the [`GRANT`](https://docs.exasol.com/sql/grant.htmhttps://docs.exasol.com/sql/grant.htm) statement for further details.
+Please refer the the documentation of the [`GRANT`](https://docs.exasol.com/sql/grant.htm) statement for further details.
 
 The minimum requirements for a regular user in order to be able to access the RLS are:
 
