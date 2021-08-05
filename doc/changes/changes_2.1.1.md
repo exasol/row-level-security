@@ -12,7 +12,7 @@ In this release we updated the dependencies. By that we fixed transitive CVE-202
 
 * Updated `com.exasol:db-fundamentals-java:0.1.1` to `0.1.2`
 * Updated `com.exasol:exasol-jdbc:7.0.7` to `7.0.11`
-* Updated `com.exasol:exasol-virtual-schema:4.0.0` to `5.0.2`
+* Updated `com.exasol:exasol-virtual-schema:4.0.0` to `5.0.3`
 
 ### Runtime Dependency Updates
 

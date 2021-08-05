@@ -54,7 +54,7 @@ RLS provides functions that make administration of RLS more user-friendly.
 
 **Important:** all the scripts must be created in the same schema as the tables that you plan to protect with row-level-security.
 
-To install the administration scripts, run the SQL batch file `administration-sql-scripts-<last-version>.sql`.
+To install the administration scripts, run the SQL batch file `administration-sql-scripts-<last-version>.sql`. You can find the file on the GitHub release page, the script is released together with the `.jar` file. 
 
 ### Role-based security
 
@@ -330,7 +330,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-2.1.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-2.1.1.jar;
 /
 ;
 ```

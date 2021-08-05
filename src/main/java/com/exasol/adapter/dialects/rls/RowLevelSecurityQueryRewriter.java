@@ -11,7 +11,9 @@ import java.util.logging.Logger;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.QueryRewriter;
+import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.rewriting.SqlGenerationHelper;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.metadata.*;
@@ -89,7 +91,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
 
     private SqlSelectList getSqlSelectList(final SqlStatementSelect select) {
         final SqlSelectList oldSelectList = select.getSelectList();
-        if (oldSelectList.isSelectStar()) {
+        if (!oldSelectList.hasExplicitColumnsList()) {
             final List<TableMetadata> tableMetadata = new ArrayList<>();
             final SqlStatementSelect newSelectStatement = (SqlStatementSelect) oldSelectList.getParent();
             SqlGenerationHelper.addMetadata(newSelectStatement.getFromClause(), tableMetadata);

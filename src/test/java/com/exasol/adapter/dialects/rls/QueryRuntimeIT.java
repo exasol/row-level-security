@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.Map;
@@ -64,7 +65,7 @@ class QueryRuntimeIT {
         return sourceSchema;
     }
 
-    private static void uploadRlsAdapter() throws InterruptedException, BucketAccessException, TimeoutException {
+    private static void uploadRlsAdapter() throws BucketAccessException, TimeoutException, FileNotFoundException {
         final Path localAdapterPath = Path.of("target", ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION).toAbsolutePath();
         EXASOL.getDefaultBucket().uploadFile(localAdapterPath, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
     }
