@@ -8,11 +8,16 @@ The SQL_DIALECT property used when executing a CREATE VIRTUAL SCHEMA from the Ex
 
 In this release we updated the dependencies. By that we fixed transitive CVE-2021-36090.
 
+## Refactoring
+
+* #103: Added error codes.
+
 ## Dependency Updates
 
 ### Compile Dependency Updates
 
 * Updated `com.exasol:db-fundamentals-java:0.1.1` to `0.1.2`
+* Added `com.exasol:error-reporting-java:0.4.0`
 * Updated `com.exasol:exasol-jdbc:7.0.7` to `7.0.11`
 * Updated `com.exasol:exasol-virtual-schema:4.0.0` to `5.0.3`
 
@@ -34,7 +39,7 @@ In this release we updated the dependencies. By that we fixed transitive CVE-202
 
 ### Plugin Dependency Updates
 
-* Added `com.exasol:error-code-crawler-maven-plugin:0.1.1`
+* Added `com.exasol:error-code-crawler-maven-plugin:0.5.1`
 * Updated `com.exasol:project-keeper-maven-plugin:0.4.2` to `0.10.0`
 * Added `io.github.zlika:reproducible-build-maven-plugin:0.13`
 * Updated `org.apache.maven.plugins:maven-jar-plugin:2.4` to `3.2.0`

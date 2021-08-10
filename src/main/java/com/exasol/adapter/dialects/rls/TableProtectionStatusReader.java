@@ -5,6 +5,7 @@ import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.*
 import java.sql.*;
 
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
+import com.exasol.errorreporting.ExaError;
 
 /**
  * Reads the list of protected tables and the protection mechanism from the database.
@@ -53,9 +54,9 @@ public class TableProtectionStatusReader {
             }
             return builder.build();
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException(
-                    "Unable to read protection status from database metadata of tables in catalog \"" + catalogName
-                            + "\", schema \"" + schemaName + "\".");
+            throw new RemoteMetadataReaderException(ExaError.messageBuilder("E-VS-RLS-JAVA-1").message(
+                    "Unable to read protection status from database metadata of tables in catalog {{catalogName}}, schema {{schemaName}}.",
+                    catalogName, schemaName).toString());
         }
     }
 }

@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 import com.exasol.db.Identifier;
+import com.exasol.errorreporting.ExaError;
 
 /**
  * This class collect information about a user's roles.
@@ -66,8 +67,10 @@ public final class UserInformation {
                     this.cachedRoleMask = Long.toUnsignedString(mask);
                 }
             } catch (final SQLException exception) {
-                throw new RemoteMetadataReaderException("Unable to read role mask from " + EXA_RLS_USERS_TABLE_NAME
-                        + ". Caused by: " + exception.getMessage(), exception);
+                throw new RemoteMetadataReaderException(ExaError.messageBuilder("E-VS-RLS-JAVA-6")
+                        .message("Unable to read role mask from " + EXA_RLS_USERS_TABLE_NAME + ". Caused by: {{cause}}",
+                                exception.getMessage())
+                        .toString(), exception);
             }
         }
         return this.cachedRoleMask;

@@ -1,1 +1,4 @@
 error-tags:
+  VS-RLS-JAVA:
+    packages:
+      - com.exasol.adapter
