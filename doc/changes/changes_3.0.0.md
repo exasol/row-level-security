@@ -34,7 +34,7 @@ In this release we updated the dependencies. By that we fixed transitive CVE-202
 
 ### Plugin Dependency Updates
 
-* Added `com.exasol:error-code-crawler-maven-plugin:0.5.1`
+* Added `com.exasol:error-code-crawler-maven-plugin:0.1.1`
 * Updated `com.exasol:project-keeper-maven-plugin:0.4.2` to `0.10.0`
 * Added `io.github.zlika:reproducible-build-maven-plugin:0.13`
 * Updated `org.apache.maven.plugins:maven-jar-plugin:2.4` to `3.2.0`
