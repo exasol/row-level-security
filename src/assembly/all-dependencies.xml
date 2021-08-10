@@ -14,9 +14,21 @@
     </containerDescriptorHandlers>
     <dependencySets>
         <dependencySet>
-            <unpack>true</unpack>
-            <scope>runtime</scope>
             <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <excludes>
+                    <exclude>com.exasol.adapter.dialects.SqlDialectFactory</exclude>
+                </excludes>
+            </unpackOptions>
+            <scope>runtime</scope>
         </dependencySet>
     </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.outputDirectory}</directory>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+    </fileSets>
 </assembly>

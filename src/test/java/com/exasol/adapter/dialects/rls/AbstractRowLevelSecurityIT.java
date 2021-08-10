@@ -152,7 +152,7 @@ abstract class AbstractRowLevelSecurityIT {
                 // Note that depending on whether this is a local or a remote virtual schema, we either expect a
                 // standalone SELECT statement or one wrapped into an IMPORT statement. That is why we match
                 // against a regular expression here.
-                matchesPattern(".*SELECT \"CITY\" FROM \"GROUP_PROTECTED_SCHEMA_WITH_ONE_GROUP\".\"SOURCE_TABLE\"" //
+                matchesPattern(".*SELECT \"SOURCE_TABLE\".\"CITY\" FROM \"GROUP_PROTECTED_SCHEMA_WITH_ONE_GROUP\".\"SOURCE_TABLE\"" //
                         + " WHERE \"EXA_ROW_GROUP\" = ''?THE_GROUP'.*"),
                 anything(), anything()).matches());
     }

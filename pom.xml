@@ -143,6 +143,7 @@
                     </linkReplacements>
                     <excludedFiles>
                         <excludedFile>.github/workflows/release_droid_upload_github_release_assets.yml</excludedFile>
+                        <excludedFile>src/assembly/all-dependencies.xml</excludedFile>
                     </excludedFiles>
                 </configuration>
             </plugin>
