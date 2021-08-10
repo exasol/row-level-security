@@ -21,7 +21,7 @@ Needs: dsn
 
 # Solution Strategy
 
-Row-level security is not part of the Exasol core database. However with the [Virtual Schema](https://github.com/exasol/virtual-schemas/blob/master/doc/development/virtual_schema_api.md) interface lends itself nicely to what we need to implement RLS as a plug-in.
+Row-level security is not part of the Exasol core database. However with the [Virtual Schema](https://github.com/exasol/virtual-schema-common-java/blob/main/doc/development/api/virtual_schema_api.md) interface lends itself nicely to what we need to implement RLS as a plug-in.
 
 At its core Exasol Virtual Schema's are a query rewriter, not unlike views. You put in a query and it passes a modified query back that is then immediately executed by the database core instead of the original one. This is exactly what we need to implement RLS.
 

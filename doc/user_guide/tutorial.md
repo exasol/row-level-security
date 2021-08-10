@@ -356,7 +356,7 @@ CREATE SCHEMA RLS_VSADAPTER_SCHEMA;
 
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_VSADAPTER_SCHEMA.RLS_VSADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/jars/row-level-security-dist-2.1.0.jar;
+    %jar /buckets/bfsdefault/jars/row-level-security-dist-3.0.0.jar;
 /
 ;
 
@@ -369,7 +369,6 @@ IDENTIFIED BY '<password>';
 CREATE VIRTUAL SCHEMA RLS_CHICAGO_TAXI_VS 
 USING RLS_VSADAPTER_SCHEMA.RLS_VSADAPTER 
 WITH
-SQL_DIALECT     = 'EXASOL_RLS'
 CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
 SCHEMA_NAME     = 'CHICAGO_TAXI'
 IS_LOCAL        = 'true';

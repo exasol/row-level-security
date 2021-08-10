@@ -11,10 +11,12 @@ import java.util.logging.Logger;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.QueryRewriter;
+import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
-import com.exasol.adapter.metadata.*;
+import com.exasol.adapter.metadata.ColumnMetadata;
+import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
 import com.exasol.db.ExasolIdentifier;
 
@@ -80,37 +82,11 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
 
     private SqlStatementSelect getProtectedSqlStatementSelect(final SqlStatementSelect select,
             final UserInformation userInformation, final TableProtectionDetails protection) throws SQLException {
-        final SqlSelectList sqlSelectList = getSqlSelectList(select);
+        final SqlSelectList sqlSelectList = select.getSelectList();
         final SqlStatementSelect.Builder rlsStatementBuilder = copyOriginalClauses(select, sqlSelectList);
         final SqlNode whereClause = createWhereClause(select, userInformation, protection);
         rlsStatementBuilder.whereClause(whereClause);
         return rlsStatementBuilder.build();
-    }
-
-    private SqlSelectList getSqlSelectList(final SqlStatementSelect select) {
-        final SqlSelectList oldSelectList = select.getSelectList();
-        if (oldSelectList.isSelectStar()) {
-            final List<TableMetadata> tableMetadata = new ArrayList<>();
-            final SqlStatementSelect newSelectStatement = (SqlStatementSelect) oldSelectList.getParent();
-            SqlGenerationHelper.addMetadata(newSelectStatement.getFromClause(), tableMetadata);
-            return SqlSelectList.createRegularSelectList(getSelectListWithColumns(tableMetadata));
-        } else {
-            return oldSelectList;
-        }
-    }
-
-    private List<SqlNode> getSelectListWithColumns(final List<TableMetadata> tableMetadata) {
-        final List<SqlNode> selectListElements = new ArrayList<>(tableMetadata.size());
-        for (int i = 0; i < tableMetadata.size(); i++) {
-            final TableMetadata tableMeta = tableMetadata.get(i);
-            for (final ColumnMetadata columnMeta : tableMeta.getColumns()) {
-                final SqlColumn sqlColumn = new SqlColumn(i, columnMeta);
-                if (!RLS_COLUMNS.contains(sqlColumn.getName())) {
-                    selectListElements.add(sqlColumn);
-                }
-            }
-        }
-        return selectListElements;
     }
 
     private SqlStatementSelect.Builder copyOriginalClauses(final SqlStatementSelect select,

@@ -54,7 +54,7 @@ RLS provides functions that make administration of RLS more user-friendly.
 
 **Important:** all the scripts must be created in the same schema as the tables that you plan to protect with row-level-security.
 
-To install the administration scripts, run the SQL batch file `administration-sql-scripts-<last-version>.sql`.
+To install the administration scripts, run the SQL batch file `administration-sql-scripts-<last-version>.sql`. You can find the file on the GitHub release page, the script is released together with the `.jar` file. 
 
 ### Role-based security
 
@@ -315,7 +315,7 @@ We prepared the schema and tables we want to protect with RLS in section ["Admin
 
 Upload the latest available release of [Row Level Security](https://github.com/exasol/row-level-security/releases) to BucketFS.
 
-Check out our [Virtual Schema user guide](https://github.com/exasol/virtual-schemas/blob/master/doc/user-guide/user_guide.md#install-the-adapter-script) for general information about adapter script installation.
+Check out our [Virtual Schema user guide](https://docs.exasol.com/database_concepts/virtual_schemas.htm) for general information about adapter script installation.
 
 ### Creating the Virtual Schema Adapter Script
 
@@ -330,7 +330,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-2.1.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-3.0.0.jar;
 /
 ;
 ```
@@ -358,7 +358,6 @@ Recommended for all RLS scenarios where RLS and the protected data share the sam
 CREATE VIRTUAL SCHEMA <virtual schema name> 
     USING RLS_SCHEMA.RLS_VS_ADAPTER
     WITH
-    SQL_DIALECT     = 'EXASOL_RLS'
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
     SCHEMA_NAME     = '<schema name>'
     IS_LOCAL = 'true'
@@ -379,7 +378,6 @@ PASSWORD '<password>'
 CREATE VIRTUAL SCHEMA <virtual schema name> 
     USING RLS_SCHEMA.RLS_VS_ADAPTER
     WITH
-    SQL_DIALECT     = 'EXASOL_RLS'
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
     SCHEMA_NAME     = '<schema name>'
     IMPORT_FROM_EXA = 'true'
@@ -394,7 +392,6 @@ This option is here for completeness, we recommend that you use [IMPORT FROM EXA
 CREATE VIRTUAL SCHEMA <virtual schema name> 
     USING RLS_SCHEMA.RLS_VS_ADAPTER
     WITH
-    SQL_DIALECT     = 'EXASOL_RLS'
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
     SCHEMA_NAME     = '<schema name>';
 ```
@@ -418,7 +415,7 @@ Here is an example for allowing `SELECT` statements to a user.
 GRANT SELECT ON SCHEMA <virtual schema name> TO <user>;
 ```
 
-Please refer the the documentation of the [`GRANT`](https://docs.exasol.com/sql/grant.htmhttps://docs.exasol.com/sql/grant.htm) statement for further details.
+Please refer the the documentation of the [`GRANT`](https://docs.exasol.com/sql/grant.htm) statement for further details.
 
 The minimum requirements for a regular user in order to be able to access the RLS are:
 

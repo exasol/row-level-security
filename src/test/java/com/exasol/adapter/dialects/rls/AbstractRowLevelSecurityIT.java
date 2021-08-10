@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
@@ -65,7 +66,7 @@ abstract class AbstractRowLevelSecurityIT {
             final Bucket bucket = EXASOL.getDefaultBucket();
             final Path pathToRls = Path.of(adapterScriptPath);
             bucket.uploadFile(pathToRls, ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION);
-        } catch (final InterruptedException | BucketAccessException | TimeoutException exception) {
+        } catch (final BucketAccessException | TimeoutException | FileNotFoundException exception) {
             throw new AssertionError(
                     "Unable to prepare test: upload of adapter script \"" + adapterScriptPath + " failed.", exception);
         }
@@ -111,7 +112,6 @@ abstract class AbstractRowLevelSecurityIT {
     private VirtualSchema installVirtualSchema(final String name, final ExasolSchema sourceSchema) {
         return objectFactory.createVirtualSchemaBuilder(name) //
                 .adapterScript(adapterScript) //
-                .dialectName("EXASOL_RLS") //
                 .connectionDefinition(connectionDefinition) //
                 .properties(getConnectionSpecificVirtualSchemaProperties()) //
                 .sourceSchema(sourceSchema) //
@@ -152,7 +152,7 @@ abstract class AbstractRowLevelSecurityIT {
                 // Note that depending on whether this is a local or a remote virtual schema, we either expect a
                 // standalone SELECT statement or one wrapped into an IMPORT statement. That is why we match
                 // against a regular expression here.
-                matchesPattern(".*SELECT \"CITY\" FROM \"GROUP_PROTECTED_SCHEMA_WITH_ONE_GROUP\".\"SOURCE_TABLE\"" //
+                matchesPattern(".*SELECT \"SOURCE_TABLE\".\"CITY\" FROM \"GROUP_PROTECTED_SCHEMA_WITH_ONE_GROUP\".\"SOURCE_TABLE\"" //
                         + " WHERE \"EXA_ROW_GROUP\" = ''?THE_GROUP'.*"),
                 anything(), anything()).matches());
     }
