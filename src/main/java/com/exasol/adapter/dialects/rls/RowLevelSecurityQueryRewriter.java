@@ -19,6 +19,7 @@ import com.exasol.adapter.metadata.ColumnMetadata;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.*;
 import com.exasol.db.ExasolIdentifier;
+import com.exasol.errorreporting.ExaError;
 
 /**
  * RLS-specific query rewriter.
@@ -53,8 +54,10 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         if (statement instanceof SqlStatementSelect) {
             return rewriteStatement(statement, exaMetadata, properties);
         } else {
-            throw new IllegalArgumentException(
-                    "Modified SQL statement must be a SELECT statement, but was " + statement.getClass().getName());
+            throw new IllegalArgumentException(ExaError.messageBuilder("E-VS-RLS-JAVA-4")
+                    .message("Modified SQL statement must be a SELECT statement, but was {{className}}",
+                            statement.getClass().getName())
+                    .toString());
         }
     }
 
@@ -216,7 +219,8 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         } else if (protection.isGroupProtected()) {
             return createGroupNode(userInformation);
         } else {
-            throw new IllegalArgumentException("Unfiltered WHERE clause in RLS.");
+            throw new IllegalArgumentException(
+                    ExaError.messageBuilder("E-VS-RLS-JAVA-5").message("Unfiltered WHERE clause in RLS.").toString());
         }
     }
 }
