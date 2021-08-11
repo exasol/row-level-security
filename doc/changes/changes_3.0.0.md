@@ -1,4 +1,4 @@
-# Exasol Row Level Security 3.0.0, released 2021-08-06
+# Exasol Row Level Security 3.0.0, released 2021-08-11
 
 Code name: Removed `SQL_DIALECT` property
 
