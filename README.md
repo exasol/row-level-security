@@ -25,8 +25,8 @@ Restrict access to rows (datasets) in tables to &hellip;
 * set of roles
 * tenants (owners)
 * group of users
-* combination of group and tenant
-* combination of group and role
+* combination of tenant and role
+* combination of tenant and group
 
 ## Table of Contents
 
