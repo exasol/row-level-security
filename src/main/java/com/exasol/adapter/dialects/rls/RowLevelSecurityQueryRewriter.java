@@ -179,7 +179,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     private SqlNode createGroupNode(final UserInformation userInformation) throws SQLException {
         final List<String> groups = userInformation.getGroups();
         if (groups.size() == 0) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-VS-RLS-JAVA-6")
+            throw new IllegalStateException(ExaError.messageBuilder("E-VS-RLS-JAVA-7")
                     .message("This user is not allowed to query the table. "
                             + "Please add this user to some groups of the" + EXA_GROUP_MEMBERS_TABLE_NAME + " table.")
                     .toString());

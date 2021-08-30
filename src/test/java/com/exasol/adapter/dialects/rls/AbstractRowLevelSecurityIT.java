@@ -201,7 +201,7 @@ abstract class AbstractRowLevelSecurityIT {
         final User user = objectFactory.createLoginUser("USER_NA").grant(virtualSchema, SELECT);
         final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
         final SQLDataException exception = assertThrows(SQLDataException.class, () -> queryForUser(sql, user));
-        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-6"));
+        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-7"));
     }
 
     // [itest->dsn~all-users-have-the-public-access-role~1]
