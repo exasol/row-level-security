@@ -132,12 +132,22 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
                 return and(where, createTenantsNode(userInformation));
             }
         } else if (protection.isRoleProtected()) {
+            if (protection.isGroupProtected()) {
+                throw getRoleAndGroupException();
+            }
             return and(where, createRolesNode(userInformation));
         } else if (protection.isGroupProtected()) {
             return and(where, createGroupNode(userInformation));
         } else {
             return where;
         }
+    }
+
+    private IllegalStateException getRoleAndGroupException() {
+        return new IllegalStateException(ExaError.messageBuilder("E-VS-RLS-JAVA-8")
+                .message("Role protection and group protection on the same table are not allowed.",
+                        EXA_GROUP_MEMBERS_TABLE_NAME)
+                .toString());
     }
 
     private SqlNode and(final SqlNode... operands) {
@@ -222,6 +232,9 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
                 return createTenantsNode(userInformation);
             }
         } else if (protection.isRoleProtected()) {
+            if (protection.isGroupProtected()) {
+                throw getRoleAndGroupException();
+            }
             return createRolesNode(userInformation);
         } else if (protection.isGroupProtected()) {
             return createGroupNode(userInformation);
