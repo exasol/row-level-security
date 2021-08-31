@@ -145,9 +145,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
 
     private IllegalStateException getRoleAndGroupException() {
         return new IllegalStateException(ExaError.messageBuilder("E-VS-RLS-JAVA-8")
-                .message("Role protection and group protection on the same table are not allowed.",
-                        EXA_GROUP_MEMBERS_TABLE_NAME)
-                .toString());
+                .message("Role protection and group protection on the same table are not allowed.").toString());
     }
 
     private SqlNode and(final SqlNode... operands) {
