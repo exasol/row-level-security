@@ -178,7 +178,14 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     // [impl->dsn~query-rewriter-adds-row-filter-for-group~1]
     private SqlNode createGroupNode(final UserInformation userInformation) throws SQLException {
         final List<String> groups = userInformation.getGroups();
-        if (groups.size() == 1) {
+        if (groups.isEmpty()) {
+            throw new IllegalStateException(
+                    ExaError.messageBuilder("E-VS-RLS-JAVA-7")
+                            .message("This user is not allowed to query the table. "
+                                    + "Please add this user to some groups in the {{group-mapping-table}} table.",
+                                    EXA_GROUP_MEMBERS_TABLE_NAME)
+                            .toString());
+        } else if (groups.size() == 1) {
             return createSingleGroupNode(groups.get(0));
         } else {
             return createMultiGroupNode(groups);

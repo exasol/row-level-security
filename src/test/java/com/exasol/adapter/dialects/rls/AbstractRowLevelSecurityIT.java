@@ -7,6 +7,7 @@ import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VE
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
@@ -187,6 +188,20 @@ abstract class AbstractRowLevelSecurityIT {
         assertAll(() -> assertThat(queryForUser(sql, userTenantOnly), expectedForTenantOnlyUser.matches()),
                 () -> assertThat(queryForUser(sql, userGroupOnly), expectedForGroupOnlyUser.matches()),
                 () -> assertThat(queryForUser(sql, userGroupAndTenant), expectedForGroupAndTenantUser.matches()));
+    }
+
+    @Test
+    void testGroupRestrictedTableWithUnauthorizedUser() throws SQLException {
+        final ExasolSchema sourceSchema = objectFactory.createSchema("GROUP_PROTECTED_SCHEMA_UNAUTHORIZED_USER");
+        sourceSchema.createTable("SOURCE_TABLE", "CITY", "VARCHAR(40)", "EXA_ROW_GROUP", "VARCHAR(128)") //
+                .insert("Rio", "HOT");
+        sourceSchema.createTable("EXA_GROUP_MEMBERS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_GROUP", "VARCHAR(128)") //
+                .insert("USER_G", "HOT");
+        final VirtualSchema virtualSchema = installVirtualSchema("VS_GROUP_UNAUTHORIZED_USER", sourceSchema);
+        final User user = objectFactory.createLoginUser("USER_NA").grant(virtualSchema, SELECT);
+        final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
+        final SQLDataException exception = assertThrows(SQLDataException.class, () -> queryForUser(sql, user));
+        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-7"));
     }
 
     // [itest->dsn~all-users-have-the-public-access-role~1]

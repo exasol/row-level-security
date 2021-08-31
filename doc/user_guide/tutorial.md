@@ -356,7 +356,7 @@ CREATE SCHEMA RLS_VSADAPTER_SCHEMA;
 
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_VSADAPTER_SCHEMA.RLS_VSADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/jars/row-level-security-dist-3.0.0.jar;
+    %jar /buckets/bfsdefault/jars/row-level-security-dist-3.0.1.jar;
 /
 ;
 
