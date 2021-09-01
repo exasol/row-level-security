@@ -235,11 +235,11 @@ abstract class AbstractRowLevelSecurityIT {
                 .insert("Moskow", "COLD", 3) //
                 .insert("Horta", "MODERATE", 2);
         sourceSchema.createTable("EXA_GROUP_MEMBERS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_GROUP", "VARCHAR(128)") //
-                .insert("USER_GR", "COLD");
+                .insert("USER_GR_2", "COLD");
         sourceSchema.createTable("EXA_RLS_USERS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_ROLE_MASK", "DECIMAL(20)") //
-                .insert("USER_GR", 1);
+                .insert("USER_GR_2", 1);
         final VirtualSchema virtualSchema = installVirtualSchema("VS_GROUP_AND_ROLE_2", sourceSchema);
-        final User user = objectFactory.createLoginUser("USER_GR").grant(virtualSchema, SELECT);
+        final User user = objectFactory.createLoginUser("USER_GR_2").grant(virtualSchema, SELECT);
         final String sqlWithWhereClause = "SELECT * FROM " + virtualSchema.getFullyQualifiedName()
                 + ".SOURCE_TABLE WHERE CITY = 'Stockholm' ORDER BY CITY";
         final SQLDataException exception = assertThrows(SQLDataException.class,
