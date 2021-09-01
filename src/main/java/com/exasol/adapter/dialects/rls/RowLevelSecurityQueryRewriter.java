@@ -134,8 +134,9 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         } else if (protection.isRoleProtected()) {
             if (protection.isGroupProtected()) {
                 throw getRoleAndGroupException();
+            } else {
+                return and(where, createRolesNode(userInformation));
             }
-            return and(where, createRolesNode(userInformation));
         } else if (protection.isGroupProtected()) {
             return and(where, createGroupNode(userInformation));
         } else {
@@ -232,8 +233,9 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         } else if (protection.isRoleProtected()) {
             if (protection.isGroupProtected()) {
                 throw getRoleAndGroupException();
+            } else {
+                return createRolesNode(userInformation);
             }
-            return createRolesNode(userInformation);
         } else if (protection.isGroupProtected()) {
             return createGroupNode(userInformation);
         } else {

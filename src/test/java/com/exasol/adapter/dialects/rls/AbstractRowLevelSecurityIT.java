@@ -221,13 +221,30 @@ abstract class AbstractRowLevelSecurityIT {
         final VirtualSchema virtualSchema = installVirtualSchema("VS_GROUP_AND_ROLE", sourceSchema);
         final User user = objectFactory.createLoginUser("USER_GR").grant(virtualSchema, SELECT);
         final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
+        final SQLDataException exception = assertThrows(SQLDataException.class, () -> queryForUser(sql, user));
+        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-8"));
+    }
+
+    @Test
+    void testGroupAndRoleRestrictedTableWithWhereClause() {
+        final ExasolSchema sourceSchema = objectFactory.createSchema("GROUP_AND_ROLE_PROTECTED_SCHEMA_2");
+        sourceSchema
+                .createTable("SOURCE_TABLE", "CITY", "VARCHAR(40)", "EXA_ROW_GROUP", "VARCHAR(128)", "EXA_ROW_ROLES",
+                        "VARCHAR(128)") //
+                .insert("Stockholm", "COLD", 1) //
+                .insert("Moskow", "COLD", 3) //
+                .insert("Horta", "MODERATE", 2);
+        sourceSchema.createTable("EXA_GROUP_MEMBERS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_GROUP", "VARCHAR(128)") //
+                .insert("USER_GR", "COLD");
+        sourceSchema.createTable("EXA_RLS_USERS", "EXA_USER_NAME", "VARCHAR(128)", "EXA_ROLE_MASK", "DECIMAL(20)") //
+                .insert("USER_GR", 1);
+        final VirtualSchema virtualSchema = installVirtualSchema("VS_GROUP_AND_ROLE_2", sourceSchema);
+        final User user = objectFactory.createLoginUser("USER_GR").grant(virtualSchema, SELECT);
         final String sqlWithWhereClause = "SELECT * FROM " + virtualSchema.getFullyQualifiedName()
                 + ".SOURCE_TABLE WHERE CITY = 'Stockholm' ORDER BY CITY";
-        final SQLDataException exception1 = assertThrows(SQLDataException.class, () -> queryForUser(sql, user));
-        final SQLDataException exception2 = assertThrows(SQLDataException.class,
+        final SQLDataException exception = assertThrows(SQLDataException.class,
                 () -> queryForUser(sqlWithWhereClause, user));
-        assertAll(() -> assertThat(exception1.getMessage(), containsString("E-VS-RLS-JAVA-8")),
-                () -> assertThat(exception2.getMessage(), containsString("E-VS-RLS-JAVA-8")));
+        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-8"));
     }
 
     // [itest->dsn~all-users-have-the-public-access-role~1]
