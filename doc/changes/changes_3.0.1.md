@@ -7,5 +7,6 @@ Code name:
 ## Bug Fixes
 
 * #86: Added error for users without group.
+* #87: Added error for role + group on the same table.
 
 ## Dependency Updates
