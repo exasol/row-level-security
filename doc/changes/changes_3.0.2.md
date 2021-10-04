@@ -1,4 +1,4 @@
-# Exasol Row Level Security 3.0.2, released 2021-??-??
+# Exasol Row Level Security 3.0.2, released 2021-10-04
 
 Code name: Support TLS connections
 
