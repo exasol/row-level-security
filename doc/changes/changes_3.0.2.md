@@ -11,6 +11,7 @@ This release updates the JDBC driver and thus supports TLS encrypted connections
 ### Compile Dependency Updates
 
 * Updated `com.exasol:exasol-jdbc:7.0.11` to `7.1.1`
+* Updated `com.exasol:exasol-virtual-schema:5.0.3` to `5.0.4`
 
 ### Runtime Dependency Updates
 
@@ -33,3 +34,4 @@ This release updates the JDBC driver and thus supports TLS encrypted connections
 * Updated `com.exasol:project-keeper-maven-plugin:0.10.0` to `1.2.0`
 * Updated `org.apache.maven.plugins:maven-dependency-plugin:3.1.2` to `3.2.0`
 * Updated `org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M3` to `3.0.0`
+* Updated `org.jacoco:jacoco-maven-plugin:0.8.6` to `0.8.7`

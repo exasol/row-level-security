@@ -40,7 +40,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-virtual-schema</artifactId>
-            <version>5.0.3</version>
+            <version>5.0.4</version>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -163,7 +163,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.7</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
