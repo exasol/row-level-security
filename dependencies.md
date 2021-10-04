@@ -23,13 +23,8 @@
 | [SLF4J JDK14 Binding][20]                       | [MIT License][21]                 |
 | [Test Database Builder for Java][22]            | [MIT][1]                          |
 | [EqualsVerifier][24]                            | [Apache License, Version 2.0][25] |
-| [udf-debugging-java][26]                        | [MIT][1]                          |
-
-## Runtime Dependencies
-
-| Dependency            | License                          |
-| --------------------- | -------------------------------- |
-| [JaCoCo :: Agent][28] | [Eclipse Public License 2.0][29] |
+| [JaCoCo :: Agent][26]                           | [Eclipse Public License 2.0][27]  |
+| [udf-debugging-java][28]                        | [MIT][1]                          |
 
 ## Plugin Dependencies
 
@@ -37,7 +32,7 @@
 | ------------------------------------------------------- | ---------------------------------------------- |
 | [Project keeper maven plugin][30]                       | [MIT][1]                                       |
 | [Maven Surefire Plugin][32]                             | [Apache License, Version 2.0][33]              |
-| [JaCoCo :: Maven Plugin][28]                            | [Eclipse Public License 2.0][29]               |
+| [JaCoCo :: Maven Plugin][26]                            | [Eclipse Public License 2.0][27]               |
 | [Apache Maven Compiler Plugin][36]                      | [Apache License, Version 2.0][33]              |
 | [Apache Maven Assembly Plugin][38]                      | [Apache License, Version 2.0][33]              |
 | [Maven Failsafe Plugin][40]                             | [Apache License, Version 2.0][33]              |
@@ -58,7 +53,7 @@
 | [Maven Deploy Plugin][70]                               | [The Apache Software License, Version 2.0][25] |
 | [Maven Site Plugin 3][72]                               | [The Apache Software License, Version 2.0][25] |
 
-[28]: https://www.eclemma.org/jacoco/index.html
+[26]: https://www.eclemma.org/jacoco/index.html
 [30]: https://github.com/exasol/project-keeper-maven-plugin
 [6]: https://github.com/exasol/error-reporting-java
 [0]: https://github.com/exasol/db-fundamentals-java
@@ -76,7 +71,7 @@
 [36]: https://maven.apache.org/plugins/maven-compiler-plugin/
 [11]: http://opensource.org/licenses/MIT
 [44]: https://github.com/itsallcode/openfasttrace-maven-plugin
-[29]: https://www.eclipse.org/legal/epl-2.0/
+[27]: https://www.eclipse.org/legal/epl-2.0/
 [2]: https://github.com/exasol/exasol-virtual-schema
 [8]: https://github.com/exasol/exasol-testcontainers
 [19]: https://github.com/mockito/mockito/blob/main/LICENSE
@@ -96,7 +91,7 @@
 [10]: https://testcontainers.org
 [46]: http://www.mojohaus.org/build-helper-maven-plugin/
 [24]: http://www.jqno.nl/equalsverifier
-[26]: https://github.com/exasol/udf-debugging-java
+[28]: https://github.com/exasol/udf-debugging-java
 [12]: http://hamcrest.org/JavaHamcrest/
 [20]: http://www.slf4j.org
 [70]: http://maven.apache.org/plugins/maven-deploy-plugin/
