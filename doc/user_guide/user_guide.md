@@ -54,7 +54,7 @@ RLS provides functions that make administration of RLS more user-friendly.
 
 **Important:** all the scripts must be created in the same schema as the tables that you plan to protect with row-level-security.
 
-To install the administration scripts, run the SQL batch file `administration-sql-scripts-<last-version>.sql`. You can find the file on the GitHub release page, the script is released together with the `.jar` file. 
+To install the administration scripts, run the SQL batch file `administration-sql-scripts-<last-version>.sql`. You can find the file on the GitHub release page, the script is released together with the `.jar` file.
 
 ### Role-based security
 
@@ -84,7 +84,7 @@ The function `ROLE_MASK` returns the bit mask for an individual role ID.
 
 #### Creating Roles
 
-Create user roles using `ADD_RLS_ROLE(role_name, role_id)` script. 
+Create user roles using `ADD_RLS_ROLE(role_name, role_id)` script.
 
 `role_name` is a unique role name. The check for an existing role is **case-insensitive** that means you can't have roles `sales` and `Sales` at the same time.
 `role_id` is a unique role id. It can be in range from 1 to 63.
@@ -150,13 +150,13 @@ In case you want to use role-based security, add a column called `EXA_ROW_ROLES 
 For our example we will create very simple order item list as shown below.
 
 ```sql
-CREATE OR REPLACE TABLE MY_SCHEMA.ORDER_ITEM 
-(  
-    ORDER_ID DECIMAL(18,0),  
-    CUSTOMER VARCHAR(50),  
-    PRODUCT VARCHAR(100),  
+CREATE OR REPLACE TABLE MY_SCHEMA.ORDER_ITEM
+(
+    ORDER_ID DECIMAL(18,0),
+    CUSTOMER VARCHAR(50),
+    PRODUCT VARCHAR(100),
     QUANTITY DECIMAL(18,0),
-    EXA_ROW_ROLES DECIMAL(20,0)  
+    EXA_ROW_ROLES DECIMAL(20,0)
 );
 ```
 
@@ -183,7 +183,7 @@ INSERT INTO SIMPLE_SALES.ORDER_ITEM VALUES
 
 An example of updating the table using `ROLES_MASK` function:
 
-```sql 
+```sql
 UPDATE LOCATIONS
 SET EXA_ROW_ROLES = (SELECT MY_SCHEMA.ROLES_MASK(ROLE_ID) FROM MY_SCHEMA.EXA_ROLES_MAPPING WHERE ROLE_NAME IN ('Sales', 'Development'))
 WHERE customer IN ('John Smith', 'Jane Doe');
@@ -203,20 +203,20 @@ Delete roles using `DELETE_RLS_ROLE(role_name)` script. The script removes the r
 
 Example:
 
-```sql 
+```sql
 EXECUTE SCRIPT DELETE_RLS_ROLE('Sales');
 ```
 
 ### Tenant-based security
 
-Tenant-based security is a way to secure a table assigning each row to only one user. 
+Tenant-based security is a way to secure a table assigning each row to only one user.
 
-If you want to use tenant security, you must add an additional column `EXA_ROW_TENANT VARCHAR(128)` to the tables you want to secure. 
+If you want to use tenant security, you must add an additional column `EXA_ROW_TENANT VARCHAR(128)` to the tables you want to secure.
 
 Example:
 
 ```sql
-CREATE OR REPLACE TABLE SIMPLE_SALES.ORDER_ITEM_WITH_TENANT 
+CREATE OR REPLACE TABLE SIMPLE_SALES.ORDER_ITEM_WITH_TENANT
 (
     ORDER_ID DECIMAL(18,0),
     CUSTOMER VARCHAR(50),
@@ -281,13 +281,13 @@ In case you want to use group-based security, add a column called `EXA_ROW_GROUP
 For our example we will create very simple order item list as shown below.
 
 ```sql
-CREATE OR REPLACE TABLE MY_SCHEMA.ORDER_ITEM 
-(  
-    ORDER_ID DECIMAL(18,0),  
-    CUSTOMER VARCHAR(50),  
-    PRODUCT VARCHAR(100),  
+CREATE OR REPLACE TABLE MY_SCHEMA.ORDER_ITEM
+(
+    ORDER_ID DECIMAL(18,0),
+    CUSTOMER VARCHAR(50),
+    PRODUCT VARCHAR(100),
     QUANTITY DECIMAL(18,0),
-    EXA_ROW_GROUP VARCHAR(128)  
+    EXA_ROW_GROUP VARCHAR(128)
 );
 ```
 
@@ -330,7 +330,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-3.0.1.jar;
+    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-3.0.2.jar;
 /
 ;
 ```
@@ -342,9 +342,9 @@ Please remember to replace the parameters in pointy brackets by the actual value
 Named connections are database objects that securely store credentials. You need to [define a `CONNECTION`](https://docs.exasol.com/sql/create_connection.htm) in order to later tell the RLS Virtual Schema how to connect to the source Exasol database.
 
 ```sql
-CREATE CONNECTION EXASOL_JDBC_CONNECTION 
-TO 'jdbc:exa:<host>:<port>' 
-USER '<user>' 
+CREATE CONNECTION EXASOL_JDBC_CONNECTION
+TO 'jdbc:exa:<host>:<port>'
+USER '<user>'
 IDENTIFIED BY '<password>';
 ```
 
@@ -355,7 +355,7 @@ In the following sections we explain how to create the Virtual Schema that RLS i
 Recommended for all RLS scenarios where RLS and the protected data share the same instance or cluster.
 
 ```sql
-CREATE VIRTUAL SCHEMA <virtual schema name> 
+CREATE VIRTUAL SCHEMA <virtual schema name>
     USING RLS_SCHEMA.RLS_VS_ADAPTER
     WITH
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
@@ -375,7 +375,7 @@ PASSWORD '<password>'
 ```
 
 ```sql
-CREATE VIRTUAL SCHEMA <virtual schema name> 
+CREATE VIRTUAL SCHEMA <virtual schema name>
     USING RLS_SCHEMA.RLS_VS_ADAPTER
     WITH
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'
@@ -386,10 +386,10 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 
 ### Creating a Virtual Schema with Import From JDBC
 
-This option is here for completeness, we recommend that you use [IMPORT FROM EXA](#creating-a-virtual-schema-with-import-from-exa) instead. 
+This option is here for completeness, we recommend that you use [IMPORT FROM EXA](#creating-a-virtual-schema-with-import-from-exa) instead.
 
 ```sql
-CREATE VIRTUAL SCHEMA <virtual schema name> 
+CREATE VIRTUAL SCHEMA <virtual schema name>
     USING RLS_SCHEMA.RLS_VS_ADAPTER
     WITH
     CONNECTION_NAME = 'EXASOL_JDBC_CONNECTION'

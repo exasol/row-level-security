@@ -16,14 +16,14 @@ else
     
     echo "Creating SQL bundle '$assembly'"
     
-    echo "-- Row Level Security administration script bundle" > "$assembly"
+    append "-- Row Level Security administration script bundle"
     append "--"
 
     for script in $scripts ; do
         if [[ -r "$script" ]]; then
             echo "Adding '$script'"
-    	    append "-- Script source '$(basename "$script")'"
-            grep -vP '^--(/?\s*\[impl|\[\[|\]\])' "$script" >> "$assembly"
+            append "-- Script source '$(basename "$script")'"
+            grep --invert-match --perl-regexp '^--(/?\s*\[impl|\[\[|\]\])' "$script" >> "$assembly"
             append ";"
             append ""
         else

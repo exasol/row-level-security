@@ -1,5 +1,9 @@
 /target/
 
+/.project
+/.classpath
+.settings/org.eclipse.jdt.apt.core.prefs
+
 # .settings : we need Eclipse settings for code formatter and clean-up rules
 target
 .cache

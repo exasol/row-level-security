@@ -22,10 +22,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
+import com.exasol.containers.ExasolDockerImageReference;
 import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.dbbuilder.dialects.User;
 import com.exasol.dbbuilder.dialects.exasol.*;
 import com.exasol.matcher.ResultSetStructureMatcher.Builder;
+import com.exasol.tools.FingerprintExtractor;
 import com.exasol.udfdebugging.UdfTestSetup;
 
 @Tag("integration")
@@ -81,9 +83,22 @@ abstract class AbstractRowLevelSecurityIT {
     }
 
     private static void createConnectionDefinition() {
-        connectionDefinition = objectFactory.createConnectionDefinition("RLS_CONNECTION",
-                "jdbc:exa:localhost:" + EXASOL.getDefaultInternalDatabasePort(), EXASOL.getUsername(),
-                EXASOL.getPassword());
+        connectionDefinition = objectFactory.createConnectionDefinition("RLS_CONNECTION", getJdbcUrl(),
+                EXASOL.getUsername(), EXASOL.getPassword());
+    }
+
+    private static String getJdbcUrl() {
+        final int port = EXASOL.getDefaultInternalDatabasePort();
+        if (exasolVersionSupportsFingerprintInAddress()) {
+            final String fingerprint = FingerprintExtractor.extractFingerprint(EXASOL.getJdbcUrl());
+            return "jdbc:exa:localhost/" + fingerprint + ":" + port;
+        }
+        return "jdbc:exa:localhost:" + port + ";validateservercertificate=0";
+    }
+
+    protected static boolean exasolVersionSupportsFingerprintInAddress() {
+        final ExasolDockerImageReference imageReference = EXASOL.getDockerImageReference();
+        return (imageReference.getMajor() >= 7) && (imageReference.getMinor() >= 1);
     }
 
     // [itest->dsn~query-rewriter-adds-row-filter-for-tenants~1]
