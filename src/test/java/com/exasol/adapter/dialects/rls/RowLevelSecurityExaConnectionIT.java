@@ -7,6 +7,7 @@ import java.util.Map;
 import org.junit.jupiter.api.*;
 
 import com.exasol.dbbuilder.dialects.exasol.ConnectionDefinition;
+import com.exasol.tools.FingerprintExtractor;
 
 @Tag("integration")
 @Tag("virtual-schema")
@@ -16,8 +17,16 @@ class RowLevelSecurityExaConnectionIT extends AbstractRowLevelSecurityIT {
 
     @BeforeEach
     void beforeEach() {
-        this.exaConnection = objectFactory.createConnectionDefinition(EXA_CONNECTION_NAME,
-                "127.0.0.1:" + EXASOL.getDefaultInternalDatabasePort(), EXASOL.getUsername(), EXASOL.getPassword());
+        this.exaConnection = objectFactory.createConnectionDefinition(EXA_CONNECTION_NAME, getTargetAddress(),
+                EXASOL.getUsername(), EXASOL.getPassword());
+    }
+
+    private String getTargetAddress() {
+        if (exasolVersionSupportsFingerprintInAddress()) {
+            final String fingerprint = FingerprintExtractor.extractFingerprint(EXASOL.getJdbcUrl());
+            return "127.0.0.1/" + fingerprint + ":" + EXASOL.getDefaultInternalDatabasePort();
+        }
+        return "127.0.0.1:" + EXASOL.getDefaultInternalDatabasePort();
     }
 
     @AfterEach
