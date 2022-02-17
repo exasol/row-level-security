@@ -41,6 +41,7 @@ abstract class AbstractRowLevelSecurityIT {
     private static AdapterScript adapterScript = null;
     private static ConnectionDefinition connectionDefinition = null;
     protected static ExasolObjectFactory objectFactory = null;
+    private static final Connection NO_CONNECTION = null;
 
     /**
      * Define the properties with which the Virtual Schema under test is created.
@@ -55,7 +56,8 @@ abstract class AbstractRowLevelSecurityIT {
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
-        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket());
+        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket(),
+                NO_CONNECTION);
         objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""),
                 ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
         uploadAdapterScript();

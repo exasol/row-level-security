@@ -33,10 +33,12 @@ class QueryRuntimeIT {
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>().withReuse(true);
     private static ExasolObjectFactory objectFactory;
+    private static final Connection NO_CONNECTION = null;
 
     @BeforeAll
     static void beforeAll() throws Exception {
-        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket());
+        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket(),
+                NO_CONNECTION);
         objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""),
                 ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
         final ExasolSchema sourceSchema = createSourceSchema();
