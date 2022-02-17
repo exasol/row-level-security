@@ -36,7 +36,7 @@ A role in the real world is a responsibility that comes with certain privileges.
 
 Translated to RLS that privilege is reading rows.
 
-You can define up to 63 different RLS role per Schema. A 64th role is reserved to indicate public access. Note that those are not regular database roles ([more about that in the next section](#rls-roles-are-not-database-roles)) but an RLS-specific concept.
+You can define up to 63 different RLS roles per Schema. A 64th role is reserved to indicate public access. Note that those are not regular database roles ([more about that in the next section](#rls-roles-are-not-database-roles)) but an RLS-specific concept.
 
 If you introduce role protection on a table, you can assign any combination of roles to each row.
 
