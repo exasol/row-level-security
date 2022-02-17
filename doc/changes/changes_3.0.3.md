@@ -6,11 +6,17 @@ Code name: Split an improved user guide
 
 Release 3.0.3 brings an improved user guide that is split into separate pages. We also reworked the explanations to be clearer and more straight forward.
 
-We remove the tests for Exasol 6.2 since that version is now discontinued. While RLS might still work with that version, we recommend switching to a newer, still supported version.
+We removed the tests for Exasol 6.2 since that version is now discontinued. While RLS might still work with that version, we recommend switching to a newer, still supported version.
+
+We also updated dependencies to the latest versions.
 
 ## Documentation
 
 * #80: Improved user guide
+
+## Refactoring
+
+* #115: Updated dependencies and removed matrix build of 6.2
 
 ## Dependency Updates
 
