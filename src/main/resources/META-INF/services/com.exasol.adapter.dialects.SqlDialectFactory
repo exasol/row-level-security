@@ -1,1 +1,1 @@
-com.exasol.adapter.dialects.exasol.rls.RowLevelSecurityDialectFactory
+com.exasol.adapter.dialects.rls.RowLevelSecurityDialectFactory

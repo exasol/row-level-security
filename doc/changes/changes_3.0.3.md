@@ -24,7 +24,6 @@ We remove the tests for Exasol 6.2 since that version is now discontinued. While
 
 * Updated `com.exasol:exasol-testcontainers:5.1.1` to `6.0.0`
 * Updated `com.exasol:test-db-builder-java:3.2.1` to `3.3.0`
-* Updated `com.exasol:udf-debugging-java:0.4.1` to `0.5.0`
 * Updated `nl.jqno.equalsverifier:equalsverifier:3.7.2` to `3.9`
 * Updated `org.junit.jupiter:junit-jupiter:5.8.1` to `5.8.2`
 * Updated `org.mockito:mockito-junit-jupiter:4.0.0` to `4.3.1`
