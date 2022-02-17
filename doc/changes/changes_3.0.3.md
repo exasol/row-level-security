@@ -9,3 +9,5 @@ Release 3.0.3 brings an improved user guide that is split into separate pages. W
 ## Documentation
 
 * #80: Improved user guide
+
+## Dependency Updates
