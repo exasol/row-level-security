@@ -305,7 +305,7 @@ USER '<user>'
 IDENTIFIED BY '<password>';
 ```
 
-In the following sections we explain how to create the Virtual Schema that RLS is based on depending on the connection type. If you want to learn more about your options and how the differ, read ["Connection Types"](connection-types.md).
+In the following sections we explain how to create the Virtual Schema that RLS is based on depending on the connection type. If you want to learn more about your options and how the differ, read ["Connection Types"](connection_types.md).
 
 ### Creating a Virtual Schema Where RLS and Protected Data are on the Same Instance or Cluster
 
