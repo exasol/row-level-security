@@ -8,9 +8,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        docker_db_version: [ 6.2.17-d1, 7.0.13, 7.1.1 ]
+        docker_db_version: [ 7.0.16, 7.1.6 ]
     env:
-      DEFAULT_DB_VERSION: "7.1.1"
+      DEFAULT_DB_VERSION: "7.1.6"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
