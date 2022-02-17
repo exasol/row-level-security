@@ -26,7 +26,7 @@ A group in the RLS sense is a collection of people. Each user can belong to zero
 
 As an example take a soccer team and a chess club. You might be a member in one of them, both or none.
 
-Tables can be annotated with a _single_ group. In this case you can think of that group collectively owning the row.
+Each row can assigned with to _single_ group. In this case you can think of that group collectively owning the row.
 
 If one of the groups a user is a member of matches the group owning a row, that user may read the row's contents.
 
@@ -36,7 +36,7 @@ A role in the real world is a responsibility that comes with certain privileges.
 
 Translated to RLS that privilege is reading rows.
 
-You can define up to 63 different RLS roles. A 64th role is reserved to indicate public access. Note that those are not regular database roles ([more about that in the next section](#rls-roles-are-not-database-roles)) but an RLS-specific concept.
+You can define up to 63 different RLS role per Schema. A 64th role is reserved to indicate public access. Note that those are not regular database roles ([more about that in the next section](#rls-roles-are-not-database-roles)) but an RLS-specific concept.
 
 If you introduce role protection on a table, you can assign any combination of roles to each row.
 

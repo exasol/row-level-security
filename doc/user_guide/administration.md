@@ -4,6 +4,12 @@ In this section we will go through the administrative steps required to prepare 
 
 As an example we are going to create a small set of tables and contents in a schema called `SIMPLE_SALES`.
 
+There is no need to be the database administrator (DBA) to setup an RLS-protected Virtual Schema. A DBA needs to assign a couple of privileges to you though before you can start.
+
+To follow the steps in the examples below you need a database user account with at least the following  [system privileges](https://docs.exasol.com/db/latest/database_concepts/privileges/details_rights_management.htm?Highlight=rights#System_Privileges): `CREATE CONNECTION`, `CREATE SCHEMA`, `CREATE SESSION` (i.e. log in), `CREATE SCRIPT`, `CREATE TABLE`.
+
+On the created objects you need the following  [object privileges](https://docs.exasol.com/db/latest/database_concepts/privileges/details_rights_management.htm?Highlight=rights#Object_Privileges) (which you automatically have if you create them yourself): `INSERT`, `SELECT`, `EXECUTE`. `UPDATE` and `DROP` are necessary if you want to be able to correct mistakes.
+
 ### Installing the Administration Scripts
 
 RLS provides functions that make administration of RLS more user-friendly.
