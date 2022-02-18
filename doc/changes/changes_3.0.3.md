@@ -1,4 +1,4 @@
-# Exasol Row Level Security 3.0.3, released 2022-02-??
+# Exasol Row Level Security 3.0.3, released 2022-02-18
 
 Code name: Split an improved user guide
 
