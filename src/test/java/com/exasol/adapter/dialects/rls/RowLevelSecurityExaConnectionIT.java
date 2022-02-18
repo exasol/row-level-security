@@ -1,7 +1,5 @@
 package com.exasol.adapter.dialects.rls;
 
-import static com.exasol.adapter.dialects.exasol.ExasolProperties.EXASOL_CONNECTION_PROPERTY;
-
 import java.util.Map;
 
 import org.junit.jupiter.api.*;
@@ -37,6 +35,6 @@ class RowLevelSecurityExaConnectionIT extends AbstractRowLevelSecurityIT {
 
     @Override
     protected Map<String, String> getConnectionSpecificVirtualSchemaProperties() {
-        return Map.of("IMPORT_FROM_EXA", "true", EXASOL_CONNECTION_PROPERTY, this.exaConnection.getName());
+        return Map.of("IMPORT_FROM_EXA", "true", "EXA_CONNECTION", this.exaConnection.getName());
     }
 }

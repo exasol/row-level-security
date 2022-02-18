@@ -23,3 +23,14 @@ Scripts
 **/*.log
 pom.xml.versionsBackup
 /bin
+local
+.directory
+venv/
+.project
+.classpath
+~*
+*.lock
+*.bak
+*.orig
+*.old
+*.md.html
