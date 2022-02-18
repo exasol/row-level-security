@@ -18,6 +18,14 @@
 
 Protect access to database tables on a per-row level based on roles and / or tenants.
 
+## Deprecation Warning
+
+&#9888;
+
+Please note that the Java-variant of Row-Level-Security is superseded by an [Lua RLS](https://github.com/exasol/row-level-security-lua). The Lua variant is faster and easier to install. It requires Exasol 7.1 or later though.
+
+**Java RLS will be discontinued** with the [end of support for Exasol 7.0 on September 30th 2022](https://www.exasol.com/portal/display/DOWNLOAD/Exasol+Life+Cycle). The Lua variant is interface-compatible and can be used as a drop-in replacement.
+
 ## Features
 
 Restrict access to rows (datasets) in tables to &hellip;
