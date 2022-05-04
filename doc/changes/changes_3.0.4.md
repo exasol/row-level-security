@@ -8,6 +8,7 @@ Code name:
 
 ### Test Dependency Updates
 
+* Updated `com.exasol:exasol-testcontainers:6.0.0` to `6.1.1`
 * Updated `com.exasol:test-db-builder-java:3.3.0` to `3.3.2`
 
 ### Plugin Dependency Updates
