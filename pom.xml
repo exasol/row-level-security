@@ -7,9 +7,6 @@
     <name>Exasol Row Level Security</name>
     <description>This projects provides a plug-in to the Exasol database that adds per-row access control.</description>
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>11</java.version>
         <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <source.admin.scripts>${basedir}/src/main/lua</source.admin.scripts>
