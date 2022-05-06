@@ -27,7 +27,6 @@ import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.dbbuilder.dialects.User;
 import com.exasol.dbbuilder.dialects.exasol.*;
 import com.exasol.matcher.ResultSetStructureMatcher.Builder;
-import com.exasol.tools.FingerprintExtractor;
 import com.exasol.udfdebugging.UdfTestSetup;
 
 @Tag("integration")
@@ -90,7 +89,7 @@ abstract class AbstractRowLevelSecurityIT {
     private static String getJdbcUrl() {
         final int port = EXASOL.getDefaultInternalDatabasePort();
         if (exasolVersionSupportsFingerprintInAddress()) {
-            final String fingerprint = FingerprintExtractor.extractFingerprint(EXASOL.getJdbcUrl());
+            final String fingerprint = EXASOL.getTlsCertificateFingerprint().get();
             return "jdbc:exa:localhost/" + fingerprint + ":" + port;
         }
         return "jdbc:exa:localhost:" + port + ";validateservercertificate=0";

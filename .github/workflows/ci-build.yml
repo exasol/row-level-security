@@ -36,7 +36,7 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Enable testcontainer reuse
-        run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"
+        run: echo 'testcontainers.reuse.enable=false' > "$HOME/.testcontainers.properties"
       - name: Run tests and build with Maven
         run: |
           mvn --batch-mode clean verify \
