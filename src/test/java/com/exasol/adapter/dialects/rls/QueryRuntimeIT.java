@@ -102,7 +102,7 @@ class QueryRuntimeIT {
         final Connection connection = EXASOL.createConnection("");
         final long originalRuntime = executeTimedQuery(connection, "SELECT * FROM SIMPLE_SALES.ORDER_ITEM");
         final long rlsRuntime = executeTimedQuery(connection, "SELECT * FROM RLS_VS.ORDER_ITEM");
-        final long maxRelativeMillis = Math.round(originalRuntime * 1.1);
+        final long maxRelativeMillis = Math.round(originalRuntime * 1.2);
         final long maxAbsoluteMillis = originalRuntime + 5000;
         assertThat(rlsRuntime, either(lessThanOrEqualTo(maxRelativeMillis)).or(lessThanOrEqualTo(maxAbsoluteMillis)));
     }
