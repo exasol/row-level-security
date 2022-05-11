@@ -33,7 +33,6 @@ import com.exasol.udfdebugging.UdfTestSetup;
 @Tag("integration")
 @Tag("virtual-schema")
 @Tag("slow")
-@Testcontainers
 abstract class AbstractRowLevelSecurityIT {
     @Container
     protected static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>()
@@ -55,12 +54,19 @@ abstract class AbstractRowLevelSecurityIT {
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
+        //seems that database reuse/purge isn't called until after execution of all derived test classes, we thus fix it this way
+        EXASOL.purgeDatabase();
         final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket());
         objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""),
                 ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
         uploadAdapterScript();
         registerAdapterScript();
         createConnectionDefinition();
+    }
+
+    @AfterAll
+    static void AfterAll() {
+
     }
 
     private static void uploadAdapterScript() {
@@ -91,14 +97,14 @@ abstract class AbstractRowLevelSecurityIT {
         final int port = EXASOL.getDefaultInternalDatabasePort();
         if (exasolVersionSupportsFingerprintInAddress(EXASOL.getDockerImageReference())) {
             final String fingerprint = EXASOL.getTlsCertificateFingerprint().get();
-            return "jdbc:exa:localhost:" + port + ";validateservercertificate=1;fingerprint="+fingerprint;
+            return "jdbc:exa:localhost:" + port + ";validateservercertificate=1;fingerprint=" + fingerprint;
         }
         return "jdbc:exa:localhost:" + port + ";validateservercertificate=0";
     }
 
 
-
     // [itest->dsn~query-rewriter-adds-row-filter-for-tenants~1]
+    @Tag("Specific")
     @Test
     void testTenantRestrictedTable() {
         final ExasolSchema sourceSchema = objectFactory.createSchema("TENANT_PROTECTED_SCHEMA");
@@ -116,8 +122,8 @@ abstract class AbstractRowLevelSecurityIT {
 
     private ResultSet queryForUser(final String sql, final User user) throws SQLException {
         try (final Connection connection = EXASOL.createConnectionForUser(user.getName(), user.getPassword());
-                final Statement statement = connection.createStatement();
-                final ResultSet result = statement.executeQuery(sql)) {
+             final Statement statement = connection.createStatement();
+             final ResultSet result = statement.executeQuery(sql)) {
             return result;
         }
     }
