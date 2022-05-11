@@ -13,7 +13,7 @@ jobs:
       matrix:
         docker_db_version: [ 7.0.18, 7.1.9 ]
     env:
-      DEFAULT_DB_VERSION: "7.1.6"
+      DEFAULT_DB_VERSION: "7.1.9"
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}

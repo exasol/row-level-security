@@ -23,7 +23,7 @@ class RowLevelSecurityExaConnectionIT extends AbstractRowLevelSecurityIT {
     private String getTargetAddress() {
         if (exasolVersionSupportsFingerprintInAddress(EXASOL.getDockerImageReference())) {
             final String fingerprint = EXASOL.getTlsCertificateFingerprint().get();
-            return "127.0.0.1:" + EXASOL.getDefaultInternalDatabasePort() + ";validateservercertificate=1;fingerprint="+fingerprint;
+            return "127.0.0.1/" + fingerprint + ":" + EXASOL.getDefaultInternalDatabasePort();
         }
         return "127.0.0.1:" + EXASOL.getDefaultInternalDatabasePort();
     }
