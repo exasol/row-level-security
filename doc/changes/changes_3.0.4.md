@@ -6,6 +6,10 @@ Code name:
 
 ## Dependency Updates
 
+### Compile Dependency Updates
+
+* Updated `com.exasol:exasol-jdbc:7.1.4` to `7.1.10`
+
 ### Test Dependency Updates
 
 * Updated `com.exasol:exasol-testcontainers:6.0.0` to `6.1.1`

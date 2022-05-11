@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
+import static com.exasol.adapter.dialects.rls.DBHelper.exasolVersionSupportsFingerprintInAddress;
 import static com.exasol.dbbuilder.dialects.exasol.ExasolObjectPrivilege.SELECT;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static com.exasol.matcher.TypeMatchMode.NO_JAVA_TYPE_CHECK;
@@ -88,17 +89,14 @@ abstract class AbstractRowLevelSecurityIT {
 
     private static String getJdbcUrl() {
         final int port = EXASOL.getDefaultInternalDatabasePort();
-        if (exasolVersionSupportsFingerprintInAddress()) {
+        if (exasolVersionSupportsFingerprintInAddress(EXASOL.getDockerImageReference())) {
             final String fingerprint = EXASOL.getTlsCertificateFingerprint().get();
-            return "jdbc:exa:localhost/" + fingerprint + ":" + port;
+            return "jdbc:exa:localhost:" + port + ";validateservercertificate=1;fingerprint="+fingerprint;
         }
         return "jdbc:exa:localhost:" + port + ";validateservercertificate=0";
     }
 
-    protected static boolean exasolVersionSupportsFingerprintInAddress() {
-        final ExasolDockerImageReference imageReference = EXASOL.getDockerImageReference();
-        return (imageReference.getMajor() >= 7) && (imageReference.getMinor() >= 1);
-    }
+
 
     // [itest->dsn~query-rewriter-adds-row-filter-for-tenants~1]
     @Test

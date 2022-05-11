@@ -87,7 +87,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-jdbc</artifactId>
-            <version>7.1.4</version>
+            <version>7.1.10</version>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>

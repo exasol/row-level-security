@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
+import static com.exasol.adapter.dialects.rls.DBHelper.exasolVersionSupportsFingerprintInAddress;
 import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -77,8 +78,15 @@ class QueryRuntimeIT {
                 + "%jar /buckets/" + bucket.getBucketFsName() + "/" + bucket.getBucketName() //
                 + "/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";";
         final AdapterScript adapterScript = rlsSchema.createAdapterScript("RLS_VS_ADAPTER", JAVA, scriptContent);
-        final ConnectionDefinition connectionDefinition = objectFactory.createConnectionDefinition(
-                "EXASOL_JDBC_CONNECTION", "jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0), EXASOL.getUsername(),
+        final String connectionToDefinition;
+        if (exasolVersionSupportsFingerprintInAddress(EXASOL.getDockerImageReference())) {
+            final String fingerprint = EXASOL.getTlsCertificateFingerprint().get();
+            connectionToDefinition="jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0) + ";validateservercertificate=1;fingerprint="+fingerprint+";";
+        } else {
+            connectionToDefinition="jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0);
+        }
+        final ConnectionDefinition connectionDefinition; connectionDefinition = objectFactory.createConnectionDefinition(
+                "EXASOL_JDBC_CONNECTION", connectionToDefinition, EXASOL.getUsername(),
                 EXASOL.getPassword());
         objectFactory.createVirtualSchemaBuilder("RLS_VS") //
                 .adapterScript(adapterScript) //

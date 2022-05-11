@@ -8,3 +8,4 @@ sources:
       - jar_artifact
 excludes:
   - "E-PK-CORE-18: Outdated content: '.github/workflows/ci-build.yml'"
+  - "E-PK-CORE-18: Outdated content: 'src/assembly/all-dependencies.xml'"
