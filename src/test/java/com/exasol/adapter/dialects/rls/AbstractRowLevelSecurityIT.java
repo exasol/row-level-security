@@ -220,7 +220,7 @@ abstract class AbstractRowLevelSecurityIT {
         final User user = objectFactory.createLoginUser("USER_NA").grant(virtualSchema, SELECT);
         final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
         final SQLDataException exception = assertThrows(SQLDataException.class, () -> queryForUser(sql, user));
-        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-7"));
+        assertThat(exception.getMessage(), containsString("E-VSRLS-JAVA-7"));
     }
 
     @Test
@@ -240,7 +240,7 @@ abstract class AbstractRowLevelSecurityIT {
         final User user = objectFactory.createLoginUser("USER_GR").grant(virtualSchema, SELECT);
         final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
         final SQLDataException exception = assertThrows(SQLDataException.class, () -> queryForUser(sql, user));
-        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-8"));
+        assertThat(exception.getMessage(), containsString("E-VSRLS-JAVA-8"));
     }
 
     @Test
@@ -262,7 +262,7 @@ abstract class AbstractRowLevelSecurityIT {
                 + ".SOURCE_TABLE WHERE CITY = 'Stockholm' ORDER BY CITY";
         final SQLDataException exception = assertThrows(SQLDataException.class,
                 () -> queryForUser(sqlWithWhereClause, user));
-        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-8"));
+        assertThat(exception.getMessage(), containsString("E-VSRLS-JAVA-8"));
     }
 
     // [itest->dsn~all-users-have-the-public-access-role~1]
