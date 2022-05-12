@@ -48,15 +48,9 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Sonar analysis
-        if: ${{ env.SONAR_TOKEN != null }}
-        run: |
-          mvn --batch-mode org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-              -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
-              -DtrimStackTrace=false \
-              -Dsonar.organization=exasol \
-              -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.login=$SONAR_TOKEN
-              -Dcom.exasol.dockerdb.image=${{ matrix.docker_db_version }}
+      - name: Sonar analysis
+        if: ${{ env.DEFAULT_DB_VERSION == matrix.docker_db_version }}
+        run: mvn --batch-mode sonar:sonar -Dsonar.organization=exasol -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
