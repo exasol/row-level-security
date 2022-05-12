@@ -67,7 +67,7 @@ public final class UserInformation {
                     this.cachedRoleMask = Long.toUnsignedString(mask);
                 }
             } catch (final SQLException exception) {
-                throw new RemoteMetadataReaderException(ExaError.messageBuilder("E-VS-RLS-JAVA-6")
+                throw new RemoteMetadataReaderException(ExaError.messageBuilder("E-VSRLS-JAVA-6")
                         .message("Unable to read role mask from " + EXA_RLS_USERS_TABLE_NAME + ". Caused by: {{cause}}",
                                 exception.getMessage())
                         .toString(), exception);

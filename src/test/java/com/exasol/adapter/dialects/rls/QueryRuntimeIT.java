@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
+import static com.exasol.adapter.dialects.rls.DBHelper.exasolVersionSupportsFingerprintInAddress;
 import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.tools.TestsConstants.ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -12,6 +13,7 @@ import java.sql.*;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
@@ -77,8 +79,9 @@ class QueryRuntimeIT {
                 + "%jar /buckets/" + bucket.getBucketFsName() + "/" + bucket.getBucketName() //
                 + "/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";";
         final AdapterScript adapterScript = rlsSchema.createAdapterScript("RLS_VS_ADAPTER", JAVA, scriptContent);
-        final ConnectionDefinition connectionDefinition = objectFactory.createConnectionDefinition(
-                "EXASOL_JDBC_CONNECTION", "jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0), EXASOL.getUsername(),
+        final String connectionToDefinition = getConnectionToDefinition();
+        final ConnectionDefinition connectionDefinition; connectionDefinition = objectFactory.createConnectionDefinition(
+                "EXASOL_JDBC_CONNECTION", connectionToDefinition, EXASOL.getUsername(),
                 EXASOL.getPassword());
         objectFactory.createVirtualSchemaBuilder("RLS_VS") //
                 .adapterScript(adapterScript) //
@@ -88,14 +91,26 @@ class QueryRuntimeIT {
                 .build();
     }
 
+    @NotNull
+    private static String getConnectionToDefinition() {
+        final String connectionToDefinition;
+        if (exasolVersionSupportsFingerprintInAddress(EXASOL.getDockerImageReference())) {
+            final String fingerprint = EXASOL.getTlsCertificateFingerprint().get();
+            connectionToDefinition="jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0) + ";validateservercertificate=1;fingerprint="+fingerprint+";";
+        } else {
+            connectionToDefinition="jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0);
+        }
+        return connectionToDefinition;
+    }
+
     // [itest->qs~total-runtime-of-secured-simple-query~1]
     @Test
     void testSimpleQueryRuntime() throws NoDriverFoundException, SQLException {
         final Connection connection = EXASOL.createConnection("");
         final long originalRuntime = executeTimedQuery(connection, "SELECT * FROM SIMPLE_SALES.ORDER_ITEM");
         final long rlsRuntime = executeTimedQuery(connection, "SELECT * FROM RLS_VS.ORDER_ITEM");
-        final long maxRelativeMillis = Math.round(originalRuntime * 1.1);
-        final long maxAbsoluteMillis = originalRuntime + 3500;
+        final long maxRelativeMillis = Math.round(originalRuntime * 1.2);
+        final long maxAbsoluteMillis = originalRuntime + 5000;
         assertThat(rlsRuntime, either(lessThanOrEqualTo(maxRelativeMillis)).or(lessThanOrEqualTo(maxAbsoluteMillis)));
     }
 

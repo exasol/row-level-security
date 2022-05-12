@@ -54,7 +54,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         if (statement instanceof SqlStatementSelect) {
             return rewriteStatement(statement, exaMetadata, properties);
         } else {
-            throw new IllegalArgumentException(ExaError.messageBuilder("E-VS-RLS-JAVA-4")
+            throw new IllegalArgumentException(ExaError.messageBuilder("E-VSRLS-JAVA-4")
                     .message("Modified SQL statement must be a SELECT statement, but was {{className}}",
                             statement.getClass().getName())
                     .toString());
@@ -145,7 +145,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     }
 
     private IllegalStateException getRoleAndGroupException() {
-        return new IllegalStateException(ExaError.messageBuilder("E-VS-RLS-JAVA-8")
+        return new IllegalStateException(ExaError.messageBuilder("E-VSRLS-JAVA-8")
                 .message("Role protection and group protection on the same table are not allowed.").toString());
     }
 
@@ -189,7 +189,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         final List<String> groups = userInformation.getGroups();
         if (groups.isEmpty()) {
             throw new IllegalStateException(
-                    ExaError.messageBuilder("E-VS-RLS-JAVA-7")
+                    ExaError.messageBuilder("E-VSRLS-JAVA-7")
                             .message("This user is not allowed to query the table. "
                                     + "Please add this user to some groups in the {{group-mapping-table}} table.",
                                     EXA_GROUP_MEMBERS_TABLE_NAME)
@@ -240,7 +240,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
             return createGroupNode(userInformation);
         } else {
             throw new IllegalArgumentException(
-                    ExaError.messageBuilder("E-VS-RLS-JAVA-5").message("Unfiltered WHERE clause in RLS.").toString());
+                    ExaError.messageBuilder("E-VSRLS-JAVA-5").message("Unfiltered WHERE clause in RLS.").toString());
         }
     }
 }

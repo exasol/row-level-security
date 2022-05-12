@@ -63,7 +63,7 @@ public class RowLevelSecurityDialect extends ExasolSqlDialect {
             return new RowLevelSecurityQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory,
                     tableProtectionStatus, delegateRewriter);
         } catch (final SQLException exception) {
-            throw new IllegalArgumentException(ExaError.messageBuilder("E-VS-RLS-JAVA-2")
+            throw new IllegalArgumentException(ExaError.messageBuilder("E-VSRLS-JAVA-2")
                     .message("Unable to read metadata for instantiating TableProtectionStatus.").toString());
         }
     }
@@ -74,7 +74,7 @@ public class RowLevelSecurityDialect extends ExasolSqlDialect {
             return new RowLevelSecurityMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException(
-                    ExaError.messageBuilder("E-VS-RLS-JAVA-3")
+                    ExaError.messageBuilder("E-VSRLS-JAVA-3")
                             .message("Unable to create metadata reader for Row-Level Security dialect.").toString(),
                     exception);
         }

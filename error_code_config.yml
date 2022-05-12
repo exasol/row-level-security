@@ -1,4 +1,5 @@
 error-tags:
-  VS-RLS-JAVA:
+  VSRLS-JAVA:
     packages:
       - com.exasol.adapter
+    highest-index: 56

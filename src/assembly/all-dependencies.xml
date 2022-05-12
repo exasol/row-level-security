@@ -13,23 +13,23 @@
         </containerDescriptorHandler>
     </containerDescriptorHandlers>
     <dependencySets>
-        <dependencySet>
-            <outputDirectory>/</outputDirectory>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
-            <unpackOptions>
-                <!-- We exclude this file here to change the order od registered dialects' factories: first should be RLS, then Exasol.-->
-                <excludes>
-                    <exclude>com.exasol.adapter.dialects.SqlDialectFactory</exclude>
-                </excludes>
-            </unpackOptions>
-            <scope>runtime</scope>
-        </dependencySet>
-    </dependencySets>
-    <fileSets>
-        <fileSet>
-            <directory>${project.build.outputDirectory}</directory>
-            <outputDirectory>/</outputDirectory>
-        </fileSet>
-    </fileSets>
+    <dependencySet>
+        <outputDirectory>/</outputDirectory>
+        <useProjectArtifact>false</useProjectArtifact>
+        <unpack>true</unpack>
+        <unpackOptions>
+            <!-- We exclude this file here to change the order of registered dialects' factories: first should be RLS, then Exasol.-->
+            <excludes>
+                <exclude>com.exasol.adapter.dialects.SqlDialectFactory</exclude>
+            </excludes>
+        </unpackOptions>
+        <scope>runtime</scope>
+    </dependencySet>
+</dependencySets>
+<fileSets>
+<fileSet>
+    <directory>${project.build.outputDirectory}</directory>
+    <outputDirectory>/</outputDirectory>
+</fileSet>
+</fileSets>
 </assembly>

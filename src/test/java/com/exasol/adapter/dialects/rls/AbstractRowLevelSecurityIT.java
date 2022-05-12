@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.rls;
 
+import static com.exasol.adapter.dialects.rls.DBHelper.exasolVersionSupportsFingerprintInAddress;
 import static com.exasol.dbbuilder.dialects.exasol.ExasolObjectPrivilege.SELECT;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static com.exasol.matcher.TypeMatchMode.NO_JAVA_TYPE_CHECK;
@@ -22,12 +23,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
-import com.exasol.containers.ExasolDockerImageReference;
 import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.dbbuilder.dialects.User;
 import com.exasol.dbbuilder.dialects.exasol.*;
 import com.exasol.matcher.ResultSetStructureMatcher.Builder;
-import com.exasol.tools.FingerprintExtractor;
 import com.exasol.udfdebugging.UdfTestSetup;
 
 @Tag("integration")
@@ -55,6 +54,8 @@ abstract class AbstractRowLevelSecurityIT {
 
     @BeforeAll
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
+        //seems that database reuse/purge isn't called until after execution of all derived test classes, we thus fix it this way
+        EXASOL.purgeDatabase();
         final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket());
         objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""),
                 ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
@@ -89,16 +90,11 @@ abstract class AbstractRowLevelSecurityIT {
 
     private static String getJdbcUrl() {
         final int port = EXASOL.getDefaultInternalDatabasePort();
-        if (exasolVersionSupportsFingerprintInAddress()) {
-            final String fingerprint = FingerprintExtractor.extractFingerprint(EXASOL.getJdbcUrl());
-            return "jdbc:exa:localhost/" + fingerprint + ":" + port;
+        if (exasolVersionSupportsFingerprintInAddress(EXASOL.getDockerImageReference())) {
+            final String fingerprint = EXASOL.getTlsCertificateFingerprint().get();
+            return "jdbc:exa:localhost:" + port + ";validateservercertificate=1;fingerprint=" + fingerprint;
         }
         return "jdbc:exa:localhost:" + port + ";validateservercertificate=0";
-    }
-
-    protected static boolean exasolVersionSupportsFingerprintInAddress() {
-        final ExasolDockerImageReference imageReference = EXASOL.getDockerImageReference();
-        return (imageReference.getMajor() >= 7) && (imageReference.getMinor() >= 1);
     }
 
     // [itest->dsn~query-rewriter-adds-row-filter-for-tenants~1]
@@ -119,8 +115,8 @@ abstract class AbstractRowLevelSecurityIT {
 
     private ResultSet queryForUser(final String sql, final User user) throws SQLException {
         try (final Connection connection = EXASOL.createConnectionForUser(user.getName(), user.getPassword());
-                final Statement statement = connection.createStatement();
-                final ResultSet result = statement.executeQuery(sql)) {
+             final Statement statement = connection.createStatement();
+             final ResultSet result = statement.executeQuery(sql)) {
             return result;
         }
     }
@@ -217,7 +213,7 @@ abstract class AbstractRowLevelSecurityIT {
         final User user = objectFactory.createLoginUser("USER_NA").grant(virtualSchema, SELECT);
         final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
         final SQLDataException exception = assertThrows(SQLDataException.class, () -> queryForUser(sql, user));
-        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-7"));
+        assertThat(exception.getMessage(), containsString("E-VSRLS-JAVA-7"));
     }
 
     @Test
@@ -237,7 +233,7 @@ abstract class AbstractRowLevelSecurityIT {
         final User user = objectFactory.createLoginUser("USER_GR").grant(virtualSchema, SELECT);
         final String sql = "SELECT * FROM " + virtualSchema.getFullyQualifiedName() + ".SOURCE_TABLE ORDER BY CITY";
         final SQLDataException exception = assertThrows(SQLDataException.class, () -> queryForUser(sql, user));
-        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-8"));
+        assertThat(exception.getMessage(), containsString("E-VSRLS-JAVA-8"));
     }
 
     @Test
@@ -259,7 +255,7 @@ abstract class AbstractRowLevelSecurityIT {
                 + ".SOURCE_TABLE WHERE CITY = 'Stockholm' ORDER BY CITY";
         final SQLDataException exception = assertThrows(SQLDataException.class,
                 () -> queryForUser(sqlWithWhereClause, user));
-        assertThat(exception.getMessage(), containsString("E-VS-RLS-JAVA-8"));
+        assertThat(exception.getMessage(), containsString("E-VSRLS-JAVA-8"));
     }
 
     // [itest->dsn~all-users-have-the-public-access-role~1]

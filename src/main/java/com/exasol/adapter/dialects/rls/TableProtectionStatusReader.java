@@ -54,7 +54,7 @@ public class TableProtectionStatusReader {
             }
             return builder.build();
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException(ExaError.messageBuilder("E-VS-RLS-JAVA-1").message(
+            throw new RemoteMetadataReaderException(ExaError.messageBuilder("E-VSRLS-JAVA-1").message(
                     "Unable to read protection status from database metadata of tables in catalog {{catalogName}}, schema {{schemaName}}.",
                     catalogName, schemaName).toString());
         }
