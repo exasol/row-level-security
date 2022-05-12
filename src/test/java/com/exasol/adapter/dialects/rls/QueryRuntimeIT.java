@@ -13,6 +13,7 @@ import java.sql.*;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.testcontainers.containers.JdbcDatabaseContainer.NoDriverFoundException;
@@ -78,13 +79,7 @@ class QueryRuntimeIT {
                 + "%jar /buckets/" + bucket.getBucketFsName() + "/" + bucket.getBucketName() //
                 + "/" + ROW_LEVEL_SECURITY_JAR_NAME_AND_VERSION + ";";
         final AdapterScript adapterScript = rlsSchema.createAdapterScript("RLS_VS_ADAPTER", JAVA, scriptContent);
-        final String connectionToDefinition;
-        if (exasolVersionSupportsFingerprintInAddress(EXASOL.getDockerImageReference())) {
-            final String fingerprint = EXASOL.getTlsCertificateFingerprint().get();
-            connectionToDefinition="jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0) + ";validateservercertificate=1;fingerprint="+fingerprint+";";
-        } else {
-            connectionToDefinition="jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0);
-        }
+        final String connectionToDefinition = getConnectionToDefinition();
         final ConnectionDefinition connectionDefinition; connectionDefinition = objectFactory.createConnectionDefinition(
                 "EXASOL_JDBC_CONNECTION", connectionToDefinition, EXASOL.getUsername(),
                 EXASOL.getPassword());
@@ -94,6 +89,18 @@ class QueryRuntimeIT {
                 .sourceSchema(sourceSchema) //
                 .properties(Map.of("IS_LOCAL", "true")) //
                 .build();
+    }
+
+    @NotNull
+    private static String getConnectionToDefinition() {
+        final String connectionToDefinition;
+        if (exasolVersionSupportsFingerprintInAddress(EXASOL.getDockerImageReference())) {
+            final String fingerprint = EXASOL.getTlsCertificateFingerprint().get();
+            connectionToDefinition="jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0) + ";validateservercertificate=1;fingerprint="+fingerprint+";";
+        } else {
+            connectionToDefinition="jdbc:exa:localhost:" + EXASOL.getExposedPorts().get(0);
+        }
+        return connectionToDefinition;
     }
 
     // [itest->qs~total-runtime-of-secured-simple-query~1]

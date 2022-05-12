@@ -5,13 +5,11 @@ import java.util.Map;
 import org.junit.jupiter.api.*;
 
 import com.exasol.dbbuilder.dialects.exasol.ConnectionDefinition;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static com.exasol.adapter.dialects.rls.DBHelper.exasolVersionSupportsFingerprintInAddress;
 
 @Tag("integration")
 @Tag("virtual-schema")
-@Testcontainers
 class RowLevelSecurityExaConnectionIT extends AbstractRowLevelSecurityIT {
     private static final String EXA_CONNECTION_NAME = "EXA_CONNECTION";
     private ConnectionDefinition exaConnection;

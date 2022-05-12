@@ -23,7 +23,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
-import com.exasol.containers.ExasolDockerImageReference;
 import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.dbbuilder.dialects.User;
 import com.exasol.dbbuilder.dialects.exasol.*;
@@ -33,6 +32,7 @@ import com.exasol.udfdebugging.UdfTestSetup;
 @Tag("integration")
 @Tag("virtual-schema")
 @Tag("slow")
+@Testcontainers
 abstract class AbstractRowLevelSecurityIT {
     @Container
     protected static final ExasolContainer<? extends ExasolContainer<?>> EXASOL = new ExasolContainer<>()
@@ -62,11 +62,6 @@ abstract class AbstractRowLevelSecurityIT {
         uploadAdapterScript();
         registerAdapterScript();
         createConnectionDefinition();
-    }
-
-    @AfterAll
-    static void AfterAll() {
-
     }
 
     private static void uploadAdapterScript() {
@@ -102,9 +97,7 @@ abstract class AbstractRowLevelSecurityIT {
         return "jdbc:exa:localhost:" + port + ";validateservercertificate=0";
     }
 
-
     // [itest->dsn~query-rewriter-adds-row-filter-for-tenants~1]
-    @Tag("Specific")
     @Test
     void testTenantRestrictedTable() {
         final ExasolSchema sourceSchema = objectFactory.createSchema("TENANT_PROTECTED_SCHEMA");
