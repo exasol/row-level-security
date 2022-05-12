@@ -48,7 +48,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Sonar analysis
-      - name: Sonar analysis
         if: ${{ env.DEFAULT_DB_VERSION == matrix.docker_db_version }}
         run: mvn --batch-mode sonar:sonar -Dsonar.organization=exasol -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
         env:
