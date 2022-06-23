@@ -62,6 +62,7 @@
 [66]: http://maven.apache.org/plugins/maven-clean-plugin/
 [1]: https://opensource.org/licenses/MIT
 [20]: https://github.com/mockito/mockito
+[40]: https://www.mojohaus.org/flatten-maven-plugin/
 [34]: https://github.com/exasol/project-keeper/
 [48]: http://www.mojohaus.org/versions-maven-plugin/
 [15]: http://opensource.org/licenses/BSD-3-Clause
@@ -79,7 +80,6 @@
 [32]: http://sonarsource.github.io/sonar-scanner-maven/
 [30]: https://github.com/exasol/udf-debugging-java/
 [18]: https://junit.org/junit5/
-[40]: https://www.mojohaus.org/flatten-maven-plugin/flatten-maven-plugin
 [14]: http://hamcrest.org/JavaHamcrest/
 [22]: http://www.slf4j.org
 [68]: http://maven.apache.org/plugins/maven-resources-plugin/
@@ -96,12 +96,12 @@
 [27]: https://www.apache.org/licenses/LICENSE-2.0.txt
 [26]: https://www.jqno.nl/equalsverifier
 [38]: https://maven.apache.org/enforcer/maven-enforcer-plugin/
-[58]: https://awhitford.github.com/lombok.maven/lombok-maven-plugin/
 [4]: http://www.exasol.com
 [19]: https://www.eclipse.org/legal/epl-v20.html
 [70]: http://maven.apache.org/plugins/maven-install-plugin/
 [42]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [12]: https://testcontainers.org
+[58]: https://anthonywhitford.com/lombok.maven/lombok-maven-plugin/
 [72]: http://maven.apache.org/plugins/maven-deploy-plugin/
 [74]: http://maven.apache.org/plugins/maven-site-plugin/
 [64]: https://github.com/exasol/error-code-crawler-maven-plugin
