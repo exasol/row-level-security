@@ -56,8 +56,9 @@ abstract class AbstractRowLevelSecurityIT {
     static void beforeAll() throws SQLException, BucketAccessException, InterruptedException, TimeoutException {
         //seems that database reuse/purge isn't called until after execution of all derived test classes, we thus fix it this way
         EXASOL.purgeDatabase();
-        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket());
-        objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""),
+        Connection connection = EXASOL.createConnection("");
+        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket(), connection);
+        objectFactory = new ExasolObjectFactory(connection,
                 ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
         uploadAdapterScript();
         registerAdapterScript();

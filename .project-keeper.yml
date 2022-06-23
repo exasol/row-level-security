@@ -6,6 +6,8 @@ sources:
       - lombok
       - udf_coverage
       - jar_artifact
+linkReplacements:
+  - "LICENSE-exasol-jdbc.txt|https://docs.exasol.com/db/latest/connect_exasol/drivers/jdbc.htm#License"
 excludes:
   - "E-PK-CORE-18: Outdated content: '.github/workflows/ci-build.yml'"
   - "E-PK-CORE-18: Outdated content: 'src/assembly/all-dependencies.xml'"

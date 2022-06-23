@@ -38,8 +38,9 @@ class QueryRuntimeIT {
 
     @BeforeAll
     static void beforeAll() throws Exception {
-        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket());
-        objectFactory = new ExasolObjectFactory(EXASOL.createConnection(""),
+        Connection connection = EXASOL.createConnection("");
+        final UdfTestSetup udfTestSetup = new UdfTestSetup(EXASOL.getHostIp(), EXASOL.getDefaultBucket(), connection);
+        objectFactory = new ExasolObjectFactory(connection,
                 ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
         final ExasolSchema sourceSchema = createSourceSchema();
         uploadRlsAdapter();
