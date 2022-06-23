@@ -1,8 +1,10 @@
-# Exasol Row Level Security 3.0.4, released 2022-??-??
+# Exasol Row Level Security 3.0.4, released 2022-06-23
 
-Code name:
+Code name: Dependency Updates
 
 ## Summary
+
+This release fixes the following vulnerabilities by updating dependencies: CVE-2022-24823, CVE-2016-5003, CVE-2016-5002, CVE-2021-43797, CVE-2016-5004, CVE-2021-37136, CVE-2021-37137, sonatype-2012-0050, sonatype-2020-0026, sonatype-2021-0789.
 
 ## Bugfixes
 

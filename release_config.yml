@@ -1,4 +1,3 @@
 release-platforms:
   - GitHub
-  - Maven
   - Jira
