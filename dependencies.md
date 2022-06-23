@@ -77,6 +77,7 @@
 [44]: http://zlika.github.io/reproducible-build-maven-plugin
 [23]: http://www.opensource.org/licenses/mit-license.php
 [32]: http://sonarsource.github.io/sonar-scanner-maven/
+[30]: https://github.com/exasol/udf-debugging-java/
 [18]: https://junit.org/junit5/
 [40]: https://www.mojohaus.org/flatten-maven-plugin/flatten-maven-plugin
 [14]: http://hamcrest.org/JavaHamcrest/
@@ -84,11 +85,11 @@
 [68]: http://maven.apache.org/plugins/maven-resources-plugin/
 [54]: https://github.com/exasol/artifact-reference-checker-maven-plugin
 [52]: https://maven.apache.org/plugins/maven-jar-plugin/
-[5]: LICENSE-exasol-jdbc.txt
 [0]: https://github.com/exasol/db-fundamentals-java
 [24]: https://github.com/exasol/test-db-builder-java/
 [60]: https://maven.apache.org/surefire/maven-failsafe-plugin/
 [13]: http://opensource.org/licenses/MIT
+[5]: https://docs.exasol.com/db/latest/connect_exasol/drivers/jdbc.htm#License
 [10]: https://github.com/exasol/exasol-testcontainers
 [35]: https://github.com/exasol/project-keeper/blob/main/LICENSE
 [56]: https://maven.apache.org/plugins/maven-dependency-plugin/
@@ -101,7 +102,6 @@
 [70]: http://maven.apache.org/plugins/maven-install-plugin/
 [42]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [12]: https://testcontainers.org
-[30]: https://github.com/exasol/udf-debugging-java
 [72]: http://maven.apache.org/plugins/maven-deploy-plugin/
 [74]: http://maven.apache.org/plugins/maven-site-plugin/
 [64]: https://github.com/exasol/error-code-crawler-maven-plugin

@@ -4,16 +4,25 @@ Code name:
 
 ## Summary
 
+## Bugfixes
+
+* #120: Fixed vulnerabilities reported by ossindex
+
 ## Dependency Updates
 
 ### Compile Dependency Updates
 
-* Updated `com.exasol:exasol-jdbc:7.1.4` to `7.1.10`
+* Updated `com.exasol:exasol-jdbc:7.1.4` to `7.1.11`
 
 ### Test Dependency Updates
 
-* Updated `com.exasol:exasol-testcontainers:6.0.0` to `6.1.1`
-* Updated `com.exasol:test-db-builder-java:3.3.0` to `3.3.2`
+* Updated `com.exasol:exasol-testcontainers:6.0.0` to `6.1.2`
+* Updated `com.exasol:test-db-builder-java:3.3.0` to `3.3.3`
+* Updated `com.exasol:udf-debugging-java:0.4.1` to `0.6.2`
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.9` to `3.10`
+* Updated `org.jacoco:org.jacoco.agent:0.8.7` to `0.8.8`
+* Updated `org.mockito:mockito-junit-jupiter:4.3.1` to `4.6.1`
+* Updated `org.testcontainers:junit-jupiter:1.16.3` to `1.17.2`
 
 ### Plugin Dependency Updates
 
