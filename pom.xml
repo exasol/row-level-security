@@ -249,16 +249,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.sonatype.ossindex.maven</groupId>
-                <artifactId>ossindex-maven-plugin</artifactId>
-                <configuration>
-                    <excludeVulnerabilityIds>
-                        <!-- This issue is mitigated in the AWS SDK. See https://github.com/exasol/cloudwatch-adapter/issues/72 -->
-                        <excludeVulnerabilityId>sonatype-2020-0026</excludeVulnerabilityId>
-                    </excludeVulnerabilityIds>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
