@@ -3,12 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>row-level-security</artifactId>
-    <version>3.0.4</version>
+    <version>3.0.5</version>
     <name>Exasol Row Level Security</name>
     <description>This projects provides a plug-in to the Exasol database that adds per-row access control.</description>
     <properties>
-        <surefire.and.failsafe.plugin.version>3.0.0-M4</surefire.and.failsafe.plugin.version>
-        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <junit.version>5.9.0</junit.version>
         <source.admin.scripts>${basedir}/src/main/lua</source.admin.scripts>
         <source.sql.scripts>${basedir}/src/main/sql</source.sql.scripts>
     </properties>
@@ -47,9 +46,6 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-    <dependencyManagement>
-        <dependencies/>
-    </dependencyManagement>
     <repositories>
         <repository>
             <id>sonatype</id>
@@ -82,7 +78,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-virtual-schema</artifactId>
-            <version>6.0.2</version>
+            <version>6.0.3</version>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -103,7 +99,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.17.2</version>
+            <version>1.17.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -121,7 +117,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.8.2</version>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -139,13 +141,13 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>3.3.3</version>
+            <version>3.3.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.10</version>
+            <version>3.10.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -158,7 +160,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>udf-debugging-java</artifactId>
-            <version>0.6.2</version>
+            <version>0.6.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -167,7 +169,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>2.4.6</version>
+                <version>2.6.1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -177,13 +179,74 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>Administration SQL Scripts Assembler</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${basedir}/tools/assemble_sql_scripts.sh</executable>
+                            <useMavenLogger>true</useMavenLogger>
+                            <arguments>
+                                <argument>target/administration-sql-scripts-${project.version}.sql</argument>
+                                <!-- Administration scripts: -->
+                                <argument>${source.admin.scripts}/exa_rls_base.lua</argument>
+                                <argument>${source.admin.scripts}/exa_identifier.lua</argument>
+                                <argument>${source.admin.scripts}/add_rls_role.lua</argument>
+                                <argument>${source.admin.scripts}/assign_roles_to_user.lua</argument>
+                                <argument>${source.admin.scripts}/delete_rls_role.lua</argument>
+                                <argument>${source.admin.scripts}/add_user_to_group.lua</argument>
+                                <argument>${source.admin.scripts}/remove_user_from_group.lua</argument>
+                                <argument>${source.admin.scripts}/list_all_groups.lua</argument>
+                                <argument>${source.admin.scripts}/list_user_groups.lua</argument>
+                                <argument>${source.admin.scripts}/list_all_roles.lua</argument>
+                                <argument>${source.admin.scripts}/bit_positions.lua</argument>
+                                <argument>${source.admin.scripts}/list_user_roles.lua</argument>
+                                <argument>${source.admin.scripts}/list_users_and_roles.lua</argument>
+                                <!-- SQL scripts -->
+                                <argument>${source.sql.scripts}/role_mask.sql</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.itsallcode</groupId>
+                <artifactId>openfasttrace-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>trace-requirements</id>
+                        <goals>
+                            <goal>trace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <!-- Adding the Lua sources to the list of source directories is necessary
+                                                    so that OFT can scan them. -->
+                                <source>src/main/lua</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.ossindex.maven</groupId>
@@ -199,23 +262,15 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <forkCount>0</forkCount>
-                    <excludedGroups>${test.excludeTags}</excludedGroups>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludedGroups>${test.excludeTags}</excludedGroups>
+                    <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
                 <configuration>
                     <finalName>row-level-security-dist-${project.version}</finalName>
                 </configuration>
-                <groupId>org.apache.maven.plugins</groupId>
             </plugin>
         </plugins>
     </build>
@@ -223,7 +278,7 @@
     <parent>
         <artifactId>row-level-security-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>3.0.4</version>
+        <version>3.0.5</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
