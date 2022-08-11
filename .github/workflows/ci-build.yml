@@ -11,9 +11,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        docker_db_version: [ 7.0.18, 7.1.9 ]
+        docker_db_version: [ 7.0.19, 7.1.12 ]
     env:
-      DEFAULT_DB_VERSION: "7.1.9"
+      DEFAULT_DB_VERSION: "7.1.12"
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,11 +37,12 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
       - name: Enable testcontainer reuse
         run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"
-      - name: Run tests and build with Maven
+      - name: Run tests and build with Maven and Exasol ${{ matrix.docker_db_version }}
         run: |
           mvn --batch-mode clean verify \
               -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
-              -DtrimStackTrace=false
+              -DtrimStackTrace=false \
+              -Dcom.exasol.dockerdb.image=${{ matrix.docker_db_version }}
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
         if: ${{ always() && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]' }}
