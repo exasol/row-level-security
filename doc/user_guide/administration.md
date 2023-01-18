@@ -287,7 +287,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_SCHEMA.RLS_VS_ADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-3.0.5.jar;
+    %jar /buckets/<BFS service>/<bucket>/row-level-security-dist-3.0.6.jar;
 /
 ;
 ```
@@ -356,9 +356,9 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 
 ### Additional optional properties
 
-Property                  | Value
-------------------------- | -----------
-`EXCLUDED_CAPABILITIES`   | A comma-separated list of capabilities that you want to deactivate (although the adapter might support them).
+| Property                 | Value                                                                                                         |
+|--------------------------|---------------------------------------------------------------------------------------------------------------|
+|  `EXCLUDED_CAPABILITIES` | A comma-separated list of capabilities that you want to deactivate (although the adapter might support them). |
 
 ### Granting Access to the Virtual Schema
 

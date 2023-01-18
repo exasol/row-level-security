@@ -21,13 +21,20 @@ We assume our readers have a firm knowledge of database principles in general an
 
 ### Terms and Abbreviations
 
-<dl>
-<dt>BACP</dt><dd>Department of Business Affairs & Consumer Protection</dd>
-<dt>Dimension table</dt><dd>Table type in an analytical database that holds descriptions for objects of the business case like for example a product description in a sales database.</dd>
-<dt>Fact table</dt><dd>Table type in an analytical database that holds business process data like the individual sales in a sales database. Fact tables hold references to keys in dimension tables and concrete values.</dd>
-<dt>RLS</dt><dd>See "Row Level Security"</dd>
-<dt>Row Level Security</dt><dd>Data access restrictions in a database on the level of an individual dataset (aka. "row").</dt>
-<dl>
+BACP
+: Department of Business Affairs & Consumer Protection</dd>
+
+Dimension table
+: Table type in an analytical database that holds descriptions for objects of the business case like for example a product description in a sales database.
+
+Fact table
+: Table type in an analytical database that holds business process data like the individual sales in a sales database. Fact tables hold references to keys in dimension tables and concrete values.</dd>
+
+RLS
+: See "Row Level Security"
+
+Row Level Security
+: Data access restrictions in a database on the level of an individual dataset (aka. "row").
 
 ### About the Dataset
 
@@ -91,7 +98,7 @@ Separating the import from production is the best practice for data ingestion, s
 
 ### The `EXA_ROW_TENANT` Column
 
-We are going to implement [tenant-based security](user_guide.md#tenant-based-security) in this tutorial and therefore need to add the column `EXA_ROW_TENANT` to the fact table (i.e. the taxi rides).
+We are going to implement [tenant-based security](introduction.md#tenant-based-security) in this tutorial and therefore need to add the column `EXA_ROW_TENANT` to the fact table (i.e. the taxi rides).
 
 Now, the dataset already contains a column for the company, but that one does not have a strict format.
 
@@ -347,7 +354,7 @@ Exasol's row-level security implementation is a [Virtual Schema](https://github.
 
 A Virtual Schema is a projection of an underlying concrete schema. In the case of RLS, it adds a filter layer that makes sure that users only see what they are supposed to.
 
-Please refer to the [user guide](user_guide.md#creating-the-virtual-schema) for detailed instructions on how to install the RLS package.
+Please refer to the [user guide](administration.md#creating-the-virtual-schema) for detailed instructions on how to install the RLS package.
 
 Execute the following SQL statements as user `SYS`.
 
@@ -356,7 +363,7 @@ CREATE SCHEMA RLS_VSADAPTER_SCHEMA;
 
 CREATE OR REPLACE JAVA ADAPTER SCRIPT RLS_VSADAPTER_SCHEMA.RLS_VSADAPTER AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/jars/row-level-security-dist-3.0.5.jar;
+    %jar /buckets/bfsdefault/jars/row-level-security-dist-3.0.6.jar;
 /
 ;
 
