@@ -1,4 +1,4 @@
-# Exasol Row Level Security 3.0.6, released 2023-01-18
+# Exasol Row Level Security 3.0.6, released 2023-01-19
 
 Code name: JDBC Driver from Central Repository
 
