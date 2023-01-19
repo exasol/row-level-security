@@ -11,13 +11,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        docker_db_version: [ 7.0.20, 7.1.17 ]
+        docker_db_version: [ 7.1.17, 7.0.20 ]
     env:
       DEFAULT_DB_VERSION: "7.1.17"
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
