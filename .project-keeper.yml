@@ -3,7 +3,6 @@ sources:
     path: pom.xml
     modules:
       - integration_tests
-      - lombok
       - udf_coverage
       - jar_artifact
 linkReplacements:
