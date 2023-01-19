@@ -5,6 +5,7 @@ import static com.exasol.adapter.dialects.rls.RowLevelSecurityDialectConstants.*
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -49,7 +50,7 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
     }
 
     @Override
-    public String rewrite(final SqlStatement statement, final ExaMetadata exaMetadata,
+    public String rewrite(final SqlStatement statement, final List<DataType> dataTypes, final ExaMetadata exaMetadata,
             final AdapterProperties properties) throws AdapterException, SQLException {
         if (statement instanceof SqlStatementSelect) {
             return rewriteStatement(statement, exaMetadata, properties);
@@ -73,9 +74,9 @@ public class RowLevelSecurityQueryRewriter implements QueryRewriter {
         if (protection.isProtected()) {
             final SqlStatementSelect protectedSelectStatement = getProtectedSqlStatementSelect(select, userInformation,
                     protection);
-            return this.delegateRewriter.rewrite(protectedSelectStatement, exaMetadata, properties);
+            return this.delegateRewriter.rewrite(protectedSelectStatement, Collections.emptyList(), exaMetadata, properties);
         } else {
-            return this.delegateRewriter.rewrite(statement, exaMetadata, properties);
+            return this.delegateRewriter.rewrite(statement, Collections.emptyList(), exaMetadata, properties);
         }
     }
 
